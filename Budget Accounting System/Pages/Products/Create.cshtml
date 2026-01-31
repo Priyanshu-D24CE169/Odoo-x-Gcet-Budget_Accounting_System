@@ -1,0 +1,138 @@
+@page
+@model Budget_Accounting_System.Pages.Products.CreateModel
+@{
+    ViewData["Title"] = "Create Product";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-box-seam"></i> Product Master - Create New</h5>
+                </div>
+                <div class="card-body">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show">
+                            @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form method="post">
+                        <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label asp-for="Input.Name" class="form-label fw-semibold">Product Name *</label>
+                                <input asp-for="Input.Name" class="form-control" placeholder="e.g., Oak Wood Plank" required />
+                                <span asp-validation-for="Input.Name" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label asp-for="Input.Description" class="form-label fw-semibold">Description</label>
+                                <textarea asp-for="Input.Description" class="form-control" rows="2" placeholder="Product description"></textarea>
+                                <span asp-validation-for="Input.Description" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+                        <h6 class="mb-3 text-primary"><i class="bi bi-tag"></i> Category (Many-to-One)</h6>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Input.CategoryId" class="form-label fw-semibold">Select Existing Category *</label>
+                                <select asp-for="Input.CategoryId" class="form-select" asp-items="Model.Categories">
+                                </select>
+                                <span asp-validation-for="Input.CategoryId" class="text-danger small"></span>
+                                <small class="text-muted">Choose from existing categories</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Input.NewCategoryName" class="form-label fw-semibold">Or Create New Category</label>
+                                <input asp-for="Input.NewCategoryName" class="form-control" placeholder="e.g., Electronics" />
+                                <span asp-validation-for="Input.NewCategoryName" class="text-danger small"></span>
+                                <small class="text-muted">Type name to create new category on-the-fly</small>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> <strong>Category Options:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Select an existing category from dropdown, OR</li>
+                                <li>Type a new category name to create it instantly</li>
+                                <li>New categories become immediately available for all products</li>
+                            </ul>
+                        </div>
+
+                        <hr class="my-4" />
+                        <h6 class="mb-3 text-primary"><i class="bi bi-currency-rupee"></i> Pricing</h6>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Input.SalesPrice" class="form-label fw-semibold">Sales Price (?) *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">?</span>
+                                    <input asp-for="Input.SalesPrice" class="form-control" placeholder="0.00" step="0.01" required />
+                                </div>
+                                <span asp-validation-for="Input.SalesPrice" class="text-danger small"></span>
+                                <small class="text-muted">Price when selling to customers</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Input.PurchasePrice" class="form-label fw-semibold">Purchase Price (?) *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">?</span>
+                                    <input asp-for="Input.PurchasePrice" class="form-control" placeholder="0.00" step="0.01" required />
+                                </div>
+                                <span asp-validation-for="Input.PurchasePrice" class="text-danger small"></span>
+                                <small class="text-muted">Price when buying from vendors</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Input.Unit" class="form-label fw-semibold">Unit of Measure</label>
+                                <input asp-for="Input.Unit" class="form-control" placeholder="Unit, Sq Ft, Gallon, Kg..." />
+                                <span asp-validation-for="Input.Unit" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-page="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Create Product
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        // Auto-clear category dropdown when typing new category
+        document.querySelector('[name="Input.NewCategoryName"]').addEventListener('input', function() {
+            if (this.value.trim()) {
+                document.querySelector('[name="Input.CategoryId"]').value = '';
+            }
+        });
+        
+        // Auto-clear new category when selecting from dropdown
+        document.querySelector('[name="Input.CategoryId"]').addEventListener('change', function() {
+            if (this.value) {
+                document.querySelector('[name="Input.NewCategoryName"]').value = '';
+            }
+        });
+    </script>
+}
+

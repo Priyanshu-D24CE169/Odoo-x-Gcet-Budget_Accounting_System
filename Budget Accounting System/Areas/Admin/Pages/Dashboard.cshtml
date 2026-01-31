@@ -1,0 +1,262 @@
+@page
+@model Budget_Accounting_System.Areas.Admin.Pages.DashboardModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <h5 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Database Migration Required</h5>
+                <p>@TempData["ErrorMessage"]</p>
+                <hr>
+                <p class="mb-0">
+                    <strong>To fix this:</strong>
+                    <ol>
+                        <li>Stop the application (Ctrl+C)</li>
+                        <li>Run: <code>IMPLEMENT-NEW-BUDGET-MODULE.bat</code></li>
+                        <li>Restart the application</li>
+                    </ol>
+                </p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="display-5 fw-bold">
+                    <i class="bi bi-speedometer2 text-primary"></i> Admin Dashboard
+                </h1>
+                <p class="lead text-muted">Welcome back, @(Model.CurrentUser?.FullName ?? User.Identity?.Name)</p>
+            </div>
+            <div class="text-end">
+                <p class="mb-0"><strong>Today:</strong> @DateTime.Now.ToString("dddd, MMMM dd, yyyy")</p>
+                <p class="mb-0"><strong>Time:</strong> @DateTime.Now.ToString("hh:mm tt")</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <h4 class="fw-bold text-primary">
+            <i class="bi bi-database"></i> Master Data
+        </h4>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card border-primary shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-2 text-muted">Contacts</h6>
+                        <h2 class="card-title mb-0 fw-bold text-primary">@Model.TotalContacts</h2>
+                    </div>
+                    <div class="display-4 text-primary opacity-25">
+                        <i class="bi bi-people"></i>
+                    </div>
+                </div>
+                <hr />
+                <a href="/Contacts/Index" class="btn btn-primary btn-sm w-100">
+                    <i class="bi bi-arrow-right-circle"></i> Manage
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-info shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-2 text-muted">Products</h6>
+                        <h2 class="card-title mb-0 fw-bold text-info">@Model.TotalProducts</h2>
+                    </div>
+                    <div class="display-4 text-info opacity-25">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+                </div>
+                <hr />
+                <a href="/Products/Index" class="btn btn-info btn-sm w-100">
+                    <i class="bi bi-arrow-right-circle"></i> Manage
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-success shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-2 text-muted">Analytics</h6>
+                        <h2 class="card-title mb-0 fw-bold text-success">@Model.TotalAnalyticalAccounts</h2>
+                    </div>
+                    <div class="display-4 text-success opacity-25">
+                        <i class="bi bi-diagram-3"></i>
+                    </div>
+                </div>
+                <hr />
+                <a href="/AnalyticalAccounts/Index" class="btn btn-success btn-sm w-100">
+                    <i class="bi bi-arrow-right-circle"></i> Manage
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-warning shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-2 text-muted">Active Budgets</h6>
+                        <h2 class="card-title mb-0 fw-bold text-warning">@Model.ActiveBudgets</h2>
+                    </div>
+                    <div class="display-4 text-warning opacity-25">
+                        <i class="bi bi-piggy-bank"></i>
+                    </div>
+                </div>
+                <hr />
+                <a href="/Budgets/Index" class="btn btn-warning btn-sm w-100">
+                    <i class="bi bi-arrow-right-circle"></i> Manage
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Procurement & Sales Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card border-danger shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-cart"></i> Procurement (Procure-to-Pay)</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center mb-3">
+                    <div class="col-6 border-end">
+                        <h2 class="text-danger mb-0">@Model.TotalPurchaseOrders</h2>
+                        <p class="text-muted mb-1"><strong>Purchase Orders</strong></p>
+                        <div>
+                            <span class="badge bg-warning text-dark">@Model.PendingPOs Pending</span>
+                            <span class="badge bg-info">@Model.ConfirmedPOs Confirmed</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <h2 class="text-danger mb-0">@Model.TotalVendorBills</h2>
+                        <p class="text-muted mb-1"><strong>Vendor Bills</strong></p>
+                        <div>
+                            <small class="d-block text-muted">Total: ?@Model.TotalVendorBillsAmount.ToString("N2")</small>
+                            <span class="badge bg-danger">?@Model.UnpaidVendorBills.ToString("N2") Unpaid</span>
+                        </div>
+                    </div>
+                </div>
+                <hr />
+                <h6 class="text-center mb-3"><i class="bi bi-lightning-charge"></i> Quick Actions - Procurement</h6>
+                <div class="d-grid gap-2">
+                    <a href="/PurchaseOrders/Create" class="btn btn-danger btn-sm">
+                        <i class="bi bi-plus-circle"></i> Create Purchase Order
+                    </a>
+                    <a href="/VendorBills/Create" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-file-earmark-plus"></i> Create Vendor Bill
+                    </a>
+                    <a href="/PurchaseOrders/Index" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-list"></i> View All POs
+                    </a>
+                    <a href="/VendorBills/Index" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-list"></i> View All Bills
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card border-success shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-cash-stack"></i> Sales (Order-to-Cash)</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center mb-3">
+                    <div class="col-6 border-end">
+                        <h2 class="text-success mb-0">@Model.TotalSalesOrders</h2>
+                        <p class="text-muted mb-1"><strong>Sales Orders</strong></p>
+                        <div>
+                            <span class="badge bg-warning text-dark">@Model.PendingSOs Pending</span>
+                            <span class="badge bg-info">@Model.ConfirmedSOs Confirmed</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <h2 class="text-success mb-0">@Model.TotalCustomerInvoices</h2>
+                        <p class="text-muted mb-1"><strong>Customer Invoices</strong></p>
+                        <div>
+                            <small class="d-block text-muted">Total: ?@Model.TotalCustomerInvoicesAmount.ToString("N2")</small>
+                            <span class="badge bg-danger">?@Model.UnpaidCustomerInvoices.ToString("N2") Unpaid</span>
+                        </div>
+                    </div>
+                </div>
+                <hr />
+                <h6 class="text-center mb-3"><i class="bi bi-lightning-charge"></i> Quick Actions - Sales</h6>
+                <div class="d-grid gap-2">
+                    <a href="/SalesOrders/Create" class="btn btn-success btn-sm">
+                        <i class="bi bi-plus-circle"></i> Create Sales Order
+                    </a>
+                    <a href="/CustomerInvoices/Create" class="btn btn-outline-success btn-sm">
+                        <i class="bi bi-file-earmark-plus"></i> Create Invoice
+                    </a>
+                    <a href="/SalesOrders/Index" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-list"></i> View All SOs
+                    </a>
+                    <a href="/CustomerInvoices/Index" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-list"></i> View All Invoices
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Links -->
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="bi bi-lightning-charge"></i> Quick Access - Create New</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-2">
+            <div class="col-md-3">
+                <a href="/Contacts/Create" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-person-plus"></i> New Contact
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="/Products/Create" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-box"></i> New Product
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="/Budgets/Create" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-piggy-bank"></i> New Budget
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="/AnalyticalAccounts/Create" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-diagram-2"></i> New Analytics
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        transition: transform 0.2s;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .btn {
+        cursor: pointer !important;
+    }
+</style>

@@ -1,0 +1,250 @@
+﻿@page
+@model Budget_Accounting_System.Pages.PurchaseOrders.CreateModel
+@{
+    ViewData["Title"] = "Create Purchase Order";
+}
+
+<div class="row mb-3">
+    <div class="col-12">
+        <h1 class="display-6">
+            <i class="bi bi-cart-plus text-primary"></i> Create Purchase Order
+        </h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-page="/Index">Dashboard</a></li>
+                <li class="breadcrumb-item"><a asp-page="./Index">Purchase Orders</a></li>
+                <li class="breadcrumb-item active">Create</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        <i class="bi bi-check-circle"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="bi bi-cart"></i> Purchase Order Information</h5>
+    </div>
+    <div class="card-body">
+        <form method="post" id="poForm">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <label asp-for="Input.PONumber" class="form-label fw-semibold">PO Number *</label>
+                    <input asp-for="Input.PONumber" class="form-control" readonly style="background-color: #f8f9fa;" />
+                    <span asp-validation-for="Input.PONumber" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="Input.PODate" class="form-label fw-semibold">PO Date *</label>
+                    <input asp-for="Input.PODate" type="date" class="form-control" />
+                    <span asp-validation-for="Input.PODate" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.VendorId" class="form-label fw-semibold">Vendor *</label>
+                    <select asp-for="Input.VendorId" class="form-select" required>
+                        <option value="">-- Select Vendor --</option>
+                        @foreach (var vendor in Model.Vendors)
+                        {
+                            <option value="@vendor.Id">@vendor.Name</option>
+                        }
+                    </select>
+                    <span asp-validation-for="Input.VendorId" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-2">
+                    <label asp-for="Input.Reference" class="form-label fw-semibold">Reference</label>
+                    <input asp-for="Input.Reference" class="form-control" placeholder="Optional" />
+                </div>
+            </div>
+
+            <hr class="my-4" />
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0"><i class="bi bi-list-ul"></i> Purchase Order Lines</h5>
+                <button type="button" class="btn btn-primary btn-sm" onclick="addLine()">
+                    <i class="bi bi-plus-circle"></i> Add Product
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered" id="linesTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 5%;">Sr.</th>
+                            <th style="width: 30%;">Product *</th>
+                            <th style="width: 25%;">Analytical Account</th>
+                            <th style="width: 10%;">Quantity *</th>
+                            <th style="width: 12%;">Unit Price *</th>
+                            <th style="width: 12%;">Total</th>
+                            <th style="width: 3%;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="linesBody">
+                        <!-- Lines added via JavaScript -->
+                    </tbody>
+                    <tfoot>
+                        <tr class="table-primary">
+                            <td colspan="5" class="text-end fw-bold">Grand Total:</td>
+                            <td id="grandTotal" class="fw-bold">₹0.00</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="alert alert-info" id="noLinesMessage">
+                <i class="bi bi-info-circle"></i> Click "Add Product" to add purchase order lines
+            </div>
+
+            <hr class="my-4" />
+
+            <div class="d-flex justify-content-between">
+                <a asp-page="./Index" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+                <div>
+                    <button type="submit" name="action" value="draft" class="btn btn-outline-secondary">
+                        <i class="bi bi-save"></i> Save as Draft
+                    </button>
+                    <button type="submit" name="action" value="confirm" class="btn btn-success" id="confirmBtn">
+                        <i class="bi bi-check-circle"></i> Confirm Order
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        let lineIndex = 0;
+        const products = @Html.Raw(Json.Serialize(Model.Products.Select(p => new { 
+            id = p.Id, 
+            name = p.Name, 
+            unitPrice = p.UnitPrice 
+        })));
+        
+        const analyticalAccounts = @Html.Raw(Json.Serialize(Model.AnalyticalAccounts.Select(a => new { 
+            id = a.Id, 
+            code = a.Code,
+            name = a.Name 
+        })));
+
+        function addLine() {
+            const tbody = document.getElementById('linesBody');
+            const row = document.createElement('tr');
+            row.id = `line_${lineIndex}`;
+            
+            row.innerHTML = `
+                <td class="text-center">${lineIndex + 1}</td>
+                <td>
+                    <select name="Input.Lines[${lineIndex}].ProductId" class="form-select form-select-sm" 
+                            onchange="updatePrice(${lineIndex})" required>
+                        <option value="">-- Select Product --</option>
+                        ${products.map(p => `<option value="${p.id}" data-price="${p.unitPrice}">${p.name}</option>`).join('')}
+                    </select>
+                </td>
+                <td>
+                    <select name="Input.Lines[${lineIndex}].AnalyticalAccountId" class="form-select form-select-sm">
+                        <option value="">-- Optional --</option>
+                        ${analyticalAccounts.map(a => `<option value="${a.id}">${a.code} - ${a.name}</option>`).join('')}
+                    </select>
+                </td>
+                <td>
+                    <input type="number" name="Input.Lines[${lineIndex}].Quantity" 
+                           class="form-control form-control-sm" value="1" step="0.01" min="0.01" 
+                           onchange="calculateTotal(${lineIndex})" required />
+                </td>
+                <td>
+                    <input type="number" name="Input.Lines[${lineIndex}].UnitPrice" 
+                           class="form-control form-control-sm" value="0" step="0.01" min="0" 
+                           onchange="calculateTotal(${lineIndex})" required />
+                </td>
+                <td>
+                    <input type="text" class="form-control form-control-sm" id="amount_${lineIndex}" 
+                           value="₹0.00" readonly style="background: #f8f9fa;" />
+                </td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeLine(${lineIndex})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            `;
+            
+            tbody.appendChild(row);
+            document.getElementById('noLinesMessage').style.display = 'none';
+            lineIndex++;
+        }
+
+        function updatePrice(index) {
+            const row = document.getElementById(`line_${index}`);
+            const select = row.querySelector('select');
+            const option = select.options[select.selectedIndex];
+            const price = option.dataset.price;
+            
+            if (price) {
+                row.querySelectorAll('input')[1].value = price;
+                calculateTotal(index);
+            }
+        }
+
+        function calculateTotal(index) {
+            const row = document.getElementById(`line_${index}`);
+            const qty = parseFloat(row.querySelectorAll('input')[0].value) || 0;
+            const price = parseFloat(row.querySelectorAll('input')[1].value) || 0;
+            const amount = qty * price;
+            
+            document.getElementById(`amount_${index}`).value = `₹${amount.toFixed(2)}`;
+            calculateGrandTotal();
+        }
+
+        function calculateGrandTotal() {
+            let total = 0;
+            document.querySelectorAll('[id^="amount_"]').forEach(input => {
+                total += parseFloat(input.value.replace('₹', '')) || 0;
+            });
+            document.getElementById('grandTotal').textContent = `₹${total.toFixed(2)}`;
+        }
+
+        function removeLine(index) {
+            document.getElementById(`line_${index}`)?.remove();
+            calculateGrandTotal();
+            
+            if (document.querySelectorAll('#linesBody tr').length === 0) {
+                document.getElementById('noLinesMessage').style.display = 'block';
+            }
+            
+            // Renumber rows
+            let srNo = 1;
+            document.querySelectorAll('#linesBody tr').forEach(row => {
+                row.cells[0].textContent = srNo++;
+            });
+        }
+
+        // Form validation
+        document.getElementById('poForm').addEventListener('submit', function(e) {
+            const hasLines = document.querySelectorAll('#linesBody tr').length > 0;
+            if (!hasLines) {
+                e.preventDefault();
+                alert('Please add at least one product line');
+                return false;
+            }
+        });
+
+        // Initialize with one line
+        document.addEventListener('DOMContentLoaded', function() {
+            addLine();
+        });
+    </script>
+}

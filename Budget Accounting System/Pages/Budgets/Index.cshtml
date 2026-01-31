@@ -1,0 +1,124 @@
+@page
+@model Budget_Accounting_System.Pages.Budgets.IndexModel
+@{
+    ViewData["Title"] = "Budgets";
+}
+
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-md-8">
+            <h2><i class="bi bi-piggy-bank"></i> Budgets</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-page="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Create New Budget
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter by State -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <form method="get">
+                <select name="filterState" class="form-select" onchange="this.form.submit()">
+                    <option value="">All States</option>
+                    <option value="Draft" selected="@(Model.FilterState == "Draft")">Draft</option>
+                    <option value="Confirmed" selected="@(Model.FilterState == "Confirmed")">Confirmed</option>
+                    <option value="Revised" selected="@(Model.FilterState == "Revised")">Revised</option>
+                    <option value="Archived" selected="@(Model.FilterState == "Archived")">Archived</option>
+                    <option value="Cancelled" selected="@(Model.FilterState == "Cancelled")">Cancelled</option>
+                </select>
+            </form>
+        </div>
+        <div class="col-md-4">
+            @if (!string.IsNullOrEmpty(Model.FilterState))
+            {
+                <a asp-page="Index" class="btn btn-outline-warning">
+                    <i class="bi bi-x-circle"></i> Clear Filter
+                </a>
+            }
+        </div>
+        <div class="col-md-4 text-end">
+            <div class="alert alert-info mb-0 py-2">
+                <small><strong>Total:</strong> @Model.Budgets.Count Budget(s)</small>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Budget Name</th>
+                            <th>Period</th>
+                            <th>Lines</th>
+                            <th>Total Budgeted</th>
+                            <th>State</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var budget in Model.Budgets)
+                        {
+                            var totalBudgeted = budget.Lines.Sum(l => l.BudgetedAmount);
+                            <tr>
+                                <td><strong>@budget.Name</strong></td>
+                                <td>
+                                    @budget.StartDate.ToString("dd/MM/yyyy") - @budget.EndDate.ToString("dd/MM/yyyy")
+                                </td>
+                                <td>
+                                    @budget.Lines.Count line(s)
+                                </td>
+                                <td>?@totalBudgeted.ToString("N2")</td>
+                                <td>
+                                    @if (budget.State == BudgetState.Draft)
+                                    {
+                                        <span class="badge bg-secondary">Draft</span>
+                                    }
+                                    else if (budget.State == BudgetState.Confirmed)
+                                    {
+                                        <span class="badge bg-success">Confirmed</span>
+                                    }
+                                    else if (budget.State == BudgetState.Revised)
+                                    {
+                                        <span class="badge bg-info">Revised</span>
+                                    }
+                                    else if (budget.State == BudgetState.Archived)
+                                    {
+                                        <span class="badge bg-warning">Archived</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Cancelled</span>
+                                    }
+                                </td>
+                                <td>
+                                    <a asp-page="Details" asp-route-id="@budget.Id" class="btn btn-sm btn-info">
+                                        <i class="bi bi-eye"></i> Details
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (!Model.Budgets.Any())
+            {
+                <div class="alert alert-info text-center">
+                    <i class="bi bi-info-circle"></i> No budgets found. Create your first budget!
+                </div>
+            }
+        </div>
+    </div>
+</div>

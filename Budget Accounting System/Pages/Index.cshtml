@@ -1,0 +1,928 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<!-- Enterprise Dashboard Header -->
+<div class="dashboard-header text-white mb-4 fade-in">
+    <div class="row align-items-center">
+        <div class="col-lg-8">
+            <h1 class="fw-bold mb-2" style="font-size: 2rem;">
+                <i class="bi bi-grid-fill me-2"></i>Dashboard
+            </h1>
+            <p class="mb-0 opacity-90" style="font-size: 1.1rem;">
+                Shiv Furniture - Enterprise Budget & Accounting System
+            </p>
+        </div>
+        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+            <div class="d-inline-block text-start">
+                <div class="fw-semibold" style="font-size: 1.1rem;">
+                    @DateTime.Now.ToString("MMMM dd, yyyy")
+                </div>
+                <div class="opacity-75">
+                    <i class="bi bi-clock me-1"></i>@DateTime.Now.ToString("hh:mm tt")
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row g-3 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <a asp-page="/PurchaseOrders/Create" class="text-decoration-none">
+            <div class="quick-action bg-rose-50 border-0">
+                <i class="bi bi-cart-plus-fill text-rose-600"></i>
+                <h6 class="mt-2 mb-0 text-neutral-800">New Purchase Order</h6>
+                <small class="text-neutral-600">Create PO</small>
+            </div>
+        </a>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <a asp-page="/SalesOrders/Create" class="text-decoration-none">
+            <div class="quick-action bg-emerald-50 border-0">
+                <i class="bi bi-bag-plus-fill text-emerald-600"></i>
+                <h6 class="mt-2 mb-0 text-neutral-800">New Sales Order</h6>
+                <small class="text-neutral-600">Create SO</small>
+            </div>
+        </a>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <a asp-page="/Budgets/Create" class="text-decoration-none">
+            <div class="quick-action bg-amber-50 border-0">
+                <i class="bi bi-wallet-fill text-amber-600"></i>
+                <h6 class="mt-2 mb-0 text-neutral-800">New Budget</h6>
+                <small class="text-neutral-600">Plan Budget</small>
+            </div>
+        </a>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <a asp-page="/Contacts/Create" class="text-decoration-none">
+            <div class="quick-action bg-blue-50 border-0">
+                <i class="bi bi-person-plus-fill text-blue-600"></i>
+                <h6 class="mt-2 mb-0 text-neutral-800">New Contact</h6>
+                <small class="text-neutral-600">Add Contact</small>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Master Data Section -->
+<div class="mb-4">
+    <h5 class="section-header">
+        <i class="bi bi-database-fill"></i>
+        Master Data Overview
+    </h5>
+    <div class="row g-3">
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="flex-grow-1">
+                        <div class="stat-label mb-2">Contacts</div>
+                        <div class="stat-number">@Model.TotalContacts</div>
+                        <div class="mt-2">
+                            <span class="badge bg-success-subtle text-success">
+                                <i class="bi bi-check-circle-fill"></i> Confirmed
+                            </span>
+                        </div>
+                    </div>
+                    <div class="stat-icon bg-blue-50 text-blue-600">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                </div>
+                <div class="mt-3 pt-3 border-top">
+                    <a asp-page="/Contacts/Index" class="text-decoration-none text-blue-600 fw-medium small">
+                        View all contacts <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="flex-grow-1">
+                        <div class="stat-label mb-2">Products</div>
+                        <div class="stat-number">@Model.TotalProducts</div>
+                        <div class="mt-2">
+                            <span class="badge bg-success-subtle text-success">
+                                <i class="bi bi-check-circle-fill"></i> Active
+                            </span>
+                        </div>
+                    </div>
+                    <div class="stat-icon bg-emerald-50 text-emerald-600">
+                        <i class="bi bi-box-seam-fill"></i>
+                    </div>
+                </div>
+                <div class="mt-3 pt-3 border-top">
+                    <a asp-page="/Products/Index" class="text-decoration-none text-emerald-600 fw-medium small">
+                        View all products <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="flex-grow-1">
+                        <div class="stat-label mb-2">Analytics</div>
+                        <div class="stat-number">@Model.TotalAnalyticalAccounts</div>
+                        <div class="mt-2">
+                            <span class="badge bg-info-subtle text-info">
+                                <i class="bi bi-graph-up"></i> Active
+                            </span>
+                        </div>
+                    </div>
+                    <div class="stat-icon bg-neutral-100 text-neutral-600">
+                        <i class="bi bi-diagram-3-fill"></i>
+                    </div>
+                </div>
+                <div class="mt-3 pt-3 border-top">
+                    <a asp-page="/AnalyticalAccounts/Index" class="text-decoration-none text-neutral-700 fw-medium small">
+                        View all accounts <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="flex-grow-1">
+                        <div class="stat-label mb-2">Budgets</div>
+                        <div class="stat-number">@Model.ActiveBudgets</div>
+                        <div class="mt-2">
+                            <span class="badge bg-warning-subtle text-warning">
+                                <i class="bi bi-lightning-fill"></i> Active
+                            </span>
+                        </div>
+                    </div>
+                    <div class="stat-icon bg-amber-50 text-amber-600">
+                        <i class="bi bi-piggy-bank-fill"></i>
+                    </div>
+                </div>
+                <div class="mt-3 pt-3 border-top">
+                    <a asp-page="/Budgets/Index" class="text-decoration-none text-amber-600 fw-medium small">
+                        View all budgets <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Procurement & Sales Row -->
+<div class="row g-4 mb-4">
+    <!-- Procurement -->
+    <div class="col-lg-6">
+        <h5 class="section-header">
+            <i class="bi bi-cart-fill"></i>
+            Procurement
+        </h5>
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="stat-icon bg-rose-50 text-rose-600" style="width: 56px; height: 56px;">
+                            <i class="bi bi-file-text-fill" style="font-size: 28px;"></i>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="stat-label mb-1">Purchase Orders</div>
+                        <div class="stat-number" style="font-size: 1.75rem;">@Model.TotalPurchaseOrders</div>
+                        <div class="d-flex gap-3 mt-2">
+                            <span class="badge bg-warning-subtle text-warning">
+                                <i class="bi bi-clock-fill"></i> @Model.PendingPOs Draft
+                            </span>
+                            <span class="badge bg-success-subtle text-success">
+                                <i class="bi bi-check-circle-fill"></i> @(Model.TotalPurchaseOrders - Model.PendingPOs) Confirmed
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <a asp-page="/PurchaseOrders/Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-right-circle"></i> View
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="stat-icon bg-rose-50 text-rose-600" style="width: 56px; height: 56px;">
+                            <i class="bi bi-receipt" style="font-size: 28px;"></i>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="stat-label mb-1">Vendor Bills</div>
+                        <div class="stat-number" style="font-size: 1.75rem;">@Model.TotalVendorBills</div>
+                        <div class="mt-2">
+                            <span class="badge bg-danger-subtle text-danger">
+                                <i class="bi bi-currency-rupee"></i> ₹@Model.UnpaidVendorBills.ToString("N2") Unpaid
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <a asp-page="/VendorBills/Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-right-circle"></i> View
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sales -->
+    <div class="col-lg-6">
+        <h5 class="section-header">
+            <i class="bi bi-graph-up-arrow"></i>
+            Sales
+        </h5>
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="stat-icon bg-emerald-50 text-emerald-600" style="width: 56px; height: 56px;">
+                            <i class="bi bi-cart-check-fill" style="font-size: 28px;"></i>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="stat-label mb-1">Sales Orders</div>
+                        <div class="stat-number" style="font-size: 1.75rem;">@Model.TotalSalesOrders</div>
+                        <div class="d-flex gap-3 mt-2">
+                            <span class="badge bg-warning-subtle text-warning">
+                                <i class="bi bi-clock-fill"></i> @Model.PendingSOs Draft
+                            </span>
+                            <span class="badge bg-success-subtle text-success">
+                                <i class="bi bi-check-circle-fill"></i> @(Model.TotalSalesOrders - Model.PendingSOs) Confirmed
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <a asp-page="/SalesOrders/Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-right-circle"></i> View
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="stat-icon bg-emerald-50 text-emerald-600" style="width: 56px; height: 56px;">
+                            <i class="bi bi-file-earmark-check-fill" style="font-size: 28px;"></i>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="stat-label mb-1">Customer Invoices</div>
+                        <div class="stat-number" style="font-size: 1.75rem;">@Model.TotalCustomerInvoices</div>
+                        <div class="mt-2">
+                            <span class="badge bg-primary-subtle text-primary">
+                                <i class="bi bi-currency-rupee"></i> ₹@Model.UnpaidCustomerInvoices.ToString("N2") Receivable
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <a asp-page="/CustomerInvoices/Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-right-circle"></i> View
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Financial Overview -->
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <h5 class="section-header">
+            <i class="bi bi-wallet2"></i>
+            Financial Overview
+        </h5>
+    </div>
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="card-body text-white p-4">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="opacity-75 mb-2" style="font-size: 0.875rem; font-weight: 500; text-transform: uppercase;">
+                            Total Payments
+                        </div>
+                        <div style="font-size: 2.5rem; font-weight: 700; line-height: 1.2;">
+                            @Model.TotalPayments
+                        </div>
+                        <div class="mt-3" style="font-size: 1.25rem; font-weight: 600;">
+                            <i class="bi bi-currency-rupee"></i>@Model.TotalPaymentsAmount.ToString("N2")
+                        </div>
+                    </div>
+                    <div class="bg-white bg-opacity-20 p-3 rounded" style="backdrop-filter: blur(10px);">
+                        <i class="bi bi-cash-stack" style="font-size: 2.5rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <div class="card-body text-white p-4">
+                <div class="opacity-75 mb-3" style="font-size: 0.875rem; font-weight: 500; text-transform: uppercase;">
+                    Outstanding Amounts
+                </div>
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="opacity-90 mb-1" style="font-size: 0.875rem;">Payable:</div>
+                        <div style="font-size: 1.5rem; font-weight: 700;">
+                            ₹@Model.UnpaidVendorBills.ToString("N2")
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="opacity-90 mb-1" style="font-size: 0.875rem;">Receivable:</div>
+                        <div style="font-size: 1.5rem; font-weight: 700;">
+                            ₹@Model.UnpaidCustomerInvoices.ToString("N2")
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Footer -->
+<div class="card border-0 bg-neutral-50 shadow-sm">
+    <div class="card-body py-3">
+        <div class="row align-items-center text-neutral-600 small">
+            <div class="col-md-4">
+                <i class="bi bi-clock me-1"></i>
+                Last updated: @DateTime.Now.ToString("hh:mm:ss tt")
+            </div>
+            <div class="col-md-4 text-md-center mt-2 mt-md-0">
+                <i class="bi bi-person-circle me-1"></i>
+                Logged in as: <span class="fw-semibold text-neutral-800">@User.Identity?.Name</span>
+            </div>
+            <div class="col-md-4 text-md-end mt-2 mt-md-0">
+                <i class="bi bi-building me-1"></i>
+                <span class="fw-semibold text-neutral-800">Shiv Furniture ERP</span> v1.0
+            </div>
+        </div>
+    </div>
+</div>
+
+    @*         <div class="card border-0 shadow-sm bg-warning bg-gradient text-dark h-100 hover-lift">
+                <div class="card-body text-center py-4">
+                    <i class="bi bi-plus-circle display-4 mb-2"></i>
+                    <h6 class="mb-0">New Budget</h6>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a asp-page="/Contacts/Create" class="text-decoration-none">
+            <div class="card border-0 shadow-sm bg-info bg-gradient text-white h-100 hover-lift">
+                <div class="card-body text-center py-4">
+                    <i class="bi bi-plus-circle display-4 mb-2"></i>
+                    <h6 class="mb-0">New Contact</h6>
+                </div>
+            </div>
+        </a>
+    </div> *@
+</div>
+
+<!-- Master Data Section -->
+@* <div class="row g-3 mb-4">
+    <div class="col-12">
+        <h4 class="fw-bold text-primary mb-3">
+            <i class="bi bi-database-fill"></i> Master Data
+        </h4>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm hover-lift h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted mb-1 small">Contacts</p>
+                        <h2 class="mb-0 fw-bold text-primary">@Model.TotalContacts</h2>
+                        <small class="text-success"><i class="bi bi-check-circle-fill"></i> Confirmed</small>
+                    </div>
+                    <div class="bg-primary bg-opacity-10 p-3 rounded">
+                        <i class="bi bi-people-fill fs-1 text-primary"></i>
+                    </div>
+                </div>
+                <hr class="my-3" />
+                <a asp-page="/Contacts/Index" class="btn btn-outline-primary btn-sm w-100">
+                    <i class="bi bi-arrow-right-circle"></i> View All
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm hover-lift h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted mb-1 small">Products</p>
+                        <h2 class="mb-0 fw-bold text-info">@Model.TotalProducts</h2>
+                        <small class="text-success"><i class="bi bi-check-circle-fill"></i> Active</small>
+                    </div>
+                    <div class="bg-info bg-opacity-10 p-3 rounded">
+                        <i class="bi bi-box-seam-fill fs-1 text-info"></i>
+                    </div>
+                </div>
+                <hr class="my-3" />
+                <a asp-page="/Products/Index" class="btn btn-outline-info btn-sm w-100">
+                    <i class="bi bi-arrow-right-circle"></i> View All
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm hover-lift h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted mb-1 small">Analytical Accounts</p>
+                        <h2 class="mb-0 fw-bold text-success">@Model.TotalAnalyticalAccounts</h2>
+                        <small class="text-success"><i class="bi bi-check-circle-fill"></i> Active</small>
+                    </div>
+                    <div class="bg-success bg-opacity-10 p-3 rounded">
+                        <i class="bi bi-diagram-3-fill fs-1 text-success"></i>
+                    </div>
+                </div>
+                <hr class="my-3" />
+                <a asp-page="/AnalyticalAccounts/Index" class="btn btn-outline-success btn-sm w-100">
+                    <i class="bi bi-arrow-right-circle"></i> View All
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="card border-0 shadow-sm hover-lift h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted mb-1 small">Confirmed Budgets</p>
+                        <h2 class="mb-0 fw-bold text-warning">@Model.ActiveBudgets</h2>
+                        <small class="text-warning"><i class="bi bi-lightning-fill"></i> Active</small>
+                    </div>
+                    <div class="bg-warning bg-opacity-10 p-3 rounded">
+                        <i class="bi bi-piggy-bank-fill fs-1 text-warning"></i>
+                    </div>
+                </div>
+                <hr class="my-3" />
+                <a asp-page="/Budgets/Index" class="btn btn-outline-warning btn-sm w-100">
+                    <i class="bi bi-arrow-right-circle"></i> View All
+                </a>
+            </div>
+        </div>
+    </div>
+</div> *@
+
+@* <!-- Procurement Section -->
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <h4 class="fw-bold text-danger mb-3">
+            <i class="bi bi-cart-fill"></i> Procurement (Procure-to-Pay)
+        </h4>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm hover-lift">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="bg-danger bg-opacity-10 p-3 rounded">
+                            <i class="bi bi-file-earmark-text-fill fs-1 text-danger"></i>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <p class="text-muted mb-1 small">Purchase Orders</p>
+                        <h3 class="mb-1 fw-bold text-danger">@Model.TotalPurchaseOrders</h3>
+                        <div class="d-flex gap-3">
+                            <small class="text-warning">
+                                <i class="bi bi-clock-fill"></i> <strong>@Model.PendingPOs</strong> Draft
+                            </small>
+                            <small class="text-success">
+                                <i class="bi bi-check-circle-fill"></i> <strong>@(Model.TotalPurchaseOrders - Model.PendingPOs)</strong> Confirmed
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <a asp-page="/PurchaseOrders/Index" class="btn btn-danger">
+                            <i class="bi bi-arrow-right-circle"></i> Manage
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm hover-lift">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="bg-danger bg-opacity-10 p-3 rounded">
+                            <i class="bi bi-receipt-cutoff fs-1 text-danger"></i>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <p class="text-muted mb-1 small">Vendor Bills</p>
+                        <h3 class="mb-1 fw-bold text-danger">@Model.TotalVendorBills</h3>
+                        <small class="text-warning">
+                            <i class="bi bi-currency-rupee"></i> <strong>@Model.UnpaidVendorBills.ToString("N2")</strong> Unpaid
+                        </small>
+                    </div>
+                    <div class="col-auto">
+                        <a asp-page="/VendorBills/Index" class="btn btn-danger">
+                            <i class="bi bi-arrow-right-circle"></i> Manage
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sales Section -->
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <h4 class="fw-bold text-success mb-3">
+            <i class="bi bi-graph-up-arrow"></i> Sales (Order-to-Cash)
+        </h4>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm hover-lift">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="bg-success bg-opacity-10 p-3 rounded">
+                            <i class="bi bi-cart-check-fill fs-1 text-success"></i>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <p class="text-muted mb-1 small">Sales Orders</p>
+                        <h3 class="mb-1 fw-bold text-success">@Model.TotalSalesOrders</h3>
+                        <div class="d-flex gap-3">
+                            <small class="text-warning">
+                                <i class="bi bi-clock-fill"></i> <strong>@Model.PendingSOs</strong> Draft
+                            </small>
+                            <small class="text-success">
+                                <i class="bi bi-check-circle-fill"></i> <strong>@(Model.TotalSalesOrders - Model.PendingSOs)</strong> Confirmed
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <a asp-page="/SalesOrders/Index" class="btn btn-success">
+                            <i class="bi bi-arrow-right-circle"></i> Manage
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm hover-lift">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="bg-success bg-opacity-10 p-3 rounded">
+                            <i class="bi bi-file-earmark-check-fill fs-1 text-success"></i>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <p class="text-muted mb-1 small">Customer Invoices</p>
+                        <h3 class="mb-1 fw-bold text-success">@Model.TotalCustomerInvoices</h3>
+                        <small class="text-info">
+                            <i class="bi bi-currency-rupee"></i> <strong>@Model.UnpaidCustomerInvoices.ToString("N2")</strong> Receivable
+                        </small>
+                    </div>
+                    <div class="col-auto">
+                        <a asp-page="/CustomerInvoices/Index" class="btn btn-success">
+                            <i class="bi bi-arrow-right-circle"></i> Manage
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payments Section -->
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <h4 class="fw-bold text-secondary mb-3">
+            <i class="bi bi-wallet2"></i> Payments & Finance
+        </h4>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="mb-1 opacity-75 small">Total Payments</p>
+                        <h2 class="mb-2 fw-bold">@Model.TotalPayments</h2>
+                        <p class="mb-0 fs-5">
+                            <i class="bi bi-currency-rupee"></i> @Model.TotalPaymentsAmount.ToString("N2")
+                        </p>
+                    </div>
+                    <div class="bg-white bg-opacity-25 p-3 rounded">
+                        <i class="bi bi-cash-stack fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm bg-gradient" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <p class="mb-1 opacity-75 small">Outstanding Amounts</p>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <small class="opacity-75">Payable:</small>
+                                <h5 class="mb-0"><i class="bi bi-currency-rupee"></i>@Model.UnpaidVendorBills.ToString("N2")</h5>
+                            </div>
+                            <div class="col-6">
+                                <small class="opacity-75">Receivable:</small>
+                                <h5 class="mb-0"><i class="bi bi-currency-rupee"></i>@Model.UnpaidCustomerInvoices.ToString("N2")</h5>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white bg-opacity-25 p-3 rounded">
+                        <i class="bi bi-graph-up-arrow fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Info -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm bg-light">
+            <div class="card-body py-2">
+                <div class="d-flex justify-content-between align-items-center small text-muted">
+                    <div>
+                        <i class="bi bi-info-circle"></i> Last Updated: @DateTime.Now.ToString("hh:mm:ss tt")
+                    </div>
+                    <div>
+                        <i class="bi bi-shield-check"></i> Logged in as: <strong>@User.Identity?.Name</strong>
+                    </div>
+                    <div>
+                        <i class="bi bi-building"></i> Shiv Furniture ERP v1.0
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+                        <small class="text-danger"><strong>@Model.UnpaidVendorBills.ToString("C")</strong> Unpaid</small>
+                    </div>
+                    <div class="display-4 text-danger opacity-25">
+                        <i class="bi bi-receipt"></i>
+                    </div>
+                </div>
+                <hr />
+                <a asp-page="/VendorBills/Index" class="btn btn-danger btn-sm w-100">
+                    <i class="bi bi-arrow-right-circle"></i> View Bills
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card border-dark shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title fw-bold">
+                    <i class="bi bi-arrow-down-circle text-danger"></i> Quick Actions - Procurement
+                </h5>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <a asp-page="/PurchaseOrders/Create" class="btn btn-outline-danger w-100">
+                            <i class="bi bi-plus-circle"></i> New Purchase Order
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a asp-page="/VendorBills/Create" class="btn btn-outline-danger w-100">
+                            <i class="bi bi-plus-circle"></i> New Vendor Bill
+                        </a>
+                    </div>
+                    <div class="col-12">
+                        <a asp-page="/VendorBills/Index" asp-route-filterPaymentStatus="NotPaid" class="btn btn-outline-warning w-100">
+                            <i class="bi bi-exclamation-triangle"></i> View Unpaid Bills (@Model.UnpaidVendorBills.ToString("C"))
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sales Section -->
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <h4 class="fw-bold text-success">
+            <i class="bi bi-cash-stack"></i> Sales (Order-to-Cash)
+        </h4>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-success shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-2 text-muted">Sales Orders</h6>
+                        <h2 class="card-title mb-0 fw-bold text-success">@Model.TotalSalesOrders</h2>
+                        <small class="text-warning"><strong>@Model.PendingSOs</strong> Pending</small>
+                    </div>
+                    <div class="display-4 text-success opacity-25">
+                        <i class="bi bi-clipboard-check"></i>
+                    </div>
+                </div>
+                <hr />
+                <a asp-page="/SalesOrders/Index" class="btn btn-success btn-sm w-100">
+                    <i class="bi bi-arrow-right-circle"></i> View SOs
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-success shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-2 text-muted">Customer Invoices</h6>
+                        <h2 class="card-title mb-0 fw-bold text-success">@Model.TotalCustomerInvoices</h2>
+                        <small class="text-danger"><strong>@Model.UnpaidCustomerInvoices.ToString("C")</strong> Unpaid</small>
+                    </div>
+                    <div class="display-4 text-success opacity-25">
+                        <i class="bi bi-file-earmark-ruled"></i>
+                    </div>
+                </div>
+                <hr />
+                <a asp-page="/CustomerInvoices/Index" class="btn btn-success btn-sm w-100">
+                    <i class="bi bi-arrow-right-circle"></i> View Invoices
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card border-dark shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title fw-bold">
+                    <i class="bi bi-arrow-up-circle text-success"></i> Quick Actions - Sales
+                </h5>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <a asp-page="/SalesOrders/Create" class="btn btn-outline-success w-100">
+                            <i class="bi bi-plus-circle"></i> New Sales Order
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a asp-page="/CustomerInvoices/Create" class="btn btn-outline-success w-100">
+                            <i class="bi bi-plus-circle"></i> New Customer Invoice
+                        </a>
+                    </div>
+                    <div class="col-12">
+                        <a asp-page="/CustomerInvoices/Index" asp-route-filterPaymentStatus="NotPaid" class="btn btn-outline-warning w-100">
+                            <i class="bi bi-exclamation-triangle"></i> View Unpaid Invoices (@Model.UnpaidCustomerInvoices.ToString("C"))
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> *@
+
+<!-- Payments & System Info -->
+@* <div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-info shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h6 class="card-subtitle mb-2 text-muted">Total Payments</h6>
+                        <h2 class="card-title mb-0 fw-bold text-info">@Model.TotalPayments</h2>
+                        <small class="text-success"><strong>@Model.TotalPaymentsAmount.ToString("C")</strong> Total Amount</small>
+                    </div>
+                    <div class="display-4 text-info opacity-25">
+                        <i class="bi bi-credit-card"></i>
+                    </div>
+                </div>
+                <hr />
+                <div class="d-grid gap-2">
+                    <a asp-page="/VendorBills/Index" asp-route-filterPaymentStatus="Partial" class="btn btn-outline-warning btn-sm">
+                        <i class="bi bi-wallet2"></i> Partial Vendor Payments
+                    </a>
+                    <a asp-page="/CustomerInvoices/Index" asp-route-filterPaymentStatus="Partial" class="btn btn-outline-warning btn-sm">
+                        <i class="bi bi-wallet"></i> Partial Customer Payments
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card border-primary shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title fw-bold">
+                    <i class="bi bi-info-circle text-primary"></i> System Features
+                </h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success"></i> Master Data Management</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success"></i> Budget Planning & Tracking</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success"></i> Purchase Order Management</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success"></i> Vendor Bill Processing</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success"></i> Sales Order Management</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success"></i> Customer Invoice Processing</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success"></i> Payment Tracking (Cash/Bank)</li>
+                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success"></i> Budget vs Actual Analysis</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> *@
+
+<!-- Footer Info -->
+@* <div class="row">
+    <div class="col-12">
+        <div class="alert alert-info shadow-sm">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-lightbulb fs-3 me-3"></i>
+                <div>
+                    <strong>System Status:</strong> All modules operational | 
+                    <strong>Database:</strong> Connected | 
+                    <strong>Version:</strong> 1.0.0
+                </div>
+            </div>
+        </div>
+    </div>
+</div> *@
+
+        </div>
+    </div>
+    
+    @* <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title">Sales</h5>
+                <p class="card-text">Sales orders and customer invoices</p>
+                <div class="d-grid gap-2">
+                    <a href="/SalesOrders" class="btn btn-info btn-sm">Sales Orders</a>
+                    <a href="/CustomerInvoices" class="btn btn-info btn-sm">Customer Invoices</a>
+                </div>
+            </div>
+        </div>
+    </div> *@
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title">Payments</h5>
+                <p class="card-text">Record and track payments</p>
+                <a href="/Payments" class="btn btn-primary">Manage Payments</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title">Customer Portal</h5>
+                <p class="card-text">View invoices and make payments</p>
+                <a href="/Portal" class="btn btn-secondary">Portal Login</a>
+            </div>
+        </div>
+    </div>
+</div>

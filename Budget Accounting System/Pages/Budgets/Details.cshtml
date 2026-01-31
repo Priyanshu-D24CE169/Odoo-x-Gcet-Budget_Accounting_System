@@ -1,0 +1,148 @@
+@page
+@model Budget_Accounting_System.Pages.Budgets.DetailsModel
+@{
+    ViewData["Title"] = "Budget Details";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-piggy-bank"></i> @Model.Budget.Name</h5>
+                    <div>
+                        @if (Model.Budget.State == BudgetState.Draft)
+                        {
+                            <span class="badge bg-light text-dark">Draft</span>
+                        }
+                        else if (Model.Budget.State == BudgetState.Confirmed)
+                        {
+                            <span class="badge bg-white text-primary">Confirmed</span>
+                        }
+                        else if (Model.Budget.State == BudgetState.Revised)
+                        {
+                            <span class="badge bg-info">Revised</span>
+                        }
+                        else if (Model.Budget.State == BudgetState.Archived)
+                        {
+                            <span class="badge bg-warning">Archived</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Cancelled</span>
+                        }
+                        <a asp-page="Index" class="btn btn-sm btn-light ms-2">
+                            <i class="bi bi-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <dl>
+                                <dt>Budget Period</dt>
+                                <dd>@Model.Budget.StartDate.ToString("dd/MM/yyyy") - @Model.Budget.EndDate.ToString("dd/MM/yyyy")</dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <dl>
+                                <dt>Created</dt>
+                                <dd>@Model.Budget.CreatedDate.ToString("dd/MM/yyyy HH:mm")</dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    @if (Model.Budget.State == BudgetState.Draft)
+                    {
+                        <div class="mb-3">
+                            <form method="post" asp-page-handler="Confirm" asp-route-id="@Model.Budget.Id" style="display:inline;">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-check-circle"></i> Confirm Budget
+                                </button>
+                            </form>
+                        </div>
+                    }
+
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show">
+                            @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <h5 class="mb-3"><i class="bi bi-list-ul"></i> Budget Lines</h5>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Sr.</th>
+                                    <th>Analytical Account</th>
+                                    <th>Type</th>
+                                    <th>Budgeted Amount</th>
+                                    @if (Model.Budget.State == BudgetState.Confirmed)
+                                    {
+                                        <th>Achieved Amount</th>
+                                        <th>Achievement %</th>
+                                        <th>Remaining</th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{int srNo = 1;}
+                                @foreach (var line in Model.Budget.Lines)
+                                {
+                                    <tr>
+                                        <td>@srNo</td>
+                                        <td>@line.AnalyticalAccount.Code - @line.AnalyticalAccount.Name</td>
+                                        <td>
+                                            @if (line.Type == BudgetLineType.Income)
+                                            {
+                                                <span class="badge bg-success">Income</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">Expense</span>
+                                            }
+                                        </td>
+                                        <td><strong>?@line.BudgetedAmount.ToString("N2")</strong></td>
+                                        @if (Model.Budget.State == BudgetState.Confirmed)
+                                        {
+                                            <td>?@line.AchievedAmount.ToString("N2")</td>
+                                            <td>
+                                                <div class="progress">
+                                                    <div class="progress-bar @(line.AchievedPercentage > 100 ? "bg-danger" : "bg-success")" 
+                                                         style="width: @Math.Min(line.AchievedPercentage, 100)%">
+                                                        @line.AchievedPercentage.ToString("N2")%
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="@(line.AmountToAchieve < 0 ? "text-danger" : "text-success")">
+                                                    ?@line.AmountToAchieve.ToString("N2")
+                                                </span>
+                                            </td>
+                                        }
+                                    </tr>
+                                    srNo++;
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-primary fw-bold">
+                                    <td colspan="3" class="text-end">Total:</td>
+                                    <td>?@Model.Budget.Lines.Sum(l => l.BudgetedAmount).ToString("N2")</td>
+                                    @if (Model.Budget.State == BudgetState.Confirmed)
+                                    {
+                                        <td>?@Model.Budget.Lines.Sum(l => l.AchievedAmount).ToString("N2")</td>
+                                        <td colspan="2"></td>
+                                    }
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

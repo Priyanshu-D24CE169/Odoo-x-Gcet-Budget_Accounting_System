@@ -1,0 +1,213 @@
+@page "{poId:int?}"
+@model Budget_Accounting_System.Pages.VendorBills.CreateFromPOModel
+@{
+    ViewData["Title"] = "Create Vendor Bill from PO";
+}
+
+<div class="row mb-3">
+    <div class="col-12">
+        <h1 class="display-6">
+            <i class="bi bi-receipt text-danger"></i> Create Vendor Bill from Purchase Order
+        </h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-page="/Index">Dashboard</a></li>
+                <li class="breadcrumb-item"><a asp-page="/PurchaseOrders/Index">Purchase Orders</a></li>
+                <li class="breadcrumb-item active">Create Bill from PO</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+@if (Model.PurchaseOrder != null)
+{
+    <div class="alert alert-info">
+        <h5><i class="bi bi-info-circle"></i> Purchase Order Details</h5>
+        <strong>PO Number:</strong> @Model.PurchaseOrder.PONumber<br/>
+        <strong>Vendor:</strong> @Model.PurchaseOrder.Vendor.Name<br/>
+        <strong>PO Date:</strong> @Model.PurchaseOrder.PODate.ToString("dd/MM/yyyy")<br/>
+        <strong>Total Amount:</strong> ?@Model.PurchaseOrder.TotalAmount.ToString("N2")
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="bi bi-exclamation-triangle"></i> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card shadow-sm">
+    <div class="card-header bg-danger text-white">
+        <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Vendor Bill Information</h5>
+    </div>
+    <div class="card-body">
+        <form method="post" id="billForm">
+            <input type="hidden" asp-for="Input.PurchaseOrderId" />
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label asp-for="Input.VendorId" class="form-label fw-semibold">Vendor *</label>
+                    <input type="text" class="form-control" value="@Model.PurchaseOrder?.Vendor.Name" readonly style="background-color: #f8f9fa;" />
+                    <input type="hidden" asp-for="Input.VendorId" />
+                    <small class="text-muted">Auto-filled from Purchase Order</small>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Input.BillNumber" class="form-label fw-semibold">Bill Number *</label>
+                    <input asp-for="Input.BillNumber" class="form-control" readonly style="background-color: #f8f9fa;" />
+                    <span asp-validation-for="Input.BillNumber" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label asp-for="Input.BillDate" class="form-label fw-semibold">Bill Date *</label>
+                    <input asp-for="Input.BillDate" type="date" class="form-control" />
+                    <span asp-validation-for="Input.BillDate" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.DueDate" class="form-label fw-semibold">Due Date</label>
+                    <input asp-for="Input.DueDate" type="date" class="form-control" />
+                    <span asp-validation-for="Input.DueDate" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.Reference" class="form-label fw-semibold">Reference</label>
+                    <input asp-for="Input.Reference" class="form-control" placeholder="Supplier invoice number" />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.Notes" class="form-label fw-semibold">Notes</label>
+                <textarea asp-for="Input.Notes" class="form-control" rows="2" placeholder="Additional notes"></textarea>
+            </div>
+
+            <hr class="my-4" />
+
+            <h5 class="mb-3"><i class="bi bi-list-ul"></i> Bill Lines (from Purchase Order)</h5>
+
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 5%;">Sr.</th>
+                            <th style="width: 35%;">Product</th>
+                            <th style="width: 25%;">Analytical Account</th>
+                            <th style="width: 10%;">Quantity</th>
+                            <th style="width: 12%;">Unit Price</th>
+                            <th style="width: 13%;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Input?.Lines != null)
+                        {
+                            int srNo = 1;
+                            for (int i = 0; i < Model.Input.Lines.Count; i++)
+                            {
+                                var line = Model.Input.Lines[i];
+                                <tr>
+                                    <td class="text-center">@srNo</td>
+                                    <td>
+                                        @Model.PurchaseOrder?.Lines.ElementAtOrDefault(i)?.Product.Name
+                                        <input type="hidden" name="Input.Lines[@i].ProductId" value="@line.ProductId" />
+                                    </td>
+                                    <td>
+                                        @if (line.AnalyticalAccountId.HasValue)
+                                        {
+                                            var account = Model.PurchaseOrder?.Lines.ElementAtOrDefault(i)?.AnalyticalAccount;
+                                            @(account != null ? $"{account.Code} - {account.Name}" : "Not assigned")
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Not assigned</span>
+                                        }
+                                        <input type="hidden" name="Input.Lines[@i].AnalyticalAccountId" value="@line.AnalyticalAccountId" />
+                                    </td>
+                                    <td>
+                                        <input type="number" name="Input.Lines[@i].Quantity" value="@line.Quantity" 
+                                               class="form-control form-control-sm" step="0.01" min="0.01" 
+                                               onchange="calculateLineTotal(@i)" required />
+                                    </td>
+                                    <td>
+                                        <input type="number" name="Input.Lines[@i].UnitPrice" value="@line.UnitPrice" 
+                                               class="form-control form-control-sm" step="0.01" min="0" 
+                                               onchange="calculateLineTotal(@i)" required />
+                                    </td>
+                                    <td>
+                                        <input type="text" class="form-control form-control-sm" id="amount_@i" 
+                                               value="?@line.LineTotal.ToString("N2")" readonly style="background: #f8f9fa;" />
+                                    </td>
+                                </tr>
+                                srNo++;
+                            }
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="table-danger">
+                            <td colspan="5" class="text-end fw-bold">Total Payable:</td>
+                            <td id="grandTotal" class="fw-bold">?@Model.Input?.Lines?.Sum(l => l.Quantity * l.UnitPrice).ToString("N2")</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="alert alert-warning">
+                <i class="bi bi-info-circle"></i> <strong>Note:</strong> You can adjust quantities and prices before creating the bill. 
+                The bill will be created with status "Draft" and can be posted later.
+            </div>
+
+            <hr class="my-4" />
+
+            <div class="d-flex justify-content-between">
+                <a asp-page="/PurchaseOrders/Details" asp-route-id="@Model.Input?.PurchaseOrderId" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to PO
+                </a>
+                <div>
+                    <button type="submit" name="action" value="draft" class="btn btn-outline-secondary">
+                        <i class="bi bi-save"></i> Save as Draft
+                    </button>
+                    <button type="submit" name="action" value="post" class="btn btn-danger" id="confirmBtn">
+                        <i class="bi bi-check-circle"></i> Create & Post Bill
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        function calculateLineTotal(index) {
+            const row = document.querySelector(`input[name="Input.Lines[${index}].Quantity"]`).closest('tr');
+            const qty = parseFloat(document.querySelector(`input[name="Input.Lines[${index}].Quantity"]`).value) || 0;
+            const price = parseFloat(document.querySelector(`input[name="Input.Lines[${index}].UnitPrice"]`).value) || 0;
+            const amount = qty * price;
+            
+            document.getElementById(`amount_${index}`).value = `?${amount.toFixed(2)}`;
+            calculateGrandTotal();
+        }
+
+        function calculateGrandTotal() {
+            let total = 0;
+            document.querySelectorAll('[id^="amount_"]').forEach(input => {
+                total += parseFloat(input.value.replace('?', '').replace(',', '')) || 0;
+            });
+            document.getElementById('grandTotal').textContent = `?${total.toFixed(2)}`;
+        }
+
+        // Form validation
+        document.getElementById('billForm').addEventListener('submit', function(e) {
+            const submitBtn = e.submitter;
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+            }
+        });
+    </script>
+}

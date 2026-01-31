@@ -1,0 +1,447 @@
+@page
+@model Budget_Accounting_System.Pages.SalesOrders.CreateModel
+@{
+    ViewData["Title"] = "Create Sales Order";
+}
+
+<!-- Page Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="fw-bold mb-1">
+                    <i class="bi bi-cart-plus-fill text-success"></i> Create Sales Order
+                </h2>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a asp-page="/Index">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a asp-page="./Index">Sales Orders</a></li>
+                        <li class="breadcrumb-item active">Create</li>
+                    </ol>
+                </nav>
+            </div>
+            <div>
+                <a asp-page="./Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="bi bi-exclamation-triangle-fill"></i> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<form method="post" id="soForm">
+    <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+
+    <!-- Main Card -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-success text-white py-3">
+            <h5 class="mb-0"><i class="bi bi-file-earmark-text-fill"></i> Sales Order Details</h5>
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label asp-for="Input.SONumber" class="form-label fw-semibold">
+                        SO Number <span class="text-danger">*</span>
+                    </label>
+                    <input asp-for="Input.SONumber" class="form-control form-control-lg" 
+                           readonly style="background-color: #e9ecef; font-weight: 600;" />
+                    <span asp-validation-for="Input.SONumber" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label asp-for="Input.SODate" class="form-label fw-semibold">
+                        SO Date <span class="text-danger">*</span>
+                    </label>
+                    <input asp-for="Input.SODate" type="date" class="form-control form-control-lg" required />
+                    <span asp-validation-for="Input.SODate" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.CustomerId" class="form-label fw-semibold">
+                        Customer <span class="text-danger">*</span>
+                    </label>
+                    <select asp-for="Input.CustomerId" class="form-select form-select-lg" required>
+                        <option value="">-- Select Customer --</option>
+                        @foreach (var customer in Model.Customers)
+                        {
+                            <option value="@customer.Id">
+                                @customer.Name
+                                @if (!string.IsNullOrEmpty(customer.Email))
+                                {
+                                    <text> (@customer.Email)</text>
+                                }
+                            </option>
+                        }
+                    </select>
+                    <span asp-validation-for="Input.CustomerId" class="text-danger small"></span>
+                    @if (!Model.Customers.Any())
+                    {
+                        <small class="text-warning">
+                            <i class="bi bi-exclamation-circle"></i> No confirmed customers available. 
+                            <a asp-page="/Contacts/Create" class="text-decoration-none">Create one</a>
+                        </small>
+                    }
+                </div>
+
+                <div class="col-md-2">
+                    <label asp-for="Input.Reference" class="form-label fw-semibold">Reference</label>
+                    <input asp-for="Input.Reference" class="form-control form-control-lg" 
+                           placeholder="Optional" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Lines Card -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-light py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-success">
+                    <i class="bi bi-list-check"></i> Order Lines
+                </h5>
+                <button type="button" class="btn btn-success btn-sm" onclick="addLine()">
+                    <i class="bi bi-plus-circle-fill"></i> Add Product
+                </button>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="linesTable">
+                    <thead class="table-success">
+                        <tr>
+                            <th class="text-center" style="width: 50px;">Sr.</th>
+                            <th style="width: 40%;">Product *</th>
+                            <th class="text-end" style="width: 15%;">Quantity *</th>
+                            <th class="text-end" style="width: 15%;">Unit Price (?) *</th>
+                            <th class="text-end" style="width: 15%;">Line Total (?)</th>
+                            <th style="width: 15%;">Analytical Account</th>
+                            <th class="text-center" style="width: 80px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="linesBody">
+                        <!-- Lines will be added dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="noLinesMessage" class="text-center py-5">
+                <div class="text-muted">
+                    <i class="bi bi-inbox display-1 d-block mb-3 opacity-25"></i>
+                    <p class="mb-0">No products added yet</p>
+                    <small>Click "Add Product" button to add items to this sales order</small>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-light">
+            <div class="row">
+                <div class="col-md-8">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle"></i> 
+                        Analytical accounts can be assigned manually or will be auto-assigned based on product category rules
+                    </small>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex justify-content-between align-items-center p-3 bg-success bg-opacity-10 rounded">
+                        <strong class="text-success">Grand Total:</strong>
+                        <h4 class="mb-0 fw-bold text-success" id="grandTotal">?0.00</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="alert alert-info mb-0">
+                        <h6 class="alert-heading">
+                            <i class="bi bi-lightbulb-fill"></i> Sales Order Workflow
+                        </h6>
+                        <ul class="mb-0 small">
+                            <li><strong>Save as Draft:</strong> Save for later editing</li>
+                            <li><strong>Confirm Order:</strong> Confirm and auto-create Customer Invoice</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-grid gap-2">
+                        <button type="submit" name="action" value="draft" class="btn btn-outline-secondary btn-lg">
+                            <i class="bi bi-save"></i> Save as Draft
+                        </button>
+                        <button type="submit" name="action" value="confirm" class="btn btn-success btn-lg" id="confirmBtn">
+                            <i class="bi bi-check-circle-fill"></i> Confirm Order & Create Invoice
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        let lineIndex = 0;
+        
+        const products = @Html.Raw(Json.Serialize(Model.Products.Select(p => new { 
+            id = p.Id, 
+            name = p.Name,
+            description = p.Description,
+            salesPrice = p.SalesPrice,
+            unit = p.Unit
+        })));
+
+        const analyticalAccounts = @Html.Raw(Json.Serialize(Model.AnalyticalAccounts.Select(a => new {
+            id = a.Id,
+            code = a.Code,
+            name = a.Name
+        })));
+
+        function addLine() {
+            const tbody = document.getElementById('linesBody');
+            const row = document.createElement('tr');
+            row.className = 'so-line-row';
+            row.id = `line_${lineIndex}`;
+            
+            row.innerHTML = `
+                <td class="text-center align-middle">
+                    <span class="badge bg-success">${lineIndex + 1}</span>
+                </td>
+                <td>
+                    <select name="Input.Lines[${lineIndex}].ProductId" 
+                            class="form-select form-select-sm" 
+                            onchange="updateProductDetails(${lineIndex})" required>
+                        <option value="">-- Select Product --</option>
+                        ${products.map(p => `
+                            <option value="${p.id}" 
+                                    data-price="${p.salesPrice}" 
+                                    data-unit="${p.unit || ''}" 
+                                    data-desc="${p.description || ''}">
+                                ${p.name}
+                            </option>
+                        `).join('')}
+                    </select>
+                    <small class="text-muted d-block mt-1" id="productDesc_${lineIndex}"></small>
+                </td>
+                <td>
+                    <div class="input-group input-group-sm">
+                        <input type="number" 
+                               name="Input.Lines[${lineIndex}].Quantity" 
+                               class="form-control text-end" 
+                               value="1" 
+                               step="0.01" 
+                               min="0.01" 
+                               onchange="calculateLineTotal(${lineIndex})" 
+                               required />
+                        <span class="input-group-text" id="unit_${lineIndex}">Unit</span>
+                    </div>
+                </td>
+                <td>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">?</span>
+                        <input type="number" 
+                               name="Input.Lines[${lineIndex}].UnitPrice" 
+                               class="form-control text-end" 
+                               value="0" 
+                               step="0.01" 
+                               min="0" 
+                               onchange="calculateLineTotal(${lineIndex})" 
+                               required />
+                    </div>
+                </td>
+                <td>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">?</span>
+                        <input type="text" 
+                               class="form-control text-end fw-bold" 
+                               id="lineTotal_${lineIndex}" 
+                               value="0.00" 
+                               readonly 
+                               style="background: #e9ecef;" />
+                    </div>
+                </td>
+                <td>
+                    <select name="Input.Lines[${lineIndex}].AnalyticalAccountId" 
+                            class="form-select form-select-sm">
+                        <option value="">-- Auto Assign --</option>
+                        ${analyticalAccounts.map(a => `
+                            <option value="${a.id}">${a.code} - ${a.name}</option>
+                        `).join('')}
+                    </select>
+                </td>
+                <td class="text-center">
+                    <button type="button" 
+                            class="btn btn-danger btn-sm" 
+                            onclick="removeLine(${lineIndex})"
+                            title="Remove">
+                        <i class="bi bi-trash-fill"></i>
+                    </button>
+                </td>
+            `;
+            
+            tbody.appendChild(row);
+            document.getElementById('noLinesMessage').style.display = 'none';
+            document.getElementById('linesTable').style.display = 'table';
+            lineIndex++;
+        }
+
+        function updateProductDetails(index) {
+            const row = document.getElementById(`line_${index}`);
+            const select = row.querySelector('select');
+            const option = select.options[select.selectedIndex];
+            
+            if (option.value) {
+                const price = parseFloat(option.dataset.price) || 0;
+                const unit = option.dataset.unit || 'Unit';
+                const desc = option.dataset.desc || '';
+                
+                // Update price
+                row.querySelectorAll('input[type="number"]')[1].value = price.toFixed(2);
+                
+                // Update unit display
+                document.getElementById(`unit_${index}`).textContent = unit;
+                
+                // Update description
+                const descElement = document.getElementById(`productDesc_${index}`);
+                if (desc) {
+                    descElement.textContent = desc;
+                    descElement.style.display = 'block';
+                } else {
+                    descElement.style.display = 'none';
+                }
+                
+                calculateLineTotal(index);
+            }
+        }
+
+        function calculateLineTotal(index) {
+            const row = document.getElementById(`line_${index}`);
+            const qtyInput = row.querySelectorAll('input[type="number"]')[0];
+            const priceInput = row.querySelectorAll('input[type="number"]')[1];
+            
+            const qty = parseFloat(qtyInput.value) || 0;
+            const price = parseFloat(priceInput.value) || 0;
+            const total = qty * price;
+            
+            document.getElementById(`lineTotal_${index}`).value = total.toFixed(2);
+            calculateGrandTotal();
+        }
+
+        function calculateGrandTotal() {
+            let total = 0;
+            document.querySelectorAll('[id^="lineTotal_"]').forEach(input => {
+                total += parseFloat(input.value) || 0;
+            });
+            document.getElementById('grandTotal').textContent = `?${total.toFixed(2)}`;
+        }
+
+        function removeLine(index) {
+            const row = document.getElementById(`line_${index}`);
+            if (row) {
+                row.remove();
+                calculateGrandTotal();
+                
+                // Renumber remaining rows
+                const rows = document.querySelectorAll('.so-line-row');
+                if (rows.length === 0) {
+                    document.getElementById('noLinesMessage').style.display = 'block';
+                    document.getElementById('linesTable').style.display = 'none';
+                } else {
+                    rows.forEach((row, idx) => {
+                        row.querySelector('.badge').textContent = idx + 1;
+                    });
+                }
+            }
+        }
+
+        // Form submission handling
+        document.getElementById('soForm').addEventListener('submit', function(e) {
+            const lines = document.querySelectorAll('.so-line-row');
+            
+            if (lines.length === 0) {
+                e.preventDefault();
+                alert('Please add at least one product line');
+                return false;
+            }
+            
+            const submitBtn = e.submitter;
+            if (submitBtn && submitBtn.id === 'confirmBtn') {
+                if (!confirm('Confirm this Sales Order? This will also create a Customer Invoice automatically.')) {
+                    e.preventDefault();
+                    return false;
+                }
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Confirming...';
+            }
+        });
+
+        // Initialize with one line
+        window.addEventListener('load', function() {
+            document.getElementById('linesTable').style.display = 'none';
+            addLine();
+        });
+    </script>
+
+    <style>
+        .table-hover tbody tr:hover {
+            background-color: rgba(25, 135, 84, 0.05);
+        }
+        
+        .so-line-row {
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+        
+        .so-line-row:hover {
+            border-left-color: #198754;
+        }
+        
+        #noLinesMessage {
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+}
+
+            calculateGrandTotal();
+            
+            if (document.querySelectorAll('#linesBody tr').length === 0) {
+                document.getElementById('noLinesMessage').style.display = 'block';
+            }
+            
+            // Renumber rows
+            let srNo = 1;
+            document.querySelectorAll('#linesBody tr').forEach(row => {
+                row.cells[0].textContent = srNo++;
+            });
+        }
+
+        // Form validation
+        document.getElementById('soForm').addEventListener('submit', function(e) {
+            const hasLines = document.querySelectorAll('#linesBody tr').length > 0;
+            if (!hasLines) {
+                e.preventDefault();
+                alert('Please add at least one product line');
+                return false;
+            }
+        });
+
+        // Initialize with one line
+        document.addEventListener('DOMContentLoaded', function() {
+            addLine();
+        });
+    </script>
+}

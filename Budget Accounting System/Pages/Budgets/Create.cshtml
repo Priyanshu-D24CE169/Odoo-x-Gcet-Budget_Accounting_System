@@ -1,0 +1,279 @@
+@page
+@model Budget_Accounting_System.Pages.Budgets.CreateModel
+@{
+    ViewData["Title"] = "Create Budget";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-piggy-bank"></i> Create New Budget</h5>
+                </div>
+                <div class="card-body">
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show">
+                            <strong>Error:</strong> @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    
+                    <form method="post" id="budgetForm">
+                        <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+
+                        <!-- Budget Header -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label asp-for="Input.Name" class="form-label fw-semibold">Budget Name *</label>
+                                <input asp-for="Input.Name" class="form-control" placeholder="e.g., Q1 2025 Multi-Department Budget" required />
+                                <span asp-validation-for="Input.Name" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Input.StartDate" class="form-label fw-semibold">Budget Period - Start Date *</label>
+                                <input asp-for="Input.StartDate" type="date" class="form-control" required />
+                                <span asp-validation-for="Input.StartDate" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Input.EndDate" class="form-label fw-semibold">Budget Period - End Date *</label>
+                                <input asp-for="Input.EndDate" type="date" class="form-control" required />
+                                <span asp-validation-for="Input.EndDate" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <!-- Budget Lines -->
+                        <h5 class="mb-3"><i class="bi bi-list-ul"></i> Budget Lines</h5>
+                        <p class="text-muted">Add multiple budget lines for different analytical accounts and types (Income/Expense)</p>
+
+                        <div id="budgetLinesContainer">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="linesTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 5%;">Sr.</th>
+                                            <th style="width: 40%;">Analytical Account *</th>
+                                            <th style="width: 20%;">Type *</th>
+                                            <th style="width: 25%;">Budgeted Amount *</th>
+                                            <th style="width: 10%;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="linesBody">
+                                        <tr class="budget-line-row">
+                                            <td class="text-center line-number">1</td>
+                                            <td>
+                                                <select name="Input.Lines[0].AnalyticalAccountId" class="form-select form-select-sm" required>
+                                                    <option value="">-- Select Account --</option>
+                                                    @foreach (var account in Model.AnalyticalAccounts)
+                                                    {
+                                                        <option value="@account.Id">@account.Code - @account.Name</option>
+                                                    }
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <select name="Input.Lines[0].Type" class="form-select form-select-sm" required>
+                                                    <option value="">-- Select --</option>
+                                                    <option value="@((int)BudgetLineType.Income)">Income</option>
+                                                    <option value="@((int)BudgetLineType.Expense)">Expense</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text">?</span>
+                                                    <input type="number" name="Input.Lines[0].BudgetedAmount" class="form-control" step="0.01" min="0.01" placeholder="0.00" required />
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <button type="button" class="btn btn-sm btn-danger remove-line" disabled>
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-success btn-sm" id="addLineBtn">
+                                <i class="bi bi-plus-circle"></i> Add Another Line
+                            </button>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Budget Guidelines</h6>
+                            <ul class="mb-0">
+                                <li>Add multiple lines for different analytical accounts</li>
+                                <li>Same analytical account can appear twice: once for Income, once for Expense</li>
+                                <li><strong>Draft:</strong> Save without confirmation - can edit later</li>
+                                <li><strong>Confirm:</strong> Budget becomes active - actuals will be computed from posted transactions</li>
+                            </ul>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-page="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancel
+                            </a>
+                            <div>
+                                <button type="submit" name="action" value="draft" class="btn btn-outline-primary me-2">
+                                    <i class="bi bi-save"></i> Save as Draft
+                                </button>
+                                <button type="submit" name="action" value="confirm" class="btn btn-primary" id="confirmBtn">
+                                    <i class="bi bi-check-circle"></i> Save & Confirm
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        let lineIndex = 1;
+
+        // Add new line
+        document.getElementById('addLineBtn').addEventListener('click', function() {
+            const tbody = document.getElementById('linesBody');
+            const newRow = document.querySelector('.budget-line-row').cloneNode(true);
+            
+            // Update indices
+            newRow.querySelectorAll('[name]').forEach(input => {
+                const name = input.getAttribute('name');
+                input.setAttribute('name', name.replace(/\[\d+\]/, `[${lineIndex}]`));
+                input.value = '';
+                input.selectedIndex = 0;
+            });
+            
+            // Update line number
+            newRow.querySelector('.line-number').textContent = lineIndex + 1;
+            
+            // Enable remove button
+            newRow.querySelector('.remove-line').disabled = false;
+            
+            tbody.appendChild(newRow);
+            lineIndex++;
+            
+            // Attach remove handler
+            attachRemoveHandler();
+            updateLineNumbers();
+        });
+
+        // Remove line handler
+        function attachRemoveHandler() {
+            document.querySelectorAll('.remove-line').forEach(btn => {
+                btn.onclick = function() {
+                    const row = this.closest('tr');
+                    if (document.querySelectorAll('.budget-line-row').length > 1) {
+                        row.remove();
+                        updateLineNumbers();
+                        reindexLines();
+                    }
+                };
+            });
+        }
+
+        // Update line numbers
+        function updateLineNumbers() {
+            document.querySelectorAll('.line-number').forEach((cell, index) => {
+                cell.textContent = index + 1;
+            });
+            
+            // Disable remove on first line if only one line
+            const rows = document.querySelectorAll('.budget-line-row');
+            if (rows.length === 1) {
+                rows[0].querySelector('.remove-line').disabled = true;
+            }
+        }
+
+        // Reindex form fields after removal
+        function reindexLines() {
+            document.querySelectorAll('.budget-line-row').forEach((row, index) => {
+                row.querySelectorAll('[name]').forEach(input => {
+                    const name = input.getAttribute('name');
+                    input.setAttribute('name', name.replace(/\[\d+\]/, `[${index}]`));
+                });
+            });
+            lineIndex = document.querySelectorAll('.budget-line-row').length;
+        }
+
+        // Form submit handling
+        document.getElementById('budgetForm').addEventListener('submit', function(e) {
+            console.log('Form submitting...');
+            
+            // Validate at least one line
+            const lines = document.querySelectorAll('.budget-line-row');
+            if (lines.length === 0) {
+                alert('Please add at least one budget line');
+                e.preventDefault();
+                return false;
+            }
+            
+            // Check if first line has values
+            const firstLine = lines[0];
+            const accountId = firstLine.querySelector('[name="Input.Lines[0].AnalyticalAccountId"]').value;
+            const type = firstLine.querySelector('[name="Input.Lines[0].Type"]').value;
+            const amount = firstLine.querySelector('[name="Input.Lines[0].BudgetedAmount"]').value;
+            
+            console.log('First line data:', { accountId, type, amount });
+            
+            if (!accountId || !type || !amount) {
+                alert('Please fill in all fields for budget line 1');
+                e.preventDefault();
+                return false;
+            }
+            
+            const submitBtn = e.submitter;
+            if (submitBtn && submitBtn.id === 'confirmBtn') {
+                if (!confirm('Confirm this budget? Once confirmed, the budget period and analytical accounts cannot be changed.')) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Add hidden input with action value BEFORE disabling button
+                // This ensures the action value is sent to server
+                const actionInput = document.createElement('input');
+                actionInput.type = 'hidden';
+                actionInput.name = 'action';
+                actionInput.value = 'confirm';
+                this.appendChild(actionInput);
+                
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Confirming...';
+            } else if (submitBtn) {
+                // Add hidden input for draft action as well
+                const actionInput = document.createElement('input');
+                actionInput.type = 'hidden';
+                actionInput.name = 'action';
+                actionInput.value = 'draft';
+                this.appendChild(actionInput);
+                
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+            }
+        });
+
+        // Date validation
+        document.querySelector('[name="Input.StartDate"]').addEventListener('change', function() {
+            const endDateInput = document.querySelector('[name="Input.EndDate"]');
+            const startDate = new Date(this.value);
+            const minEndDate = new Date(startDate);
+            minEndDate.setDate(minEndDate.getDate() + 1);
+            endDateInput.setAttribute('min', minEndDate.toISOString().split('T')[0]);
+        });
+
+        // Initialize
+        attachRemoveHandler();
+    </script>
+}
