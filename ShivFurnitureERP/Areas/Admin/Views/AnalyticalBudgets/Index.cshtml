@@ -1,0 +1,131 @@
+@using ShivFurnitureERP.ViewModels.AnalyticalBudgets
+@using ShivFurnitureERP.Models
+@model IReadOnlyList<ShivFurnitureERP.ViewModels.AnalyticalBudgets.BudgetPerformanceListItemViewModel>
+@{
+    ViewData["Title"] = "Analytical Budgets";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var mode = ViewData["Mode"] as BudgetListMode? ?? BudgetListMode.Confirm;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/analytical-budget-master.css" asp-append-version="true" />
+}
+
+<div class="budget-page">
+    <div class="container-fluid">
+        <div class="budget-hero">
+            <div>
+                <p class="budget-eyebrow">Budget List View</p>
+                <h1>Analytical Budgets</h1>
+                <p>Keep every income and expense allocation on a single canvas. Click any line to open its detailed form.</p>
+            </div>
+        </div>
+
+        @if (TempData["StatusMessage"] is string alert)
+        {
+            <div class="budget-alert">@alert</div>
+        }
+
+        <div class="budget-card">
+            <div class="master-action-bar">
+                <a asp-action="Create" class="master-action-btn">New</a>
+                <a asp-action="Index" asp-route-mode="@BudgetListMode.Draft" class="master-action-btn @(mode == BudgetListMode.Draft ? "is-primary" : string.Empty)">Draft</a>
+                <a asp-action="Index" asp-route-mode="@BudgetListMode.Confirm" class="master-action-btn @(mode == BudgetListMode.Confirm ? "is-primary" : string.Empty)">Confirm</a>
+                <a asp-action="Index" asp-route-mode="@BudgetListMode.Revise" class="master-action-btn @(mode == BudgetListMode.Revise ? "is-primary" : string.Empty)">Revise</a>
+                <a asp-action="Index" asp-route-mode="@BudgetListMode.Archived" class="master-action-btn @(mode == BudgetListMode.Archived ? "is-primary" : string.Empty)">Archived</a>
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="master-action-btn">Home</a>
+                <a href="javascript:history.back()" class="master-action-btn">Back</a>
+            </div>
+
+            <div class="budget-table-wrapper">
+                @if (!Model.Any())
+                {
+                    <div class="budget-empty">No budgets match this filter.</div>
+                }
+                else
+                {
+                    <table class="budget-table">
+                        <thead>
+                            <tr>
+                                <th>Budget Name</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Status</th>
+                                <th class="text-end">Pie</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                var progress = Math.Clamp(item.AchievedPercent, -200, 200);
+                                var progressClip = Math.Clamp(progress, 0, 100);
+                                var (statusLabel, statusClass) = item.Status switch
+                                {
+                                    BudgetStatus.Draft => ("Draft", "is-draft"),
+                                    BudgetStatus.Confirmed => ("Confirm", "is-confirm"),
+                                    BudgetStatus.Revised => ("Revised", "is-revised"),
+                                    BudgetStatus.Archived => ("Archived", "is-archived"),
+                                    _ => ("Draft", "is-draft")
+                                };
+                                var detailsUrl = Url.Action("Details", new { id = item.AnalyticalBudgetId });
+                                <tr class="budget-row" data-url="@detailsUrl">
+                                    <td>
+                                        <a asp-action="Details" asp-route-id="@item.AnalyticalBudgetId" class="budget-link">@item.BudgetName</a>
+                                        <div class="budget-subtext">@item.AccountName · @item.BudgetType</div>
+                                    </td>
+                                    <td>@item.PeriodStart.ToString("dd/MM/yyyy")</td>
+                                    <td>@item.PeriodEnd.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        <span class="status-pill @statusClass">@statusLabel</span>
+                                        @if (item.HasRevisions)
+                                        {
+                                            <span class="status-hint">• revised</span>
+                                        }
+                                        @if (item.ShouldArchive)
+                                        {
+                                            <span class="status-hint text-warning">• target met</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        <a asp-action="Details" asp-route-id="@item.AnalyticalBudgetId" class="pie-link" title="View pie">
+                                            <span class="pie-chip" style="--progress:@progressClip;"></span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+
+@section Scripts {
+    <script>
+        (() => {
+            document.querySelectorAll('.budget-row').forEach(row => {
+                const url = row.dataset.url;
+                if (!url) {
+                    return;
+                }
+
+                row.setAttribute('tabindex', '0');
+
+                row.addEventListener('click', event => {
+                    if (event.target.closest('a')) {
+                        return;
+                    }
+                    window.location.href = url;
+                });
+
+                row.addEventListener('keydown', event => {
+                    if ((event.key === 'Enter' || event.key === ' ') && !event.target.closest('a')) {
+                        event.preventDefault();
+                        window.location.href = url;
+                    }
+                });
+            });
+        })();
+    </script>
+}
+</div>

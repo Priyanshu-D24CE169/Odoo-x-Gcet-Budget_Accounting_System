@@ -1,0 +1,78 @@
+@using ShivFurnitureERP.Models
+@model ShivFurnitureERP.ViewModels.AnalyticalBudgets.AnalyticalBudgetFormViewModel
+
+<div asp-validation-summary="ModelOnly" class="budget-validation text-danger mb-3"></div>
+<div class="budget-form-grid">
+    @if (Model.IsRevision)
+    {
+        <div class="budget-field">
+            <label>Budget Name</label>
+            <input class="budget-input" value="@Model.BudgetName" readonly />
+            <input type="hidden" asp-for="BudgetName" />
+        </div>
+    }
+    else
+    {
+        <div class="budget-field">
+            <label asp-for="BudgetName">Budget Name</label>
+            <input asp-for="BudgetName" class="budget-input" placeholder="e.g. January 2026" />
+            <small>Give each budget an easy to scan name.</small>
+            <span asp-validation-for="BudgetName" class="text-danger small"></span>
+        </div>
+    }
+
+    @if (!Model.IsRevision)
+    {
+        <div class="budget-field">
+            <label asp-for="AnalyticalAccountId">Analytic Name</label>
+            <select asp-for="AnalyticalAccountId" asp-items="Model.Accounts" class="budget-input">
+                <option value="">Select analytical account</option>
+            </select>
+            <small>Alpha numeric text. Keep original name while revising.</small>
+            <span asp-validation-for="AnalyticalAccountId" class="text-danger small"></span>
+        </div>
+    }
+    else
+    {
+        <div class="budget-field">
+            <label>Analytic Name</label>
+            <input class="budget-input" value="@Model.AnalyticalAccountName" readonly />
+            <input type="hidden" asp-for="AnalyticalAccountId" />
+        </div>
+    }
+
+    @if (Model.IsRevision)
+    {
+        <div class="budget-field">
+            <label>Budget Type</label>
+            <input class="budget-input" value="@Model.BudgetType" readonly />
+            <input type="hidden" asp-for="BudgetType" />
+        </div>
+    }
+    else
+    {
+        <div class="budget-field">
+            <label asp-for="BudgetType">Budget Type</label>
+            <select asp-for="BudgetType" class="budget-input" asp-items="Html.GetEnumSelectList<BudgetType>()"></select>
+            <small>Choose Income for funds in, Expense for funds out.</small>
+        </div>
+    }
+
+    <div class="budget-field">
+        <label asp-for="PeriodStart">Budget Period · Start Date</label>
+        <input asp-for="PeriodStart" type="date" class="budget-input" />
+        <span asp-validation-for="PeriodStart" class="text-danger small"></span>
+    </div>
+    <div class="budget-field">
+        <label asp-for="PeriodEnd">Budget Period · End Date</label>
+        <input asp-for="PeriodEnd" type="date" class="budget-input" />
+        <span asp-validation-for="PeriodEnd" class="text-danger small"></span>
+    </div>
+    <div class="budget-field">
+        <label asp-for="LimitAmount">Budgeted Amount</label>
+        <input asp-for="LimitAmount" type="number" step="0.01" min="0" class="budget-input" />
+        <small>Monetary value. Use revisions to adjust later.</small>
+        <span asp-validation-for="LimitAmount" class="text-danger small"></span>
+    </div>
+</div>
+<input type="hidden" asp-for="OriginalBudgetId" />

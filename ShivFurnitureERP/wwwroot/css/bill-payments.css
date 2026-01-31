@@ -1,0 +1,487 @@
+:root {
+  --billpay-ink: #43233f;
+  --billpay-primary: #a54483;
+  --billpay-accent: #7a3d83;
+  --billpay-paper: #fdf8f4;
+  --billpay-border: #e6d4da;
+  --billpay-muted: #a18b95;
+  --billpay-soft: #fffaf7;
+  --billpay-success: #3c9b7b;
+  --billpay-warning: #d48d22;
+  --billpay-danger: #c15050;
+}
+
+.bill-payments-page {
+  background: linear-gradient(180deg, #fff 0%, var(--billpay-paper) 70%);
+  padding: 2rem 0 4rem;
+  color: var(--billpay-ink);
+}
+
+.bill-payments-page .container-fluid {
+  max-width: 1180px;
+}
+
+.bill-payments-hero {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+  align-items: flex-start;
+}
+
+.hero-text .hero-eyebrow {
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--billpay-primary);
+  margin-bottom: 0.35rem;
+}
+
+.hero-text h1 {
+  font-size: 2.4rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+
+.hero-text p {
+  color: var(--billpay-muted);
+  max-width: 520px;
+  margin-bottom: 0;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.chip-btn {
+  border-radius: 999px;
+  border: 1px solid var(--billpay-border);
+  padding: 0.55rem 1.6rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--billpay-ink);
+  background: #fff;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.08);
+}
+
+.chip-btn:hover {
+  color: var(--billpay-primary);
+}
+
+.bill-payments-sheet {
+  background: #fff;
+  border: 2px solid var(--billpay-border);
+  border-radius: 28px;
+  padding: 2rem;
+  box-shadow: 0 14px 34px rgba(91, 49, 80, 0.08);
+}
+
+.payment-form-sheet {
+  margin-top: 1rem;
+}
+
+.payment-stage-tabs {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.stage-chip {
+  border: 1px dashed var(--billpay-border);
+  border-radius: 20px;
+  padding: 0.35rem 1.25rem;
+  font-weight: 600;
+  color: var(--billpay-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+}
+
+.stage-chip.is-active {
+  border-color: var(--billpay-primary);
+  color: var(--billpay-primary);
+  background: rgba(165, 68, 131, 0.08);
+}
+
+.payment-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px dashed var(--billpay-border);
+  margin-bottom: 1.2rem;
+}
+
+.payment-toolbar .toolbar-label {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--billpay-muted);
+  margin-bottom: 0.2rem;
+  font-size: 0.78rem;
+}
+
+.payment-number {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--billpay-primary);
+  margin: 0;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.toolbar-btn {
+  border-radius: 12px;
+  border: 1px solid var(--billpay-border);
+  background: #fff;
+  color: var(--billpay-ink);
+  font-weight: 600;
+  padding: 0.45rem 1.4rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.toolbar-btn.is-primary {
+  background: var(--billpay-primary);
+  color: #fff;
+  border-color: var(--billpay-primary);
+}
+
+.toolbar-btn.is-cancel {
+  color: var(--billpay-danger);
+  border-color: rgba(193, 80, 80, 0.4);
+}
+
+.toolbar-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.payment-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.summary-label {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.7rem;
+  color: var(--billpay-muted);
+  margin-bottom: 0.2rem;
+}
+
+.summary-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+.payment-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem 1.5rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-field label {
+  font-weight: 600;
+  color: var(--billpay-primary);
+  margin-bottom: 0.3rem;
+}
+
+.form-field small {
+  color: var(--billpay-muted);
+  font-size: 0.78rem;
+  margin-top: 0.2rem;
+}
+
+.form-field-wide {
+  grid-column: 1 / -1;
+}
+
+.chip-radio-group {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.chip-radio {
+  border: 1px solid var(--billpay-border);
+  border-radius: 999px;
+  padding: 0.2rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 600;
+  color: var(--billpay-muted);
+}
+
+.chip-radio input {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--billpay-border);
+  border-radius: 50%;
+  background: #fff;
+}
+
+.chip-radio.is-selected {
+  border-color: var(--billpay-primary);
+  color: var(--billpay-primary);
+}
+
+.chip-radio.is-selected input {
+  background: var(--billpay-primary);
+}
+
+.billpay-input {
+  border: none;
+  border-bottom: 2px solid var(--billpay-border);
+  padding: 0.35rem 0;
+  font-weight: 600;
+  color: var(--billpay-ink);
+  background: transparent;
+}
+
+.billpay-input:focus {
+  outline: none;
+  border-color: var(--billpay-primary);
+  box-shadow: none;
+}
+
+.pill-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: baseline;
+  margin-bottom: 1.5rem;
+}
+
+.primary-pill {
+  background: var(--billpay-primary);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.25rem 1.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.15);
+}
+
+.note {
+  color: var(--billpay-muted);
+  font-size: 0.95rem;
+}
+
+.filter-form {
+  border: 2px dashed var(--billpay-border);
+  border-radius: 18px;
+  padding: 1.5rem;
+  background: var(--billpay-soft);
+  margin-bottom: 1.75rem;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.2rem;
+  align-items: end;
+}
+
+.filter-form label {
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--billpay-primary);
+  margin-bottom: 0.35rem;
+}
+
+.filter-form input[type="text"],
+.filter-form select {
+  border: none;
+  border-bottom: 2px solid var(--billpay-border);
+  border-radius: 0;
+  padding-left: 0;
+  padding-right: 0;
+  font-weight: 600;
+  color: var(--billpay-ink);
+  background: transparent;
+}
+
+.filter-form input:focus,
+.filter-form select:focus {
+  outline: none;
+  box-shadow: none;
+  border-color: var(--billpay-primary);
+}
+
+.filter-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.filter-actions button {
+  border-radius: 999px;
+  border: 1px solid var(--billpay-primary);
+  color: var(--billpay-primary);
+  padding: 0.5rem 1.85rem;
+  font-weight: 600;
+  background: transparent;
+}
+
+.table-wrapper {
+  border: 2px dashed var(--billpay-border);
+  border-radius: 22px;
+  padding: 1.25rem;
+}
+
+.bill-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.95rem;
+}
+
+.bill-table thead th {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  color: var(--billpay-primary);
+  background: #f7edf5;
+  padding: 0.65rem 0.5rem;
+  border-bottom: 2px solid var(--billpay-border);
+}
+
+.bill-table tbody tr {
+  border-bottom: 1px dashed var(--billpay-border);
+}
+
+.bill-table td {
+  padding: 0.75rem 0.5rem;
+  vertical-align: middle;
+}
+
+.bill-info .bill-number {
+  font-weight: 600;
+}
+
+.bill-info .bill-date {
+  color: var(--billpay-muted);
+  font-size: 0.85rem;
+}
+
+.vendor-name {
+  font-weight: 600;
+  color: var(--billpay-ink);
+}
+
+.status-pill,
+.payment-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.2rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-pill.is-confirmed {
+  background: rgba(60, 155, 123, 0.2);
+  color: var(--billpay-success);
+}
+
+.status-pill.is-draft {
+  background: rgba(212, 141, 34, 0.15);
+  color: var(--billpay-warning);
+}
+
+.status-pill.is-cancelled {
+  background: rgba(193, 80, 80, 0.18);
+  color: var(--billpay-danger);
+}
+
+.payment-pill.is-unpaid {
+  background: rgba(193, 80, 80, 0.15);
+  color: var(--billpay-danger);
+}
+
+.payment-pill.is-partial {
+  background: rgba(212, 141, 34, 0.15);
+  color: var(--billpay-warning);
+}
+
+.payment-pill.is-paid {
+  background: rgba(60, 155, 123, 0.2);
+  color: var(--billpay-success);
+}
+
+.amount-stack .total {
+  font-weight: 600;
+}
+
+.amount-stack .due {
+  display: block;
+  color: var(--billpay-muted);
+  font-size: 0.85rem;
+}
+
+.pay-btn {
+  display: inline-block;
+  border-radius: 10px;
+  border: 1px solid rgba(165, 68, 131, 0.3);
+  padding: 0.35rem 1.1rem;
+  font-size: 0.85rem;
+  text-decoration: none;
+  color: var(--billpay-primary);
+  font-weight: 600;
+}
+
+.pay-btn.disabled {
+  border-style: dashed;
+  color: var(--billpay-muted);
+  pointer-events: none;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem 0;
+  color: var(--billpay-muted);
+  font-weight: 600;
+}
+
+@media (max-width: 767px) {
+  .bill-payments-sheet {
+    padding: 1.5rem;
+  }
+
+  .bill-table thead {
+    display: none;
+  }
+
+  .bill-table tbody tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .bill-table td.actions {
+    grid-column: 1 / -1;
+    text-align: right;
+  }
+}

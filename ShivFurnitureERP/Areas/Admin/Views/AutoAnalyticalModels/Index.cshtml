@@ -1,0 +1,137 @@
+@using System.Linq
+@using ShivFurnitureERP.Models
+@model IReadOnlyList<ShivFurnitureERP.ViewModels.AutoAnalyticalModels.AutoAnalyticalModelListItemViewModel>
+@{
+    ViewData["Title"] = "Auto Analytical Models";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var statusFilter = ViewData["StatusFilter"] as AnalyticalModelStatus? ?? AnalyticalModelStatus.Confirmed;
+    var showArchived = ViewData["ShowArchived"] as bool? ?? false;
+    var statusOptions = new[]
+    {
+        new { Value = AnalyticalModelStatus.Draft, Label = "Draft", Archived = false },
+        new { Value = AnalyticalModelStatus.Confirmed, Label = "Confirm", Archived = false },
+        new { Value = AnalyticalModelStatus.Archived, Label = "Cancelled", Archived = true }
+    };
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/auto-analytical-model.css" asp-append-version="true" />
+}
+
+<div class="auto-analytical-page">
+    <div class="container-fluid">
+        <div class="auto-hero">
+            <div>
+                <p class="auto-eyebrow">Auto Analytical Model</p>
+                <h1>Analytics Master</h1>
+                <p>Teach the ERP how to pick analytical accounts automatically by combining partner, tags, and product cues.</p>
+            </div>
+        </div>
+
+        @if (TempData["StatusMessage"] is string statusMessage)
+        {
+            <div class="auto-alert">@statusMessage</div>
+        }
+
+        <div class="auto-card">
+            <div class="master-action-bar">
+                <a asp-action="Create" class="master-action-btn">New</a>
+                <a asp-action="Index" asp-route-status="@AnalyticalModelStatus.Confirmed" asp-route-showArchived="false" class="master-action-btn @(statusFilter == AnalyticalModelStatus.Confirmed && !showArchived ? "is-primary" : string.Empty)">Confirm</a>
+                <a asp-action="Index" asp-route-status="@AnalyticalModelStatus.Archived" asp-route-showArchived="true" class="master-action-btn @(showArchived ? "is-primary" : string.Empty)">Archived</a>
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="master-action-btn">Home</a>
+                <a href="javascript:history.back()" class="master-action-btn">Back</a>
+            </div>
+
+            <div class="status-pill-group">
+                @foreach (var option in statusOptions)
+                {
+                    var active = statusFilter == option.Value && showArchived == option.Archived;
+                    <a asp-action="Index"
+                       asp-route-status="@option.Value"
+                       asp-route-showArchived="@option.Archived"
+                       class="status-option @(active ? "is-active" : string.Empty)">@option.Label</a>
+                }
+            </div>
+
+            <div class="auto-table-wrapper">
+                @if (!Model.Any())
+                {
+                    <div class="auto-empty">No auto analytical models match the selection.</div>
+                }
+                else
+                {
+                    <table class="auto-table">
+                        <thead>
+                            <tr>
+                                <th>Partner Tag</th>
+                                <th>Partner</th>
+                                <th>Product Category</th>
+                                <th>Product</th>
+                                <th>Analytical Account</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.PartnerTagName</td>
+                                <td>@item.PartnerName</td>
+                                <td>@item.ProductCategoryName</td>
+                                <td>@item.ProductName</td>
+                                <td>@item.AnalyticalAccountName</td>
+                                <td>
+                                    <span class="status-pill-small @(item.Status switch
+                                    {
+                                        AnalyticalModelStatus.Draft => "is-draft",
+                                        AnalyticalModelStatus.Confirmed => "is-confirm",
+                                        _ => "is-archived"
+                                    })">@item.Status</span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="auto-action-stack">
+                                        <a asp-action="Edit" asp-route-id="@item.ModelId" class="auto-link-btn">Edit</a>
+                                        @if (item.Status != AnalyticalModelStatus.Confirmed && !item.IsArchived)
+                                        {
+                                            <form asp-action="UpdateStatus" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@item.ModelId" />
+                                                <input type="hidden" name="status" value="@AnalyticalModelStatus.Confirmed" />
+                                                <button type="submit" class="auto-link-btn">Confirm</button>
+                                            </form>
+                                        }
+                                        @if (!item.IsArchived)
+                                        {
+                                            <form asp-action="ToggleArchive" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@item.ModelId" />
+                                                <input type="hidden" name="archive" value="true" />
+                                                <button type="submit" class="auto-link-btn text-danger">Archive</button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <form asp-action="ToggleArchive" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@item.ModelId" />
+                                                <input type="hidden" name="archive" value="false" />
+                                                <button type="submit" class="auto-link-btn">Restore</button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+            </div>
+
+            <div class="auto-guidance">
+                <p>Example: If the product category is Wooden Furniture and the partner is Mr. A, the selected analytical distribution is applied when both match. If only the category matches, the rule still works as a generic fallback under Wooden Furniture.</p>
+                <p>More selected fields make the rule stricter; fewer selections keep it flexible. Mix conditions that make sense for your business and let the ERP keep allocations tidy.</p>
+            </div>
+        </div>
+    </div>
+</div>

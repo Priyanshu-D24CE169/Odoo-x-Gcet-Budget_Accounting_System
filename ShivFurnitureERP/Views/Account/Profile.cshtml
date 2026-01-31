@@ -1,0 +1,31 @@
+@model ShivFurnitureERP.ViewModels.ProfileViewModel
+@{
+    ViewData["Title"] = "My Profile";
+    var displayName = string.IsNullOrWhiteSpace(Model.DisplayName) ? "User" : Model.DisplayName.Trim();
+    var avatarInitial = displayName[0].ToString().ToUpperInvariant();
+}
+
+<section class="py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <div class="avatar-placeholder avatar-lg mx-auto mb-3">@avatarInitial</div>
+                    <h2 class="h4 mb-1">@displayName</h2>
+                    @if (!string.IsNullOrWhiteSpace(Model.Email))
+                    {
+                        <p class="text-muted mb-4">@Model.Email</p>
+                    }
+                    <dl class="row text-start g-2 mb-0">
+                        <dt class="col-4">Login ID</dt>
+                        <dd class="col-8">@Model.LoginId</dd>
+                        <dt class="col-4">Full Name</dt>
+                        <dd class="col-8">@(string.IsNullOrWhiteSpace(Model.FullName) ? "—" : Model.FullName)</dd>
+                        <dt class="col-4">Roles</dt>
+                        <dd class="col-8">@(Model.Roles.Count > 0 ? string.Join(", ", Model.Roles) : "—")</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

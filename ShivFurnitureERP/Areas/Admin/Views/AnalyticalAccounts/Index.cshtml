@@ -1,0 +1,108 @@
+@using System.Linq
+@model IEnumerable<ShivFurnitureERP.ViewModels.AnalyticalAccounts.AnalyticalAccountListItemViewModel>
+@{
+    ViewData["Title"] = "Analytical Accounts";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var search = ViewData["Search"] as string;
+    var includeArchived = ViewData["IncludeArchived"] as bool? ?? false;
+    var accounts = Model?.ToList() ?? new List<ShivFurnitureERP.ViewModels.AnalyticalAccounts.AnalyticalAccountListItemViewModel>();
+    var activeCount = accounts.Count(a => !a.IsArchived);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/analytical-account-master.css" asp-append-version="true" />
+}
+
+<div class="account-master-page">
+    <div class="container-fluid">
+        <div class="account-hero">
+            <div class="account-hero-text">
+                <div class="account-eyebrow">Analytical Account Master</div>
+                <h1>Cost Centers</h1>
+                <p>Define cost centers for sales, purchase, and budget allocation with a single polished flow.</p>
+            </div>
+        </div>
+
+        @if (TempData["StatusMessage"] is string statusMessage)
+        {
+            <div class="account-alert account-alert-success">@statusMessage</div>
+        }
+
+        <div class="account-sheet">
+            <div class="master-action-bar">
+                <a asp-area="Admin" asp-controller="AnalyticalAccounts" asp-action="Create" class="master-action-btn">New</a>
+                <a asp-area="Admin" asp-controller="AnalyticalAccounts" asp-action="Index" asp-route-includeArchived="false" class="master-action-btn @(includeArchived ? string.Empty : "is-primary")">Confirm</a>
+                <a asp-area="Admin" asp-controller="AnalyticalAccounts" asp-action="Index" asp-route-includeArchived="true" class="master-action-btn @(includeArchived ? "is-primary" : string.Empty)">Archived</a>
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="master-action-btn">Home</a>
+                <a href="javascript:history.back()" class="master-action-btn">Back</a>
+            </div>
+            <div class="account-pill-row">
+                <span class="account-pill">Active Accounts</span>
+                <span class="account-note">@activeCount record@(activeCount == 1 ? string.Empty : "s") · @(includeArchived ? "Showing all records" : "Active records only")</span>
+                <a asp-area="Admin" asp-controller="AnalyticalAccounts" asp-action="Create" class="account-add-btn ms-auto">+ Add Analytical Account</a>
+            </div>
+
+            <form method="get" class="account-filter-form">
+                <div class="account-filter-grid">
+                    <div>
+                        <label for="search">Search</label>
+                        <input type="text" id="search" name="search" value="@search" placeholder="Name" />
+                    </div>
+                    <div>
+                        <label for="includeArchived">Options</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="includeArchived" value="true" @(includeArchived ? "checked" : string.Empty) id="includeArchived" />
+                            <label class="form-check-label" for="includeArchived">Show archived</label>
+                        </div>
+                    </div>
+                    <div class="account-filter-actions">
+                        <button type="submit">Apply Filter</button>
+                    </div>
+                </div>
+            </form>
+
+            @if (!accounts.Any())
+            {
+                <div class="account-table-wrapper">
+                    <div class="account-empty">No analytical accounts found.</div>
+                </div>
+            }
+            else
+            {
+                <div class="account-table-wrapper">
+                    <table class="account-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var account in accounts)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="account-name">@account.Name</div>
+                                    </td>
+                                    <td>
+                                        <div class="account-desc">@account.Description</div>
+                                    </td>
+                                    <td>
+                                        <span class="account-status-pill @(account.IsArchived ? "is-archived" : "is-active")">@(account.IsArchived ? "Archived" : "Active")</span>
+                                    </td>
+                                    <td>@account.CreatedOn.ToString("dd MMM yyyy")</td>
+                                    <td class="actions text-end">
+                                        <a asp-area="Admin" asp-controller="AnalyticalAccounts" asp-action="Edit" asp-route-id="@account.AnalyticalAccountId">Edit</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,34 @@
+@model ShivFurnitureERP.ViewModels.SalesOrders.SalesOrderFormViewModel
+@{
+    ViewData["Title"] = "New Sales Order";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/sales-orders.css" asp-append-version="true" />
+}
+
+<section class="sales-order-page">
+    <div class="sales-order-hero">
+        <div>
+            <h1>Sales Order</h1>
+            <p>Draft, confirm, and send polished sales paperwork with a single flow.</p>
+        </div>
+        <div class="sales-order-nav">
+            <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Home</a>
+            <a asp-area="Admin" asp-controller="SalesOrders" asp-action="Index">Back</a>
+        </div>
+    </div>
+
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        @await Html.PartialAsync("_Form", Model)
+        <div class="sales-order-footer-actions">
+            <button type="submit" class="btn btn-primary">Create Sales Order</button>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

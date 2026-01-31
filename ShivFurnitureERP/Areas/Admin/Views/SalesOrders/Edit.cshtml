@@ -1,0 +1,67 @@
+@model ShivFurnitureERP.ViewModels.SalesOrders.SalesOrderFormViewModel
+@{
+    ViewData["Title"] = $"Sales Order {Model.SONumber}";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/sales-orders.css" asp-append-version="true" />
+}
+
+<section class="sales-order-page">
+    <div class="sales-order-hero">
+        <div>
+            <h1>Sales Order <span class="text-muted">@Model.SONumber</span></h1>
+            <p>Review, confirm, and convert to an invoice without leaving the sheet.</p>
+        </div>
+        <div class="sales-order-nav">
+            <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Home</a>
+            <a asp-area="Admin" asp-controller="SalesOrders" asp-action="Index">Back</a>
+        </div>
+    </div>
+
+    <div class="sales-order-action-stack">
+        @if (Model.CanConfirm)
+        {
+            <form asp-action="Confirm" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.SalesOrderId" />
+                <button type="submit" class="btn btn-success">Confirm</button>
+            </form>
+        }
+        @if (Model.CanCancel)
+        {
+            <form asp-action="Cancel" method="post" onsubmit="return confirm('Cancel this sales order?');">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.SalesOrderId" />
+                <button type="submit" class="btn btn-outline-danger">Cancel</button>
+            </form>
+        }
+        <form asp-action="CreateInvoice" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.SalesOrderId" />
+            <button type="submit" class="btn btn-primary" @(Model.CanCreateInvoice ? null : "disabled")>Create Invoice</button>
+        </form>
+    </div>
+
+    @if (TempData["StatusMessage"] is string statusMessage)
+    {
+        <div class="alert alert-info">@statusMessage</div>
+    }
+
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <input asp-for="SalesOrderId" type="hidden" />
+        @await Html.PartialAsync("_Form", Model)
+        @if (Model.CanConfirm)
+        {
+            <div class="sales-order-footer-actions">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        }
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

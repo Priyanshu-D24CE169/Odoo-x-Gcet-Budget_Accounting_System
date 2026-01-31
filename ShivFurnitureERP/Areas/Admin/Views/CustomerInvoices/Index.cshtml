@@ -1,0 +1,103 @@
+@model IReadOnlyList<ShivFurnitureERP.ViewModels.CustomerInvoices.CustomerInvoiceListItemViewModel>
+@using ShivFurnitureERP.Models
+@{
+    ViewData["Title"] = "Customer Invoices";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var search = ViewData["Search"] as string;
+    var status = ViewData["Status"] is CustomerInvoiceStatus statusValue ? statusValue : (CustomerInvoiceStatus?)null;
+    var paymentStatus = ViewData["PaymentStatus"] is CustomerInvoicePaymentStatus paymentValue ? paymentValue : (CustomerInvoicePaymentStatus?)null;
+}
+
+<section class="py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+            <h2 class="mb-0">Customer Invoices</h2>
+            <p class="text-muted mb-0">Track invoices created from sales orders and their payment status.</p>
+        </div>
+        <a asp-area="Admin" asp-controller="SalesOrders" asp-action="Index" class="btn btn-outline-primary">Create from Sales Order</a>
+    </div>
+
+    <form method="get" class="card card-body shadow-sm mb-4">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Search</label>
+                <input type="text" name="search" value="@search" class="form-control" placeholder="Invoice, customer or sales order" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Invoice Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All</option>
+                    @foreach (var option in Enum.GetValues<CustomerInvoiceStatus>())
+                    {
+                        <option value="@((int)option)" selected="@(status == option ? "selected" : null)">@option</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Payment Status</label>
+                <select name="paymentStatus" class="form-select">
+                    <option value="">All</option>
+                    @foreach (var option in Enum.GetValues<CustomerInvoicePaymentStatus>())
+                    {
+                        <option value="@((int)option)" selected="@(paymentStatus == option ? "selected" : null)">@option</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Reset</a>
+            </div>
+        </div>
+    </form>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-striped align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Invoice</th>
+                        <th>Sales Order</th>
+                        <th>Customer</th>
+                        <th>Invoice Date</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th>Payment Status</th>
+                        <th class="text-end">Total</th>
+                        <th class="text-end">Paid</th>
+                        <th class="text-end">Amount Due</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="11" class="text-center text-muted py-4">No invoices yet. Confirm a sales order to start invoicing.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var invoice in Model)
+                        {
+                            <tr>
+                                <td>@invoice.InvoiceNumber</td>
+                                <td>@invoice.SalesOrderNumber</td>
+                                <td>@invoice.CustomerName</td>
+                                <td>@invoice.InvoiceDate.ToString("dd MMM yyyy")</td>
+                                <td>@invoice.DueDate.ToString("dd MMM yyyy")</td>
+                                <td>@invoice.Status</td>
+                                <td>@invoice.PaymentStatus</td>
+                                <td class="text-end">@invoice.TotalAmount.ToString("N2")</td>
+                                <td class="text-end text-success">@invoice.AmountPaid.ToString("N2")</td>
+                                <td class="text-end fw-semibold">@invoice.AmountDue.ToString("N2")</td>
+                                <td class="text-end">
+                                    <a asp-action="Details" asp-route-id="@invoice.CustomerInvoiceId" class="btn btn-sm btn-outline-primary">View</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

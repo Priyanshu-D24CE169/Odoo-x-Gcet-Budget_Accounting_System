@@ -1,0 +1,302 @@
+@using System.Linq
+@using ShivFurnitureERP.Models
+@using ShivFurnitureERP.Services
+@using ShivFurnitureERP.ViewModels.AnalyticalBudgets
+@model ShivFurnitureERP.ViewModels.AnalyticalBudgets.BudgetDetailsViewModel
+@{
+    ViewData["Title"] = $"Budget {Model.AnalyticalBudgetId}";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var status = Model.Status switch
+    {
+        BudgetStatus.Draft => "Draft",
+        BudgetStatus.Confirmed => "Confirm",
+        BudgetStatus.Revised => "Revised",
+        BudgetStatus.Archived => "Archived",
+        _ => "Draft"
+    };
+    var incomeTransactions = Model.BudgetType == BudgetType.Income
+        ? Model.Transactions.Where(t => t.Type == BudgetTransactionType.SalesOrder)
+        : Model.Transactions.Where(t => t.Type == BudgetTransactionType.CustomerInvoice);
+    var incomeTotal = incomeTransactions.Sum(t => t.Amount);
+    var vendorTotal = Model.Transactions.Where(t => t.Type == BudgetTransactionType.VendorBill).Sum(t => t.Amount);
+    var purchaseTotal = Model.Transactions.Where(t => t.Type == BudgetTransactionType.PurchaseOrder).Sum(t => t.Amount);
+    decimal PercentOf(decimal amount) => Model.LimitAmount == 0 ? 0 : Math.Round(amount / Model.LimitAmount * 100, 2);
+    var amountToAchieve = Math.Max(Model.LimitAmount - Model.AchievedAmount, 0);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/analytical-budget-master.css" asp-append-version="true" />
+}
+
+<div class="budget-page">
+    <div class="container-fluid">
+        <div class="budget-hero">
+            <div>
+                <p class="budget-eyebrow">Budget Form View</p>
+                <h1>@Model.BudgetName</h1>
+                <p>@Model.AccountName · @Model.PeriodStart.ToString("dd MMM yyyy") – @Model.PeriodEnd.ToString("dd MMM yyyy")</p>
+            </div>
+        </div>
+
+        <div class="budget-card">
+            <div class="master-action-bar">
+                <a asp-action="Create" class="master-action-btn">New</a>
+                <a asp-action="Index" asp-route-mode="@BudgetListMode.Draft" class="master-action-btn @(status == "Draft" ? "is-primary" : string.Empty)">Draft</a>
+                <a asp-action="Index" asp-route-mode="@BudgetListMode.Confirm" class="master-action-btn @(status == "Confirm" ? "is-primary" : string.Empty)">Confirm</a>
+                <a asp-action="Index" asp-route-mode="@BudgetListMode.Revise" class="master-action-btn @(status == "Revised" ? "is-primary" : string.Empty)">Revised</a>
+                <a asp-action="Index" asp-route-mode="@BudgetListMode.Archived" class="master-action-btn @(status == "Archived" ? "is-primary" : string.Empty)">Archived</a>
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="master-action-btn">Home</a>
+                <a asp-action="Index" class="master-action-btn">Back</a>
+            </div>
+
+            @if (Model.ShouldArchive)
+            {
+                <div class="budget-alert is-warning mt-3">
+                    Income target reached. Archive this budget to lock the allocation and start a new cycle.
+                </div>
+            }
+
+            <div class="budget-header-row">
+                <div class="budget-link-row">
+                    @if (Model.Status == BudgetStatus.Draft)
+                    {
+                        <form asp-action="UpdateStatus" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.AnalyticalBudgetId" />
+                            <input type="hidden" name="status" value="@BudgetStatus.Confirmed" />
+                            <button type="submit" class="view-link">Confirm Budget</button>
+                        </form>
+                    }
+                    @if (Model.Status != BudgetStatus.Archived)
+                    {
+                        <form asp-action="UpdateStatus" method="post" class="d-inline ms-3">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.AnalyticalBudgetId" />
+                            <input type="hidden" name="status" value="@BudgetStatus.Archived" />
+                            <button type="submit" class="view-link text-danger">Archive Budget</button>
+                        </form>
+                    }
+                    @if (Model.Status == BudgetStatus.Confirmed)
+                    {
+                        <a asp-action="CreateRevision" asp-route-id="@Model.AnalyticalBudgetId" class="view-link ms-3">Revise Budget</a>
+                    }
+                    else if (Model.LatestRevisionId.HasValue)
+                    {
+                        <a asp-action="Details" asp-route-id="@Model.LatestRevisionId" class="view-link ms-3">Latest Revision</a>
+                    }
+                    @if (Model.OriginalBudgetId.HasValue)
+                    {
+                        <a asp-action="Details" asp-route-id="@Model.OriginalBudgetId" class="view-link ms-3">Original Budget</a>
+                    }
+                </div>
+                <div class="budget-stage-flow">
+                    @foreach (var flow in new[] { "Draft", "Confirm", "Revised", "Archived" })
+                    {
+                        var active = status == flow;
+                        <span class="stage-step @(active ? "is-active" : string.Empty)">@flow</span>
+                    }
+                </div>
+            </div>
+
+            <div class="budget-meta-grid">
+                <div>
+                    <p class="label">Budget Name</p>
+                    <p class="value">@Model.BudgetName</p>
+                </div>
+                <div>
+                    <p class="label">Analytic Name</p>
+                    <p class="value">@Model.AnalyticalAccountName</p>
+                </div>
+                <div>
+                    <p class="label">Budget Type</p>
+                    <p class="value">@Model.BudgetType</p>
+                </div>
+                <div>
+                    <p class="label">Budgeted Amount</p>
+                    <p class="value">@Model.LimitAmount.ToString("N2")</p>
+                </div>
+                <div>
+                    <p class="label">Revision Chain</p>
+                    <p class="value">
+                        @if (Model.OriginalBudgetId.HasValue)
+                        {
+                            <a asp-action="Details" asp-route-id="@Model.OriginalBudgetId">Revision of #@Model.OriginalBudgetId</a>
+                        }
+                        else if (Model.LatestRevisionId.HasValue)
+                        {
+                            <a asp-action="Details" asp-route-id="@Model.LatestRevisionId">Revised with #@Model.LatestRevisionId</a>
+                        }
+                        else
+                        {
+                            <span>Original budget</span>
+                        }
+                    </p>
+                </div>
+            </div>
+
+            @if (Model.ShowPerformance)
+            {
+                <div class="budget-stat-grid">
+                    <div>
+                        <p class="label">Achieved Amount</p>
+                        <p class="value text-success">@Model.AchievedAmount.ToString("N2")</p>
+                        <a href="#budget-transactions" class="view-link">View</a>
+                    </div>
+                    <div>
+                        <p class="label">Achieved %</p>
+                        <p class="value">@Model.AchievedPercent.ToString("N2") %</p>
+                        <small>(Achieved ÷ Budgeted) × 100</small>
+                    </div>
+                    <div>
+                        <p class="label">Amount to Achieve</p>
+                        <p class="value">@amountToAchieve.ToString("N2")</p>
+                        <small>Budgeted ? Achieved</small>
+                    </div>
+                    <div class="pie-panel">
+                        <canvas id="budgetPie" height="180"></canvas>
+                    </div>
+                </div>
+
+                <div class="budget-breakdown">
+                    <div class="budget-breakdown-header">
+                        <div>Analytic Name</div>
+                        <div>Type</div>
+                        <div>Lookup</div>
+                        <div>Achieved Amount</div>
+                        <div>Achieved %</div>
+                        <div>Amount to Achieve</div>
+                    </div>
+                    @if (Model.BudgetType == BudgetType.Income)
+                    {
+                        <div class="budget-breakdown-row">
+                            <div>@Model.AnalyticalAccountName</div>
+                            <div>Income</div>
+                            <div>Sales Orders</div>
+                            <div>
+                                <span>@incomeTotal.ToString("N2")</span>
+                                <a href="#budget-transactions" class="view-link">View</a>
+                            </div>
+                            <div>@PercentOf(incomeTotal).ToString("N2")%</div>
+                            <div>@Math.Max(Model.LimitAmount - incomeTotal, 0).ToString("N2")</div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="budget-breakdown-row">
+                            <div>@Model.AnalyticalAccountName</div>
+                            <div>Expense</div>
+                            <div>Vendor Bills</div>
+                            <div>
+                                <span>@vendorTotal.ToString("N2")</span>
+                                <a href="#budget-transactions" class="view-link">View</a>
+                            </div>
+                            <div>@PercentOf(vendorTotal).ToString("N2")%</div>
+                            <div>@Math.Max(Model.LimitAmount - vendorTotal, 0).ToString("N2")</div>
+                        </div>
+                        <div class="budget-breakdown-row">
+                            <div>@Model.AnalyticalAccountName</div>
+                            <div>Expense</div>
+                            <div>Purchase Orders</div>
+                            <div>
+                                <span>@purchaseTotal.ToString("N2")</span>
+                                <a href="#budget-transactions" class="view-link">View</a>
+                            </div>
+                            <div>@PercentOf(purchaseTotal).ToString("N2")%</div>
+                            <div>@Math.Max(Model.LimitAmount - purchaseTotal, 0).ToString("N2")</div>
+                        </div>
+                    }
+                </div>
+
+                <div class="budget-guidance">
+                    <p>The model applies when any field matches the transaction line. More matches make the rule stricter and take precedence. Use the view buttons to inspect every invoice, bill, or purchase order contributing to the achieved amount.</p>
+                </div>
+            }
+            else
+            {
+                <div class="budget-guidance">
+                    <p>Confirm the budget to compute achieved amounts, percentages, and detailed breakdowns. Draft, revised, or archived budgets hide performance numbers until a confirmed version is active.</p>
+                </div>
+            }
+        </div>
+
+        @if (Model.ShowPerformance)
+        {
+            <div class="budget-card mt-4" id="budget-transactions">
+                <div class="budget-card-header">
+                    <h2>Achieved Amount · View</h2>
+                    <p>Invoice/Bill/PO number, date, and monetary impact for this budget period.</p>
+                </div>
+                <div class="budget-table-wrapper">
+                    @if (!Model.Transactions.Any())
+                    {
+                        <div class="budget-empty">No invoice, bill, or purchase order lines were matched for this budget period.</div>
+                    }
+                    else
+                    {
+                        <table class="budget-table">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Reference</th>
+                                    <th>Date</th>
+                                    <th>Counterparty</th>
+                                    <th class="text-end">Amount</th>
+                                    <th class="text-end">Open</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var transaction in Model.Transactions)
+                                {
+                                    <tr>
+                                        <td>@transaction.DocumentType</td>
+                                        <td>@transaction.Reference</td>
+                                        <td>@transaction.Date.ToString("dd MMM yyyy")</td>
+                                        <td>@transaction.Counterparty</td>
+                                        <td class="text-end">@transaction.Amount.ToString("N2")</td>
+                                        <td class="text-end">
+                                            <a asp-area="Admin" asp-controller="@transaction.Controller" asp-action="@transaction.Action" asp-route-id="@transaction.DocumentId" class="view-link">View</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    @if (Model.ShowPerformance)
+    {
+        <script>
+            (() => {
+                const ctx = document.getElementById('budgetPie');
+                if (!ctx) { return; }
+                const achieved = @Model.AchievedAmount;
+                const balance = Math.max(@Model.BalanceForChart, 0);
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Achieved', 'Balance'],
+                        datasets: [{
+                            data: [achieved, balance],
+                            backgroundColor: ['#a54483', '#f4dbe9'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            })();
+        </script>
+    }
+}

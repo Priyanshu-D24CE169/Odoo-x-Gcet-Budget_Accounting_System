@@ -1,0 +1,62 @@
+@using System.Linq
+@model IReadOnlyList<ShivFurnitureERP.ViewModels.PortalInvoices.PortalCustomerInvoiceListItemViewModel>
+@{
+    ViewData["Title"] = "My Invoices";
+    Layout = "~/Areas/Portal/Views/Shared/_PortalLayout.cshtml";
+}
+
+<section class="py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+            <h2 class="mb-0">Customer Invoices</h2>
+            <p class="text-muted mb-0">Review invoices issued to your account and pay the outstanding balance securely.</p>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-striped align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Invoice</th>
+                        <th>Invoice Date</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th>Payment Status</th>
+                        <th class="text-end">Total</th>
+                        <th class="text-end">Paid</th>
+                        <th class="text-end">Due</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="9" class="text-center text-muted py-4">No invoices available yet.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var invoice in Model)
+                        {
+                            <tr>
+                                <td>@invoice.InvoiceNumber</td>
+                                <td>@invoice.InvoiceDate.ToString("dd MMM yyyy")</td>
+                                <td>@invoice.DueDate.ToString("dd MMM yyyy")</td>
+                                <td>@invoice.Status</td>
+                                <td>@invoice.PaymentStatus</td>
+                                <td class="text-end">@invoice.TotalAmount.ToString("N2")</td>
+                                <td class="text-end text-success">@invoice.AmountPaid.ToString("N2")</td>
+                                <td class="text-end fw-semibold">@invoice.AmountDue.ToString("N2")</td>
+                                <td class="text-end">
+                                    <a asp-action="Details" asp-route-id="@invoice.CustomerInvoiceId" class="btn btn-sm btn-outline-primary">View</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,112 @@
+@using System.Linq
+@model IEnumerable<ShivFurnitureERP.ViewModels.Products.ProductListItemViewModel>
+@{
+    ViewData["Title"] = "Product Master";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var search = ViewData["Search"] as string;
+    var includeArchived = ViewData["IncludeArchived"] as bool? ?? false;
+    var products = Model?.ToList() ?? new List<ShivFurnitureERP.ViewModels.Products.ProductListItemViewModel>();
+    var activeCount = products.Count(p => !p.IsArchived);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/product-master.css" asp-append-version="true" />
+}
+
+<div class="product-master-page">
+    <div class="container-fluid">
+        <div class="product-hero">
+            <div class="product-hero-text">
+                <div class="product-eyebrow">Product Master</div>
+                <h1>Products</h1>
+                <p>Draft, confirm, and keep every sellable item tidy with a single polished flow.</p>
+            </div>
+        </div>
+
+        @if (TempData["StatusMessage"] is string statusMessage)
+        {
+            <div class="product-alert product-alert-success">@statusMessage</div>
+        }
+
+        <div class="product-sheet">
+            <div class="master-action-bar">
+                <a asp-area="Admin" asp-controller="Products" asp-action="Create" class="master-action-btn">New</a>
+                <a asp-area="Admin" asp-controller="Products" asp-action="Index" asp-route-includeArchived="false" class="master-action-btn @(includeArchived ? string.Empty : "is-primary")">Confirm</a>
+                <a asp-area="Admin" asp-controller="Products" asp-action="Index" asp-route-includeArchived="true" class="master-action-btn @(includeArchived ? "is-primary" : string.Empty)">Archived</a>
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="master-action-btn">Home</a>
+                <a href="javascript:history.back()" class="master-action-btn">Back</a>
+            </div>
+            <div class="product-pill-row">
+                <span class="product-pill">Active Products</span>
+                <span class="product-note">@activeCount record@(activeCount == 1 ? string.Empty : "s") · @(includeArchived ? "Showing all records" : "Active records only")</span>
+                <a asp-area="Admin" asp-controller="Products" asp-action="Create" class="product-add-btn ms-auto">+ Add Product</a>
+            </div>
+
+            <form method="get" class="product-filter-form">
+                <div class="product-filter-grid">
+                    <div>
+                        <label for="search">Search</label>
+                        <input type="text" id="search" name="search" value="@search" placeholder="Name or category" />
+                    </div>
+                    <div>
+                        <label for="includeArchived">Options</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="includeArchived" value="true" @(includeArchived ? "checked" : string.Empty) id="includeArchived" />
+                            <label class="form-check-label" for="includeArchived">Show archived</label>
+                        </div>
+                    </div>
+                    <div class="product-filter-actions">
+                        <button type="submit">Apply Filter</button>
+                    </div>
+                </div>
+            </form>
+
+            @if (!products.Any())
+            {
+                <div class="product-table-wrapper">
+                    <div class="product-empty">No products found.</div>
+                </div>
+            }
+            else
+            {
+                <div class="product-table-wrapper">
+                    <table class="product-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Sales Price</th>
+                                <th>Purchase Price</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var product in products)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="product-name">@product.Name</div>
+                                    </td>
+                                    <td>
+                                        <span class="product-category">@product.Category</span>
+                                    </td>
+                                    <td class="product-price">@product.SalesPrice.ToString("C")</td>
+                                    <td class="product-price">@product.PurchasePrice.ToString("C")</td>
+                                    <td>
+                                        <span class="product-status-pill @(product.IsArchived ? "is-archived" : "is-active")">@(product.IsArchived ? "Archived" : "Active")</span>
+                                    </td>
+                                    <td>@product.CreatedOn.ToString("dd MMM yyyy")</td>
+                                    <td class="actions text-end">
+                                        <a asp-area="Admin" asp-controller="Products" asp-action="Edit" asp-route-id="@product.ProductId">Edit</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

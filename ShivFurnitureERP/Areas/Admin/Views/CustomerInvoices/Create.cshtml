@@ -1,0 +1,140 @@
+@model ShivFurnitureERP.ViewModels.CustomerInvoices.CustomerInvoiceFormViewModel
+@{
+    ViewData["Title"] = "Create Customer Invoice";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var amountDue = Model.TotalAmount;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/customer-invoice.css" asp-append-version="true" />
+}
+
+<section class="customer-invoice-page">
+    <div class="container-fluid">
+        <div class="customer-invoice-hero">
+            <div>
+                <p class="eyebrow">Customer Invoice</p>
+                <h1>Draft</h1>
+                <p>Invoice created from Sales Order @Model.SalesOrderNumber for @Model.CustomerName.</p>
+            </div>
+            <div class="customer-invoice-actions">
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="btn-ghost-pill">Home</a>
+                <a asp-area="Admin" asp-controller="SalesOrders" asp-action="Details" asp-route-id="@Model.SalesOrderId" class="btn-ghost-pill">Back</a>
+            </div>
+        </div>
+
+        <form asp-action="Create" method="post" class="customer-invoice-sheet">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="SalesOrderId" />
+
+            <div class="customer-invoice-actions mb-3">
+                <a asp-area="Admin" asp-controller="SalesOrders" asp-action="Details" asp-route-id="@Model.SalesOrderId" class="btn-ghost-pill">Cancel</a>
+                <button type="submit" class="btn-pill-primary">Create Invoice</button>
+            </div>
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="customer-invoice-pill-row">
+                <span class="customer-invoice-pill">New</span>
+                <span class="customer-invoice-note">Invoice number will be auto-generated when saved.</span>
+            </div>
+
+            <div class="invoice-meta-grid">
+                <div class="invoice-meta-card">
+                    <label asp-for="InvoiceDate"></label>
+                    <input asp-for="InvoiceDate" class="form-control" type="date" />
+                    <span asp-validation-for="InvoiceDate" class="text-danger small"></span>
+                </div>
+                <div class="invoice-meta-card">
+                    <label asp-for="DueDate"></label>
+                    <input asp-for="DueDate" class="form-control" type="date" />
+                    <span asp-validation-for="DueDate" class="text-danger small"></span>
+                </div>
+                <div class="invoice-meta-card">
+                    <label>Customer Name</label>
+                    <div class="form-control-plaintext">@Model.CustomerName</div>
+                    <small class="text-muted">(from Contact master - many to one)</small>
+                </div>
+                <div class="invoice-meta-card">
+                    <label>Reference</label>
+                    <div class="form-control-plaintext">Sales Order @Model.SalesOrderNumber</div>
+                    <small class="text-muted">Fetched from SO sheet.</small>
+                </div>
+            </div>
+
+            <div class="invoice-stage-set">
+                <span class="invoice-stage-pill is-active">Draft</span>
+                <span class="invoice-stage-pill">Confirm</span>
+                <span class="invoice-stage-pill">Cancelled</span>
+            </div>
+
+            <div class="customer-invoice-lines">
+                <div class="invoice-lines-header">
+                    <div>
+                        <h5 class="mb-1">Invoice Lines</h5>
+                        <p>Fetched from the sales order with product, quantity, and analytical allocation.</p>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="invoice-line-table">
+                        <thead>
+                            <tr>
+                                <th>Sr. No.</th>
+                                <th>Product</th>
+                                <th>Budget Analytics</th>
+                                <th style="width:120px;">Qty</th>
+                                <th style="width:140px;">Unit Price</th>
+                                <th style="width:140px;" class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (var i = 0; i < Model.Lines.Count; i++)
+                            {
+                                var line = Model.Lines[i];
+                                <tr>
+                                    <td class="invoice-line-index">@(i + 1)</td>
+                                    <td>@line.ProductName</td>
+                                    <td>@(string.IsNullOrWhiteSpace(line.AnalyticalAccountName) ? "—" : line.AnalyticalAccountName)</td>
+                                    <td>@line.Quantity.ToString("N2")</td>
+                                    <td>@line.UnitPrice.ToString("N2")</td>
+                                    <td class="text-end fw-semibold">@line.Total.ToString("N2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="5" class="text-end">Invoice Total</th>
+                                <th class="text-end h5">@Model.TotalAmount.ToString("N2")</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <div class="invoice-summary-grid">
+                <div class="invoice-summary-card">
+                    <h6>Invoice Total</h6>
+                    <div class="amount">@Model.TotalAmount.ToString("N2")</div>
+                    <p class="text-muted mb-0">Sum of all invoice lines.</p>
+                </div>
+                <div class="invoice-summary-card">
+                    <h6>Amount Due</h6>
+                    <div class="amount text-danger">@amountDue.ToString("N2")</div>
+                    <p class="text-muted mb-0">Payments will reduce this balance.</p>
+                </div>
+                <div class="invoice-summary-card">
+                    <h6>Status Legend</h6>
+                    <div class="payment-status-legend">
+                        <span><span class="payment-status-dot paid"></span> Paid (amount due = 0)</span>
+                        <span><span class="payment-status-dot partial"></span> Partial (amount due &lt; total)</span>
+                        <span><span class="payment-status-dot due"></span> Not Paid (amount due = total)</span>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

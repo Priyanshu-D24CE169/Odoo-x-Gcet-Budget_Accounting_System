@@ -1,0 +1,67 @@
+@model ShivFurnitureERP.ViewModels.Contacts.PortalContactViewModel?
+@{
+    ViewData["Title"] = "My Contact";
+    Layout = "~/Areas/Portal/Views/Shared/_PortalLayout.cshtml";
+}
+
+@if (Model is null)
+{
+    <div class="alert alert-warning">Your contact profile is not available. Please contact your administrator.</div>
+}
+else
+{
+    <section class="row g-4 py-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        @if (!string.IsNullOrWhiteSpace(Model.ImagePath))
+                        {
+                            <img src="@Model.ImagePath" class="img-fluid rounded" alt="Profile image" />
+                        }
+                        else
+                        {
+                            <div class="bg-light border rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 120px; height: 120px;">
+                                <span class="fw-bold fs-3 text-secondary">@Model.Name.Substring(0, System.Math.Min(1, Model.Name.Length))</span>
+                            </div>
+                        }
+                    </div>
+                    <h4 class="fw-semibold">@Model.Name</h4>
+                    <p class="text-muted mb-1">@Model.Email</p>
+                    <p class="text-muted">@Model.Phone</p>
+                    <span class="badge text-bg-primary">@Model.Type</span>
+                    @if (Model.IsArchived)
+                    {
+                        <span class="badge text-bg-secondary ms-2">Archived</span>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="fw-semibold mb-3">Address</h5>
+                    <p class="mb-0">@Model.Street</p>
+                    <p class="mb-0">@Model.City, @Model.State</p>
+                    <p class="text-muted">@Model.Country - @Model.Pincode</p>
+                </div>
+            </div>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="fw-semibold mb-3">Tags</h5>
+                    @if (Model.Tags is null || Model.Tags.Count == 0)
+                    {
+                        <p class="text-muted mb-0">No tags assigned.</p>
+                    }
+                    else
+                    {
+                        foreach (var tag in Model.Tags)
+                        {
+                            <span class="badge text-bg-light me-1">@tag</span>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+}

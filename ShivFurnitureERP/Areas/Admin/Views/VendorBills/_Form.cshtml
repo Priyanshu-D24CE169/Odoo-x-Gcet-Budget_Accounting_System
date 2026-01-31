@@ -1,0 +1,267 @@
+@using Microsoft.AspNetCore.Mvc.ViewFeatures
+@model ShivFurnitureERP.ViewModels.VendorBills.VendorBillFormViewModel
+@{
+    var forceReadOnly = ViewData["ForceReadOnly"] as bool? ?? false;
+    var isEditable = Model.CanEdit && !forceReadOnly;
+    var hasWarnings = Model.Lines.Any(l => l.HasBudgetWarning);
+    var statusBadgeClass = Model.Status switch
+    {
+        ShivFurnitureERP.Models.VendorBillStatus.Confirmed => "text-bg-success",
+        ShivFurnitureERP.Models.VendorBillStatus.Cancelled => "text-bg-secondary",
+        _ => "text-bg-warning"
+    };
+    var paymentBadgeClass = Model.PaymentStatus switch
+    {
+        ShivFurnitureERP.Models.VendorBillPaymentStatus.Paid => "text-bg-success",
+        ShivFurnitureERP.Models.VendorBillPaymentStatus.Partial => "text-bg-warning",
+        _ => "text-bg-secondary"
+    };
+}
+
+<div class="row g-4" data-vendor-bill-form data-next-index="@Model.Lines.Count">
+    <div class="col-lg-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title">Bill Summary</h5>
+                <p class="text-muted small mb-4">Review the vendor, dates, and financial status for this bill.</p>
+                <div class="mb-3">
+                    <label asp-for="BillNumber" class="form-label"></label>
+                    <input asp-for="BillNumber" class="form-control" readonly />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="VendorId" class="form-label"></label>
+                    @if (isEditable)
+                    {
+                        <select asp-for="VendorId" class="form-select" asp-items="Model.Vendors">
+                            <option value="">Select vendor</option>
+                        </select>
+                    }
+                    else
+                    {
+                        <input type="hidden" asp-for="VendorId" />
+                        <div class="form-control-plaintext fw-semibold">
+                            @Model.Vendors.FirstOrDefault(v => v.Value == Model.VendorId?.ToString())?.Text ?? "-"
+                        </div>
+                    }
+                    <span asp-validation-for="VendorId" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="BillDate" class="form-label"></label>
+                    <input asp-for="BillDate" class="form-control" type="date" readonly="@(!isEditable)" />
+                    <span asp-validation-for="BillDate" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="DueDate" class="form-label"></label>
+                    <input asp-for="DueDate" class="form-control" type="date" readonly="@(!isEditable)" />
+                    <span asp-validation-for="DueDate" class="text-danger small"></span>
+                </div>
+                @if (Model.PurchaseOrderId.HasValue)
+                {
+                    <div class="mb-3">
+                        <label class="form-label">Purchase Order</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="form-control-plaintext fw-semibold">#@Model.PurchaseOrderId</span>
+                            <a asp-area="Admin" asp-controller="PurchaseOrders" asp-action="Edit" asp-route-id="@Model.PurchaseOrderId" class="btn btn-sm btn-outline-secondary">Open PO</a>
+                        </div>
+                        <input asp-for="PurchaseOrderId" type="hidden" />
+                    </div>
+                }
+                else
+                {
+                    <input asp-for="PurchaseOrderId" type="hidden" />
+                }
+                <div class="mb-3">
+                    <label class="form-label">Status</label>
+                    <div class="d-flex gap-2 align-items-center flex-wrap">
+                        <span class="badge @statusBadgeClass">@Model.Status</span>
+                        <span class="badge @paymentBadgeClass">@Model.PaymentStatus</span>
+                    </div>
+                    <input asp-for="Status" type="hidden" />
+                    <input asp-for="PaymentStatus" type="hidden" />
+                </div>
+                <div>
+                    <div class="d-flex justify-content-between">
+                        <span>Total</span>
+                        <strong>@Model.TotalAmount.ToString("C")</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Paid</span>
+                        <strong>@Model.AmountPaid.ToString("C")</strong>
+                    </div>
+                    <div class="d-flex justify-content-between text-danger">
+                        <span>Amount Due</span>
+                        <strong>@Model.AmountDue.ToString("C")</strong>
+                    </div>
+                    <input asp-for="AmountPaid" type="hidden" />
+                    <input asp-for="TotalAmount" type="hidden" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="card-title mb-0">Bill Lines</h5>
+                        <small class="text-muted">Lines inherit products, quantities, and analytical accounts from the source PO.</small>
+                    </div>
+                    @if (isEditable)
+                    {
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-vendor-bill-add-line>+ Add Line</button>
+                    }
+                </div>
+                @if (hasWarnings)
+                {
+                    <div class="alert alert-warning py-2 small">
+                        Budget limits were exceeded for highlighted lines. Use the budget button to review the analytical account configuration.
+                    </div>
+                }
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th style="width: 120px;">Qty</th>
+                                <th style="width: 140px;">Unit Price</th>
+                                <th style="width: 140px;" class="text-end">Line Total</th>
+                                <th>Analytical Account</th>
+                                <th class="text-end" style="width: 90px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody data-vendor-bill-lines>
+                            @for (var i = 0; i < Model.Lines.Count; i++)
+                            {
+                                var rowViewData = new ViewDataDictionary(ViewData);
+                                rowViewData.TemplateInfo.HtmlFieldPrefix = $"Lines[{i}]";
+                                rowViewData["RowIndex"] = i.ToString();
+                                rowViewData["Products"] = Model.Products;
+                                rowViewData["AnalyticalAccounts"] = Model.AnalyticalAccounts;
+                                rowViewData["IsReadOnly"] = !isEditable;
+                                @await Html.PartialAsync("_LineRow", Model.Lines[i], rowViewData)
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="3" class="text-end">Grand Total</th>
+                                <th class="text-end">
+                                    <span class="fw-semibold" data-vendor-bill-grand-total>@Model.TotalAmount.ToString("N2")</span>
+                                </th>
+                                <th colspan="2"></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@{
+    var templateViewData = new ViewDataDictionary(ViewData);
+    templateViewData.TemplateInfo.HtmlFieldPrefix = "Lines[__prefix__]";
+    templateViewData["RowIndex"] = "__prefix__";
+    templateViewData["Products"] = Model.Products;
+    templateViewData["AnalyticalAccounts"] = Model.AnalyticalAccounts;
+}
+<template id="vendor-bill-line-template">
+    @await Html.PartialAsync("_LineRow", new ShivFurnitureERP.ViewModels.VendorBills.VendorBillLineViewModel(), templateViewData)
+</template>
+
+@if (isEditable)
+{
+    <script>
+        (() => {
+            const formRoot = document.querySelector('[data-vendor-bill-form]');
+            if (!formRoot) {
+                return;
+            }
+
+            const linesBody = formRoot.querySelector('[data-vendor-bill-lines]');
+            const addLineButton = formRoot.querySelector('[data-vendor-bill-add-line]');
+            const template = formRoot.querySelector('#vendor-bill-line-template');
+            const totalTarget = formRoot.querySelector('[data-vendor-bill-grand-total]');
+            let nextIndex = Number(formRoot.getAttribute('data-next-index')) || 0;
+            const numberFormatter = new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            const recalcRow = (row) => {
+                const qtyInput = row.querySelector('[data-field="quantity"]');
+                const priceInput = row.querySelector('[data-field="unitPrice"]');
+                const qty = qtyInput ? parseFloat(qtyInput.value) || 0 : 0;
+                const price = priceInput ? parseFloat(priceInput.value) || 0 : 0;
+                const total = qty * price;
+                const lineTotalTarget = row.querySelector('[data-line-total]');
+                if (lineTotalTarget) {
+                    lineTotalTarget.textContent = numberFormatter.format(total);
+                }
+                return total;
+            };
+
+            const recalcGrandTotal = () => {
+                let grand = 0;
+                linesBody?.querySelectorAll('tr').forEach(row => {
+                    grand += recalcRow(row);
+                });
+                if (totalTarget) {
+                    totalTarget.textContent = numberFormatter.format(grand);
+                }
+            };
+
+            const parseValidation = (row) => {
+                if (window.jQuery && window.jQuery.validator && window.jQuery.validator.unobtrusive) {
+                    window.jQuery.validator.unobtrusive.parse(row);
+                }
+            };
+
+            const addLine = () => {
+                if (!template || !linesBody) {
+                    return;
+                }
+                const placeholder = String(nextIndex);
+                nextIndex += 1;
+                const html = template.innerHTML.replace(/__prefix__/g, placeholder).trim();
+                const wrapper = document.createElement('tbody');
+                wrapper.innerHTML = html;
+                const newRow = wrapper.firstElementChild;
+                if (!newRow) {
+                    return;
+                }
+                linesBody.appendChild(newRow);
+                parseValidation(newRow);
+                recalcRow(newRow);
+                recalcGrandTotal();
+            };
+
+            addLineButton?.addEventListener('click', () => addLine());
+
+            linesBody?.addEventListener('click', (event) => {
+                const target = event.target instanceof HTMLElement ? event.target : null;
+                if (!target) {
+                    return;
+                }
+                if (target.closest('.remove-line')) {
+                    const rows = linesBody.querySelectorAll('tr');
+                    if (rows.length <= 1) {
+                        return;
+                    }
+                    target.closest('tr')?.remove();
+                    recalcGrandTotal();
+                }
+            });
+
+            linesBody?.addEventListener('input', (event) => {
+                const input = event.target instanceof HTMLInputElement ? event.target : null;
+                if (!input) {
+                    return;
+                }
+                if (input.matches('[data-field="quantity"], [data-field="unitPrice"]')) {
+                    const row = input.closest('tr');
+                    if (row) {
+                        recalcRow(row);
+                        recalcGrandTotal();
+                    }
+                }
+            });
+        })();
+    </script>
+}

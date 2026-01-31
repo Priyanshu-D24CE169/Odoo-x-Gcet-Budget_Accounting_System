@@ -1,0 +1,73 @@
+@model ShivFurnitureERP.ViewModels.AutoAnalyticalModels.AutoAnalyticalModelFormViewModel
+@using ShivFurnitureERP.Models
+
+<div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+<input type="hidden" asp-for="ModelId" />
+
+<div class="auto-form-grid">
+    <div class="auto-form-field">
+        <label asp-for="PartnerTagId"></label>
+        <select asp-for="PartnerTagId" asp-items="Model.PartnerTags">
+            <option value="">Any partner tag</option>
+        </select>
+        <small>Many to One (from list)</small>
+        <span asp-validation-for="PartnerTagId" class="text-danger"></span>
+    </div>
+    <div class="auto-form-field">
+        <label asp-for="PartnerId"></label>
+        <select asp-for="PartnerId" asp-items="Model.Partners">
+            <option value="">Any partner</option>
+        </select>
+        <small>Many to One (from list)</small>
+        <span asp-validation-for="PartnerId" class="text-danger"></span>
+    </div>
+    <div class="auto-form-field">
+        <label asp-for="ProductCategoryId"></label>
+        <select asp-for="ProductCategoryId" asp-items="Model.ProductCategories">
+            <option value="">Any product category</option>
+        </select>
+        <small>Many to One (from list)</small>
+        <span asp-validation-for="ProductCategoryId" class="text-danger"></span>
+    </div>
+    <div class="auto-form-field">
+        <label asp-for="ProductId"></label>
+        <select asp-for="ProductId" asp-items="Model.Products">
+            <option value="">Any product</option>
+        </select>
+        <small>Many to One (from list)</small>
+        <span asp-validation-for="ProductId" class="text-danger"></span>
+    </div>
+</div>
+
+<div class="auto-form-field full">
+    <label asp-for="AnalyticalAccountId">Analyticals to Apply?</label>
+    <select asp-for="AnalyticalAccountId" asp-items="Model.AnalyticalAccounts">
+        <option value="">Select analytical account</option>
+    </select>
+    <small>Many to One (from analytical master list)</small>
+    <span asp-validation-for="AnalyticalAccountId" class="text-danger"></span>
+</div>
+
+<div class="auto-status-group">
+    <label asp-for="Status">Auto Apply Analytical Model</label>
+    <div class="status-radio-group">
+        @foreach (var option in new[]
+        {
+            new { Value = AnalyticalModelStatus.Draft, Label = "Draft" },
+            new { Value = AnalyticalModelStatus.Confirmed, Label = "Confirm" },
+            new { Value = AnalyticalModelStatus.Archived, Label = "Cancelled" }
+        })
+        {
+            var isChecked = Model.Status == option.Value;
+            <label class="status-radio @(isChecked ? "is-active" : string.Empty)" for="status-@option.Value">
+                <input type="radio" id="status-@option.Value" name="Status" value="@option.Value" checked="@isChecked" />
+                <span>@option.Label</span>
+            </label>
+        }
+    </div>
+</div>
+
+<div class="auto-guidance">
+    <p>The model is applied if any one field matches the transaction line. When multiple fields match, the model becomes specific and wins priority. This keeps automatic analytical assignment flexible yet predictable.</p>
+    <p>Models with fewer matched fields behave like generic fallbacks, while combinations with many matches act as strict rules. Mix and match partner, tags, product category, or SKUs to reflect how your finance team wants allocations to behave.</p>
+</div>

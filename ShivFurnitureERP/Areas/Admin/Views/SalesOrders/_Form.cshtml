@@ -1,0 +1,195 @@
+@using ShivFurnitureERP.Models
+@model ShivFurnitureERP.ViewModels.SalesOrders.SalesOrderFormViewModel
+@{
+    var isReadOnly = !Model.CanConfirm;
+    var selectedCustomer = Model.Customers.FirstOrDefault(c => c.Value == Model.CustomerId?.ToString())?.Text ?? string.Empty;
+}
+<div class="sales-order-sheet" data-sales-order-form data-next-index="@Model.Lines.Count">
+    <div class="sales-order-pill-row">
+        <span class="sales-order-pill">New</span>
+        <span class="sales-order-note">(auto generate PO number + 1 of last order)</span>
+    </div>
+
+    <div class="sales-order-meta-grid">
+        <div class="sales-meta-card">
+            <label asp-for="SONumber"></label>
+            <input asp-for="SONumber" class="form-control meta-control" readonly />
+            <small>Auto generated when the order is saved.</small>
+        </div>
+        <div class="sales-meta-card">
+            <label asp-for="CustomerId"></label>
+            @if (Model.CanConfirm)
+            {
+                <select asp-for="CustomerId" class="form-select" asp-items="Model.Customers">
+                    <option value="">Select customer</option>
+                </select>
+            }
+            else
+            {
+                <input type="hidden" asp-for="CustomerId" />
+                <div class="form-control-plaintext fw-semibold">@selectedCustomer</div>
+            }
+            <small>(from Contact master - many to one)</small>
+            <span asp-validation-for="CustomerId" class="text-danger"></span>
+        </div>
+        <div class="sales-meta-card">
+            <label asp-for="Reference"></label>
+            <input asp-for="Reference" class="form-control" placeholder="Alpha numeric (text)" readonly="@(isReadOnly)" />
+            <small>Optional reference visible to customer.</small>
+            <span asp-validation-for="Reference" class="text-danger"></span>
+        </div>
+        <div class="sales-meta-card">
+            <label asp-for="SODate"></label>
+            <input asp-for="SODate" class="form-control" type="date" readonly="@(isReadOnly)" />
+            <small>SO Date</small>
+        </div>
+        <div class="sales-meta-card">
+            <label asp-for="Status"></label>
+            @if (Model.CanConfirm)
+            {
+                <select asp-for="Status" asp-items="Model.StatusOptions" class="form-select"></select>
+            }
+            else
+            {
+                <input type="hidden" asp-for="Status" />
+                <select asp-for="Status" asp-items="Model.StatusOptions" class="form-select" disabled="disabled"></select>
+            }
+            <small>Updates as the order progresses.</small>
+            <span asp-validation-for="Status" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="sales-order-stage">
+        <span class="stage-pill @(Model.Status == SalesOrderStatus.Draft ? "is-active" : null)">Draft</span>
+        <span class="stage-pill @(Model.Status == SalesOrderStatus.Confirmed ? "is-active" : null)">Confirm</span>
+        <span class="stage-pill @(Model.Status == SalesOrderStatus.Cancelled ? "is-active" : null)">Cancelled</span>
+    </div>
+
+    <div class="sales-order-lines">
+        <div class="sales-order-lines-header">
+            <div>
+                <h5>Sales Order Lines</h5>
+                <p>Add the products, analytical link and pricing for this order.</p>
+            </div>
+            @if (Model.CanConfirm)
+            {
+                <button type="button" class="sales-order-add-line" data-sales-order-add-line>+ Add Line</button>
+            }
+        </div>
+        <div class="sales-order-table-wrapper">
+            <table class="sales-order-table">
+                <thead>
+                    <tr>
+                        <th style="width:60px;">Sr. No.</th>
+                        <th>Product</th>
+                        <th style="width:120px;">Qty</th>
+                        <th style="width:140px;">Unit Price</th>
+                        <th style="width:140px;" class="text-end">Total</th>
+                        <th>Analytical Account</th>
+                        <th style="width:110px;"></th>
+                    </tr>
+                </thead>
+                <tbody data-sales-order-lines>
+                    @for (var i = 0; i < Model.Lines.Count; i++)
+                    {
+                        var rowViewData = new ViewDataDictionary(ViewData);
+                        rowViewData.TemplateInfo.HtmlFieldPrefix = $"Lines[{i}]";
+                        rowViewData["RowIndex"] = i.ToString();
+                        rowViewData["Products"] = Model.Products;
+                        rowViewData["AnalyticalAccounts"] = Model.AnalyticalAccounts;
+                        @await Html.PartialAsync("_LineRow", Model.Lines[i], rowViewData)
+                    }
+                </tbody>
+                <tfoot>
+                    <tr class="sales-order-grand-total-row">
+                        <th colspan="4" class="text-end">Total</th>
+                        <th class="text-end"><span class="sales-order-grand-total" data-sales-order-grand-total>0.00</span></th>
+                        <th colspan="2"></th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+@{
+    var templateViewData = new ViewDataDictionary(ViewData);
+    templateViewData.TemplateInfo.HtmlFieldPrefix = "Lines[__prefix__]";
+    templateViewData["RowIndex"] = "__prefix__";
+    templateViewData["Products"] = Model.Products;
+    templateViewData["AnalyticalAccounts"] = Model.AnalyticalAccounts;
+}
+<template id="sales-order-line-template">
+    @await Html.PartialAsync("_LineRow", new ShivFurnitureERP.ViewModels.SalesOrders.SalesOrderLineViewModel(), templateViewData)
+</template>
+
+<script>
+        (() => {
+            const root = document.querySelector('[data-sales-order-form]');
+            if (!root) return;
+            const linesBody = root.querySelector('[data-sales-order-lines]');
+            const template = document.getElementById('sales-order-line-template');
+            const addBtn = root.querySelector('[data-sales-order-add-line]');
+            const totalTarget = root.querySelector('[data-sales-order-grand-total]');
+            let nextIndex = Number(root.getAttribute('data-next-index')) || 0;
+            const format = new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            const parseRowTotal = (row) => {
+                const qty = parseFloat(row.querySelector('[data-field="quantity"]').value) || 0;
+                const price = parseFloat(row.querySelector('[data-field="unitPrice"]').value) || 0;
+                const total = qty * price;
+                const totalCell = row.querySelector('[data-line-total]');
+                if (totalCell) totalCell.textContent = format.format(total);
+                return total;
+            };
+
+            const refreshGrandTotal = () => {
+                let sum = 0;
+                linesBody?.querySelectorAll('tr').forEach(row => sum += parseRowTotal(row));
+                if (totalTarget) totalTarget.textContent = format.format(sum);
+            };
+
+            const hookValidation = (element) => {
+                if (window.jQuery && window.jQuery.validator && window.jQuery.validator.unobtrusive) {
+                    window.jQuery.validator.unobtrusive.parse(element);
+                }
+            };
+
+            const addLine = () => {
+                if (!template || !linesBody) return;
+                const placeholder = `line_${nextIndex++}`;
+                const html = template.innerHTML.replace(/__prefix__/g, placeholder);
+                const wrapper = document.createElement('tbody');
+                wrapper.innerHTML = html.trim();
+                const newRow = wrapper.firstElementChild;
+                if (!newRow) return;
+                linesBody.appendChild(newRow);
+                hookValidation(newRow);
+                refreshGrandTotal();
+            };
+
+            addBtn?.addEventListener('click', () => addLine());
+
+            linesBody?.addEventListener('input', (event) => {
+                const target = event.target;
+                if (!(target instanceof HTMLInputElement)) return;
+                if (target.matches('[data-field="quantity"], [data-field="unitPrice"]')) {
+                    const row = target.closest('tr');
+                    if (row) {
+                        parseRowTotal(row);
+                        refreshGrandTotal();
+                    }
+                }
+            });
+
+            linesBody?.addEventListener('click', (event) => {
+                const button = (event.target instanceof HTMLElement) ? event.target.closest('.remove-line') : null;
+                if (!button) return;
+                const rows = linesBody.querySelectorAll('tr');
+                if (rows.length <= 1) return;
+                button.closest('tr')?.remove();
+                refreshGrandTotal();
+            });
+            refreshGrandTotal();
+        })();
+</script>

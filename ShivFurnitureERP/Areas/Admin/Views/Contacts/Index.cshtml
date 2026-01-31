@@ -1,0 +1,132 @@
+@model IEnumerable<ShivFurnitureERP.ViewModels.Contacts.ContactListItemViewModel>
+@using System.Linq
+@{
+    ViewData["Title"] = "Contact Master";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var search = ViewData["Search"] as string;
+    var includeArchived = ViewData["IncludeArchived"] as bool? ?? false;
+    var contactCount = Model?.Count() ?? 0;
+    var recordLabel = contactCount == 1 ? "record" : "records";
+    var pillLabel = includeArchived ? "All Contacts" : "Active Contacts";
+    var visibilityNote = includeArchived ? "Includes archived entries" : "Active records only";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/contact-master.css" asp-append-version="true" />
+}
+
+<section class="contact-master-page">
+    <div class="container-fluid">
+        <div class="contact-hero">
+            <div>
+                <p class="eyebrow">Contact Master</p>
+                <h1>Contacts</h1>
+                <p>Draft, confirm, and keep every customer or vendor profile tidy with a single polished flow.</p>
+            </div>
+        </div>
+
+        @if (TempData["StatusMessage"] is string statusMessage)
+        {
+            <div class="alert alert-success shadow-sm">@statusMessage</div>
+        }
+
+        <div class="contact-sheet">
+            <div class="master-action-bar">
+                <a asp-area="Admin" asp-controller="Contacts" asp-action="Create" class="master-action-btn">New</a>
+                <a asp-area="Admin" asp-controller="Contacts" asp-action="Index" asp-route-includeArchived="false" class="master-action-btn @(includeArchived ? string.Empty : "is-primary")">Confirm</a>
+                <a asp-area="Admin" asp-controller="Contacts" asp-action="Index" asp-route-includeArchived="true" class="master-action-btn @(includeArchived ? "is-primary" : string.Empty)">Archived</a>
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="master-action-btn">Home</a>
+                <a href="javascript:history.back()" class="master-action-btn">Back</a>
+            </div>
+
+            <div class="contact-pill-row">
+                <span class="contact-pill">@pillLabel</span>
+                <span class="contact-note">@contactCount @recordLabel · @visibilityNote</span>
+                <a asp-area="Admin" asp-controller="Contacts" asp-action="Create" class="contact-add-btn">+ Add Contact</a>
+            </div>
+
+            <form method="get" class="contact-filter-form">
+                <div class="contact-filter-grid">
+                    <div>
+                        <label for="search">Search</label>
+                        <input type="text" id="search" name="search" value="@search" placeholder="Name, email or phone" />
+                    </div>
+                    <div class="d-flex flex-column flex-lg-row align-items-lg-center gap-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="includeArchived" value="true" @(includeArchived ? "checked" : string.Empty) id="includeArchived" />
+                            <label class="form-check-label" for="includeArchived">Show archived</label>
+                        </div>
+                        <div class="contact-filter-actions">
+                            <button type="submit">Apply Filter</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="contact-table-wrapper">
+                <table class="contact-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Type</th>
+                            <th>Tags</th>
+                            <th>Created</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="8" class="contact-empty">No contacts match the filters.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var contact in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="contact-name">@contact.Name</div>
+                                    <div class="contact-city">@contact.City</div>
+                                </td>
+                                <td>@contact.Email</td>
+                                <td>@contact.Phone</td>
+                                <td>
+                                    <span class="contact-status-pill" style="background: rgba(165, 68, 131, 0.1); color: var(--contact-accent);">@contact.Type</span>
+                                </td>
+                                <td class="contact-tags">
+                                    @if (!string.IsNullOrWhiteSpace(contact.Tags))
+                                    {
+                                        foreach (var tag in contact.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                                        {
+                                            <span>@tag</span>
+                                        }
+                                    }
+                                </td>
+                                <td>@contact.CreatedOn.ToString("dd MMM yyyy")</td>
+                                <td>
+                                    @if (contact.IsArchived)
+                                    {
+                                        <span class="contact-status-pill is-archived">Archived</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="contact-status-pill is-active">Active</span>
+                                    }
+                                </td>
+                                <td class="actions text-end">
+                                    <a asp-area="Admin" asp-controller="Contacts" asp-action="Edit" asp-route-id="@contact.ContactId">Edit</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>

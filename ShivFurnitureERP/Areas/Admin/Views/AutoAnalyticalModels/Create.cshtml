@@ -1,0 +1,41 @@
+@model ShivFurnitureERP.ViewModels.AutoAnalyticalModels.AutoAnalyticalModelFormViewModel
+@using ShivFurnitureERP.Models
+@{
+    ViewData["Title"] = "New Auto Analytical Model";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/auto-analytical-model.css" asp-append-version="true" />
+}
+
+<div class="auto-analytical-page">
+    <div class="container-fluid">
+        <div class="auto-hero">
+            <div>
+                <p class="auto-eyebrow">Auto Analytical Model</p>
+                <h1>Create Model</h1>
+                <p>Combine partner context, product tags, and analytical accounts to auto-assign the perfect cost center every time.</p>
+            </div>
+        </div>
+
+        <div class="auto-card">
+            <div class="master-action-bar">
+                <a asp-action="Create" class="master-action-btn is-primary">New</a>
+                <a asp-action="Index" asp-route-status="@AnalyticalModelStatus.Confirmed" class="master-action-btn">Confirm</a>
+                <a asp-action="Index" asp-route-status="@AnalyticalModelStatus.Archived" asp-route-showArchived="true" class="master-action-btn">Archived</a>
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="master-action-btn">Home</a>
+                <a href="javascript:history.back()" class="master-action-btn">Back</a>
+            </div>
+
+            <form asp-action="Create" method="post" class="auto-form">
+                @Html.AntiForgeryToken()
+                <partial name="_Form" model="Model" />
+                <div class="auto-form-actions">
+                    <button type="submit" class="btn btn-primary px-4">Save Model</button>
+                    <a asp-action="Index" class="btn btn-link">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,114 @@
+@model IReadOnlyList<ShivFurnitureERP.ViewModels.VendorBills.VendorBillListItemViewModel>
+@{
+    ViewData["Title"] = "Vendor Bills";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var search = ViewData["Search"]?.ToString();
+    var statusValue = ViewData["Status"]?.ToString();
+    var paymentStatusValue = ViewData["PaymentStatus"]?.ToString();
+}
+
+<section class="py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+            <h2 class="mb-0">Vendor Bills</h2>
+            <p class="text-muted mb-0">Track vendor commitments, payment progress, and outstanding balances.</p>
+        </div>
+    </div>
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="search" class="form-label">Search</label>
+                    <input type="text" class="form-control" id="search" name="search" value="@search" placeholder="Bill number or vendor" />
+                </div>
+                <div class="col-md-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select id="status" name="status" class="form-select">
+                        <option value="">All</option>
+                        @foreach (var value in Enum.GetValues<ShivFurnitureERP.Models.VendorBillStatus>())
+                        {
+                            var isSelected = string.Equals(statusValue, value.ToString(), StringComparison.OrdinalIgnoreCase);
+                            <option value="@value" selected="@(isSelected ? "selected" : null)">@value</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="paymentStatus" class="form-label">Payment Status</label>
+                    <select id="paymentStatus" name="paymentStatus" class="form-select">
+                        <option value="">All</option>
+                        @foreach (var value in Enum.GetValues<ShivFurnitureERP.Models.VendorBillPaymentStatus>())
+                        {
+                            var isSelected = string.Equals(paymentStatusValue, value.ToString(), StringComparison.OrdinalIgnoreCase);
+                            <option value="@value" selected="@(isSelected ? "selected" : null)">@value</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2 text-end">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Bill</th>
+                            <th>Vendor</th>
+                            <th>Bill Date</th>
+                            <th>Due Date</th>
+                            <th class="text-end">Total</th>
+                            <th class="text-end">Paid</th>
+                            <th class="text-end">Amount Due</th>
+                            <th>Status</th>
+                            <th>Payment</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="10" class="text-center py-4 text-muted">No vendor bills found.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var bill in Model)
+                            {
+                                var statusBadge = bill.Status switch
+                                {
+                                    ShivFurnitureERP.Models.VendorBillStatus.Confirmed => "text-bg-success",
+                                    ShivFurnitureERP.Models.VendorBillStatus.Cancelled => "text-bg-secondary",
+                                    _ => "text-bg-warning"
+                                };
+                                var paymentBadge = bill.PaymentStatus switch
+                                {
+                                    ShivFurnitureERP.Models.VendorBillPaymentStatus.Paid => "text-bg-success",
+                                    ShivFurnitureERP.Models.VendorBillPaymentStatus.Partial => "text-bg-warning",
+                                    _ => "text-bg-secondary"
+                                };
+                                <tr>
+                                    <td class="fw-semibold">@bill.BillNumber</td>
+                                    <td>@bill.VendorName</td>
+                                    <td>@bill.BillDate.ToString("d")</td>
+                                    <td>@bill.DueDate.ToString("d")</td>
+                                    <td class="text-end">@bill.TotalAmount.ToString("C")</td>
+                                    <td class="text-end">@bill.AmountPaid.ToString("C")</td>
+                                    <td class="text-end">@bill.AmountDue.ToString("C")</td>
+                                    <td><span class="badge @statusBadge">@bill.Status</span></td>
+                                    <td><span class="badge @paymentBadge">@bill.PaymentStatus</span></td>
+                                    <td class="text-end">
+                                        <a asp-area="Admin" asp-controller="VendorBills" asp-action="Edit" asp-route-id="@bill.VendorBillId" class="btn btn-sm btn-outline-primary">Open</a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>

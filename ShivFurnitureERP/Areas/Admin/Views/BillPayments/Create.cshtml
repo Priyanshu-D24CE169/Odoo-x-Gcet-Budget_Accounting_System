@@ -1,0 +1,113 @@
+@model ShivFurnitureERP.ViewModels.BillPayments.BillPaymentFormViewModel
+@{
+    ViewData["Title"] = "Bill Payment";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/bill-payments.css" asp-append-version="true" />
+}
+
+<div class="bill-payments-page">
+    <div class="container-fluid">
+        <div class="bill-payments-hero">
+            <div class="hero-text">
+                <p class="hero-eyebrow">Bill Payment</p>
+                <h1>Pay Vendor Bill</h1>
+                <p>Open from the bill's Pay button, keep the original partner, and confirm a send payment against the remaining due.</p>
+            </div>
+            <div class="hero-actions">
+                <a asp-area="Admin" asp-controller="VendorBills" asp-action="Edit" asp-route-id="@Model.VendorBillId" class="chip-btn">Back to Bill</a>
+                <a asp-area="Admin" asp-controller="BillPayments" asp-action="Index" class="chip-btn">Payment Register</a>
+            </div>
+        </div>
+
+        <div class="bill-payments-sheet payment-form-sheet">
+            <div class="payment-stage-tabs">
+                <span class="stage-chip is-active">Draft</span>
+                <span class="stage-chip">Confirm</span>
+                <span class="stage-chip">Cancelled</span>
+            </div>
+
+            <form asp-action="Create" method="post" id="billPaymentForm">
+                @Html.AntiForgeryToken()
+                <input asp-for="VendorBillId" type="hidden" />
+
+                <div class="payment-toolbar">
+                    <div>
+                        <p class="toolbar-label">New</p>
+                        <p class="payment-number">@(!string.IsNullOrWhiteSpace(Model.PaymentNumberPreview) ? Model.PaymentNumberPreview : "PAY-XXXX")</p>
+                    </div>
+                    <div class="toolbar-actions">
+                        <button type="submit" class="toolbar-btn is-primary">Confirm</button>
+                        <button type="button" class="toolbar-btn" disabled>Print</button>
+                        <button type="button" class="toolbar-btn" disabled>Send</button>
+                        <a asp-area="Admin" asp-controller="VendorBills" asp-action="Edit" asp-route-id="@Model.VendorBillId" class="toolbar-btn is-cancel">Cancel</a>
+                    </div>
+                </div>
+
+                <div class="payment-summary-grid">
+                    <div>
+                        <p class="summary-label">Partner</p>
+                        <p class="summary-value">@Model.VendorName</p>
+                        <small>Auto-filled from the vendor bill.</small>
+                    </div>
+                    <div>
+                        <p class="summary-label">Bill Reference</p>
+                        <p class="summary-value">@Model.BillNumber</p>
+                        <small>Click Back to Bill to review lines.</small>
+                    </div>
+                    <div>
+                        <p class="summary-label">Amount Due</p>
+                        <p class="summary-value text-success">@Model.AmountDue.ToString("N2")</p>
+                        <small>Auto-calculated (Bill Total ? Paid).</small>
+                    </div>
+                </div>
+
+                <div class="payment-form-grid">
+                    <div class="form-field">
+                        <label>Payment Type</label>
+                        <div class="chip-radio-group">
+                            <label class="chip-radio is-selected">
+                                <input type="radio" checked disabled />
+                                <span>Send</span>
+                            </label>
+                            <label class="chip-radio" title="Vendor bills always send funds">
+                                <input type="radio" disabled />
+                                <span>Receive</span>
+                            </label>
+                        </div>
+                        <small>From Bill · Clicking Pay keeps the type locked.</small>
+                    </div>
+                    <div class="form-field">
+                        <label asp-for="PaymentDate">Date</label>
+                        <input asp-for="PaymentDate" type="date" class="billpay-input" />
+                        <span asp-validation-for="PaymentDate" class="text-danger small"></span>
+                        <small>Defaults to today's date.</small>
+                    </div>
+                    <div class="form-field">
+                        <label asp-for="PaymentMode">Payment Via</label>
+                        <select asp-for="PaymentMode" asp-items="Model.PaymentModes" class="billpay-input"></select>
+                        <span asp-validation-for="PaymentMode" class="text-danger small"></span>
+                        <small>Default bank can be switched to cash.</small>
+                    </div>
+                    <div class="form-field">
+                        <label asp-for="Amount">Amount</label>
+                        <input asp-for="Amount" type="number" min="0.01" step="0.01" max="@Model.AmountDue" class="billpay-input" />
+                        <span asp-validation-for="Amount" class="text-danger small"></span>
+                        <small>Auto-fills with exact due from invoice/bill.</small>
+                    </div>
+                    <div class="form-field form-field-wide">
+                        <label asp-for="Note">Note</label>
+                        <textarea asp-for="Note" rows="2" class="billpay-input" placeholder="Alpha numeric (text)"></textarea>
+                        <span asp-validation-for="Note" class="text-danger small"></span>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
