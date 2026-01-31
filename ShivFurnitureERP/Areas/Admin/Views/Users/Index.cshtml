@@ -1,72 +1,93 @@
 @model IReadOnlyList<ShivFurnitureERP.ViewModels.AdminUsers.UserListItemViewModel>
 @{
     ViewData["Title"] = "Manage Users";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="h4 mb-0">Manage Users</h2>
-        <a class="btn btn-primary" asp-area="Admin" asp-controller="Users" asp-action="Create">Create User</a>
-    </div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/user-master.css" asp-append-version="true" />
+}
 
-    @if (TempData["SuccessMessage"] is string successMessage)
-    {
-        <div class="alert alert-success" role="alert">
-            @successMessage
+<div class="user-master-page">
+    <div class="container-fluid">
+        <div class="user-hero">
+            <div>
+                <p class="user-eyebrow">User Master</p>
+                <h1>Manage Users</h1>
+                <p>Keep every administrator and portal login tidy with one polished roster. Draft, confirm, and edit accounts from a single sheet.</p>
+            </div>
+            <div class="user-hero-actions">
+                <a asp-area="Admin" asp-controller="Users" asp-action="Create">New User</a>
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Home</a>
+            </div>
         </div>
-    }
 
-    <div class="card shadow-sm">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-striped mb-0 align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th scope="col">Login ID</th>
-                            <th scope="col">Name</th>
-                            <th scope="col">Email</th>
-                            <th scope="col">Role</th>
-                            <th scope="col">Must Change Password</th>
-                            <th scope="col" class="text-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    @if (Model.Count == 0)
-                    {
-                        <tr>
-                            <td colspan="6" class="text-center text-muted py-4">No users found.</td>
-                        </tr>
-                    }
-                    else
-                    {
-                        foreach (var user in Model)
+        <div class="user-card">
+            <div class="master-action-bar">
+                <a asp-action="Create" class="master-action-btn is-primary">New</a>
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="master-action-btn">Home</a>
+                <a href="javascript:history.back()" class="master-action-btn">Back</a>
+            </div>
+
+            @if (TempData["SuccessMessage"] is string successMessage)
+            {
+                <div class="user-alert is-success" role="alert">
+                    @successMessage
+                </div>
+            }
+
+            <div class="user-table-wrapper">
+                <div class="user-pill-row mb-3">
+                    <div class="user-pill">Active directory</div>
+                    <div class="user-note mb-0">@Model.Count record@(Model.Count == 1 ? string.Empty : "s") · Includes admin and portal logins</div>
+                    <a asp-action="Create" class="user-add-btn">+ Add User</a>
+                </div>
+
+                @if (Model.Count == 0)
+                {
+                    <div class="user-empty">No users found.</div>
+                }
+                else
+                {
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>Login ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Must Change Password</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var user in Model)
                         {
                             <tr>
                                 <td>@user.LoginId</td>
                                 <td>@user.DisplayName</td>
                                 <td>@user.Email</td>
                                 <td>
-                                    <span class="badge bg-secondary">@user.Role</span>
+                                    <span class="user-role-pill">@user.Role</span>
                                 </td>
                                 <td>
-                                    @if (user.MustChangePassword)
-                                    {
-                                        <span class="badge bg-warning text-dark">Yes</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-success">No</span>
-                                    }
+                                    <span class="user-flag-pill @(user.MustChangePassword ? "is-yes" : "is-no")">
+                                        @(user.MustChangePassword ? "Yes" : "No")
+                                    </span>
                                 </td>
-                                <td class="text-end">
-                                    <a class="btn btn-sm btn-outline-primary" asp-area="Admin" asp-controller="Users" asp-action="Edit" asp-route-id="@user.Id">Edit</a>
+                                <td class="user-actions text-end">
+                                    <a asp-area="Admin" asp-controller="Users" asp-action="Edit" asp-route-id="@user.Id">Edit</a>
                                 </td>
                             </tr>
                         }
-                    }
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                }
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

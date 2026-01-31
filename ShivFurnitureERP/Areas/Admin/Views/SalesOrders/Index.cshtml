@@ -6,25 +6,38 @@
     var statusValue = ViewData["Status"]?.ToString();
 }
 
-<section class="py-4">
-    <div class="d-flex justify-content-between flex-wrap gap-2 align-items-center mb-3">
-        <div>
-            <h2 class="mb-0">Sales Orders</h2>
-            <p class="text-muted mb-0">Track customer commitments and convert to invoices.</p>
-        </div>
-        <a asp-area="Admin" asp-controller="SalesOrders" asp-action="Create" class="btn btn-primary">+ New Sales Order</a>
-    </div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/sales-orders.css" asp-append-version="true" />
+}
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label" for="search">Search</label>
-                    <input type="text" class="form-control" id="search" name="search" value="@search" placeholder="SO number or customer" />
+<div class="sales-order-page">
+    <div class="container-fluid">
+        <div class="sales-order-hero">
+            <div>
+                <p class="user-eyebrow sales-order-eyebrow">Order Master</p>
+                <h1>Sales Orders</h1>
+                <p>Track customer commitments, confirm delivery promises, and convert them into invoices with confidence.</p>
+            </div>
+            <div class="sales-order-nav">
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Home</a>
+                <a asp-area="Admin" asp-controller="SalesOrders" asp-action="Create">+ New Sales Order</a>
+            </div>
+        </div>
+
+        <div class="sales-order-sheet">
+            <div class="sales-order-pill-row">
+                <div class="sales-order-pill">Active pipeline</div>
+                <div class="sales-order-note">@Model.Count record@(Model.Count == 1 ? string.Empty : "s") in queue</div>
+            </div>
+
+            <form method="get" class="sales-order-filter-grid">
+                <div class="sales-order-field">
+                    <label for="search">Search</label>
+                    <input type="text" id="search" name="search" value="@search" placeholder="SO number or customer" />
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label" for="status">Status</label>
-                    <select id="status" name="status" class="form-select">
+                <div class="sales-order-field">
+                    <label for="status">Status</label>
+                    <select id="status" name="status">
                         <option value="">All</option>
                         @foreach (var value in Enum.GetValues<ShivFurnitureERP.Models.SalesOrderStatus>())
                         {
@@ -33,51 +46,52 @@
                         }
                     </select>
                 </div>
-                <div class="col-md-2 text-end">
-                    <button type="submit" class="btn btn-outline-primary w-100">Filter</button>
+                <div class="sales-order-filter-actions">
+                    <button type="submit">Filter</button>
+                    <a asp-action="Index">Reset</a>
                 </div>
             </form>
-        </div>
-    </div>
 
-    <div class="card shadow-sm">
-        <div class="table-responsive">
-            <table class="table table-striped align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>SO #</th>
-                        <th>Customer</th>
-                        <th>Date</th>
-                        <th>Reference</th>
-                        <th>Status</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (!Model.Any())
-                    {
-                        <tr>
-                            <td colspan="6" class="text-center py-4 text-muted">No sales orders found.</td>
-                        </tr>
-                    }
-                    else
-                    {
-                        foreach (var order in Model)
+            @if (!Model.Any())
+            {
+                <div class="sales-order-empty">No sales orders found.</div>
+            }
+            else
+            {
+                <div class="sales-order-table-wrapper">
+                    <table class="sales-order-list">
+                        <thead>
+                            <tr>
+                                <th>SO #</th>
+                                <th>Customer</th>
+                                <th>Date</th>
+                                <th>Reference</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var order in Model)
                         {
                             <tr>
                                 <td class="fw-semibold">@order.SONumber</td>
                                 <td>@order.CustomerName</td>
-                                <td>@order.SODate.ToString("d")</td>
+                                <td>@order.SODate.ToString("dd MMM yy")</td>
                                 <td>@order.Reference</td>
-                                <td>@order.Status</td>
+                                <td><span class="sales-order-status-pill">@order.Status</span></td>
                                 <td class="text-end">
-                                    <a asp-area="Admin" asp-controller="SalesOrders" asp-action="Edit" asp-route-id="@order.SalesOrderId" class="btn btn-sm btn-outline-primary">Open</a>
+                                    <a asp-area="Admin" asp-controller="SalesOrders" asp-action="Edit" asp-route-id="@order.SalesOrderId" class="sales-order-link">Open</a>
                                 </td>
                             </tr>
                         }
-                    }
-                </tbody>
-            </table>
+                        </tbody>
+                    </table>
+                </div>
+            }
         </div>
     </div>
-</section>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

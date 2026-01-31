@@ -1,106 +1,100 @@
 @model ShivFurnitureERP.ViewModels.Contacts.ContactFormViewModel
 
-<div class="row g-4">
-    <div class="col-md-8">
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
-                <h5 class="card-title">Contact Information</h5>
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label asp-for="Name" class="form-label"></label>
-                        <input asp-for="Name" class="form-control" />
-                        <span asp-validation-for="Name" class="text-danger"></span>
-                    </div>
-                    <div class="col-md-6">
-                        <label asp-for="Email" class="form-label"></label>
-                        <input asp-for="Email" class="form-control" />
-                        <span asp-validation-for="Email" class="text-danger"></span>
-                    </div>
-                    <div class="col-md-6">
-                        <label asp-for="Phone" class="form-label"></label>
-                        <input asp-for="Phone" class="form-control" />
-                        <span asp-validation-for="Phone" class="text-danger"></span>
-                    </div>
-                    <div class="col-md-6">
-                        <label asp-for="Type" class="form-label"></label>
-                        <select asp-for="Type" class="form-select" asp-items="Html.GetEnumSelectList<ShivFurnitureERP.Models.ContactType>()"></select>
-                    </div>
+<div class="contact-form-layout">
+    <div>
+        <section class="contact-form-section">
+            <h5>Contact Information</h5>
+            <div class="contact-field-grid">
+                <div class="contact-field">
+                    <label asp-for="Name"></label>
+                    <input asp-for="Name" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                <div class="contact-field">
+                    <label asp-for="Email"></label>
+                    <input asp-for="Email" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="contact-field">
+                    <label asp-for="Phone"></label>
+                    <input asp-for="Phone" />
+                    <span asp-validation-for="Phone" class="text-danger"></span>
+                </div>
+                <div class="contact-field">
+                    <label asp-for="Type"></label>
+                    <select asp-for="Type" asp-items="Html.GetEnumSelectList<ShivFurnitureERP.Models.ContactType>()"></select>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
-                <h5 class="card-title">Address</h5>
-                <div class="row g-3">
-                    <div class="col-md-12">
-                        <label asp-for="Street" class="form-label"></label>
-                        <input asp-for="Street" class="form-control" />
-                    </div>
-                    <div class="col-md-6">
-                        <label asp-for="City" class="form-label"></label>
-                        <input asp-for="City" class="form-control" />
-                    </div>
-                    <div class="col-md-6">
-                        <label asp-for="State" class="form-label"></label>
-                        <input asp-for="State" class="form-control" />
-                    </div>
-                    <div class="col-md-6">
-                        <label asp-for="Country" class="form-label"></label>
-                        <input asp-for="Country" class="form-control" />
-                    </div>
-                    <div class="col-md-6">
-                        <label asp-for="Pincode" class="form-label"></label>
-                        <input asp-for="Pincode" class="form-control" />
-                    </div>
+        <section class="contact-form-section">
+            <h5>Address</h5>
+            <div class="contact-field-grid">
+                <div class="contact-field full">
+                    <label asp-for="Street"></label>
+                    <input asp-for="Street" />
+                </div>
+                <div class="contact-field">
+                    <label asp-for="City"></label>
+                    <input asp-for="City" />
+                </div>
+                <div class="contact-field">
+                    <label asp-for="State"></label>
+                    <input asp-for="State" />
+                </div>
+                <div class="contact-field">
+                    <label asp-for="Country"></label>
+                    <input asp-for="Country" />
+                </div>
+                <div class="contact-field">
+                    <label asp-for="Pincode"></label>
+                    <input asp-for="Pincode" />
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h5 class="card-title">Tags & Status</h5>
-                <div class="row g-3">
-                    <div class="col-md-12">
-                        <label asp-for="TagsInput" class="form-label"></label>
-                        <input asp-for="TagsInput" class="form-control" placeholder="Furniture, Enterprise, Priority" />
-                        <span class="form-text">Separate tags with commas to auto-create new tags.</span>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-check mt-4 pt-2">
-                            <input asp-for="IsArchived" class="form-check-input" />
-                            <label asp-for="IsArchived" class="form-check-label">Archived</label>
-                        </div>
-                    </div>
-                    <div class="col-md-8 text-end">
-                        <label class="form-label d-block">Created On</label>
-                        <span class="fw-semibold">@Model.CreatedOn.ToString("dd MMM yyyy HH:mm")</span>
-                    </div>
+        <section class="contact-form-section">
+            <h5>Tags & Status</h5>
+            <div class="contact-field-grid">
+                <div class="contact-field full">
+                    <label asp-for="TagsInput"></label>
+                    <input asp-for="TagsInput" placeholder="Furniture, Enterprise, Priority" />
+                    <span class="form-text">Separate tags with commas to auto-create new tags.</span>
+                </div>
+                <div class="contact-field">
+                    <label class="contact-checkbox">
+                        <input asp-for="IsArchived" />
+                        <span>@Html.DisplayNameFor(m => m.IsArchived)</span>
+                    </label>
+                </div>
+                <div class="contact-field">
+                    <span class="contact-meta-label">Created On</span>
+                    <span class="contact-meta-value">@Model.CreatedOn.ToString("dd MMM yyyy HH:mm")</span>
                 </div>
             </div>
-        </div>
+        </section>
     </div>
 
-    <div class="col-md-4">
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
-                <h5 class="card-title">Profile Image</h5>
-                <div class="mb-3">
-                    <label asp-for="ImageFile" class="form-label"></label>
-                    <input asp-for="ImageFile" class="form-control" type="file" accept="image/*" />
-                    <span asp-validation-for="ImageFile" class="text-danger"></span>
-                </div>
-                @if (!string.IsNullOrWhiteSpace(Model.ExistingImagePath))
-                {
-                    <div class="text-center">
-                        <img src="@Model.ExistingImagePath" class="img-fluid rounded" alt="Contact image" />
-                    </div>
-                }
-                else
-                {
-                    <p class="text-muted small mb-0">No image uploaded.</p>
-                }
+    <aside class="contact-form-aside">
+        <section class="contact-form-section">
+            <h5>Profile Image</h5>
+            <div class="contact-field full">
+                <label asp-for="ImageFile"></label>
+                <input asp-for="ImageFile" type="file" accept="image/*" />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
             </div>
-        </div>
-    </div>
+            @if (!string.IsNullOrWhiteSpace(Model.ExistingImagePath))
+            {
+                <div class="contact-image-preview">
+                    <img src="@Model.ExistingImagePath" class="img-fluid rounded" alt="Contact image" />
+                </div>
+            }
+            else
+            {
+                <div class="contact-image-preview text-muted small">
+                    No image uploaded.
+                </div>
+            }
+        </section>
+    </aside>
 </div>

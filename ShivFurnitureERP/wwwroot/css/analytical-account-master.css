@@ -310,6 +310,111 @@
   color: var(--account-success);
 }
 
+.account-form {
+  border: 2px dashed var(--account-border);
+  border-radius: 22px;
+  padding: 1.75rem;
+  background: var(--account-soft);
+}
+
+.account-validation {
+  font-weight: 600;
+  color: #c23152;
+  margin-bottom: 1rem;
+}
+
+.account-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.4rem;
+}
+
+.account-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.account-field-full {
+  grid-column: 1 / -1;
+}
+
+.account-field label {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  color: var(--account-primary);
+  font-weight: 700;
+  margin-bottom: 0.45rem;
+}
+
+.account-field input,
+.account-field textarea,
+.account-field select {
+  border: none;
+  border-bottom: 2px solid var(--account-border);
+  border-radius: 0;
+  background: transparent;
+  padding: 0.35rem 0;
+  font-weight: 600;
+  color: var(--account-ink);
+}
+
+.account-field textarea {
+  min-height: 120px;
+}
+
+.account-field input:focus,
+.account-field textarea:focus,
+.account-field select:focus {
+  outline: none;
+  box-shadow: none;
+  border-color: var(--account-primary);
+}
+
+.account-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 600;
+  color: var(--account-ink);
+}
+
+.account-meta-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--account-muted);
+}
+
+.account-meta-value {
+  font-weight: 700;
+  color: var(--account-ink);
+}
+
+.account-form-actions {
+  margin-top: 1.75rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.account-form-actions a,
+.account-form-actions button {
+  border-radius: 999px;
+  padding: 0.45rem 1.6rem;
+  font-weight: 600;
+  border: 1px solid var(--account-border);
+  background: #fff;
+  color: var(--account-ink);
+}
+
+.account-form-actions button[type="submit"] {
+  background: var(--account-accent);
+  border-color: var(--account-accent);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(122, 61, 131, 0.3);
+}
+
 @media (max-width: 767px) {
   .account-sheet {
     padding: 1.5rem;

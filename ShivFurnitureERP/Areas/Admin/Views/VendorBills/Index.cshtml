@@ -1,114 +1,127 @@
 @model IReadOnlyList<ShivFurnitureERP.ViewModels.VendorBills.VendorBillListItemViewModel>
+@using ShivFurnitureERP.Models
 @{
     ViewData["Title"] = "Vendor Bills";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
     var search = ViewData["Search"]?.ToString();
     var statusValue = ViewData["Status"]?.ToString();
     var paymentStatusValue = ViewData["PaymentStatus"]?.ToString();
+    var recordCount = Model.Count;
 }
 
-<section class="py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-        <div>
-            <h2 class="mb-0">Vendor Bills</h2>
-            <p class="text-muted mb-0">Track vendor commitments, payment progress, and outstanding balances.</p>
+@section Styles {
+    <link rel="stylesheet" href="~/css/vendor-bills.css" asp-append-version="true" />
+}
+
+<div class="vendor-bill-page">
+    <div class="container-fluid">
+        <div class="vendor-bill-hero">
+            <div>
+                <p class="eyebrow">Bill Master</p>
+                <h1>Vendor Bills</h1>
+                <p>Track vendor commitments, monitor payments, and keep outstanding balances under control.</p>
+            </div>
+            <div class="vendor-bill-actions">
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Home</a>
+                <a asp-area="Admin" asp-controller="VendorBills" asp-action="Create" class="btn-primary-pill">+ New Bill</a>
+            </div>
         </div>
-    </div>
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label for="search" class="form-label">Search</label>
-                    <input type="text" class="form-control" id="search" name="search" value="@search" placeholder="Bill number or vendor" />
+
+        <div class="vendor-bill-sheet">
+            <div class="vendor-bill-pill-row">
+                <div class="vendor-bill-pill">Active payables</div>
+                <div class="vendor-bill-note">@recordCount record@(recordCount == 1 ? string.Empty : "s") visible</div>
+            </div>
+
+            <form method="get" class="vendor-bill-filter-grid">
+                <div class="vendor-bill-field">
+                    <label for="search">Search</label>
+                    <input type="text" id="search" name="search" value="@search" placeholder="Bill number or vendor" />
                 </div>
-                <div class="col-md-3">
-                    <label for="status" class="form-label">Status</label>
-                    <select id="status" name="status" class="form-select">
+                <div class="vendor-bill-field">
+                    <label for="status">Status</label>
+                    <select id="status" name="status">
                         <option value="">All</option>
-                        @foreach (var value in Enum.GetValues<ShivFurnitureERP.Models.VendorBillStatus>())
+                        @foreach (var value in Enum.GetValues<VendorBillStatus>())
                         {
                             var isSelected = string.Equals(statusValue, value.ToString(), StringComparison.OrdinalIgnoreCase);
                             <option value="@value" selected="@(isSelected ? "selected" : null)">@value</option>
                         }
                     </select>
                 </div>
-                <div class="col-md-3">
-                    <label for="paymentStatus" class="form-label">Payment Status</label>
-                    <select id="paymentStatus" name="paymentStatus" class="form-select">
+                <div class="vendor-bill-field">
+                    <label for="paymentStatus">Payment Status</label>
+                    <select id="paymentStatus" name="paymentStatus">
                         <option value="">All</option>
-                        @foreach (var value in Enum.GetValues<ShivFurnitureERP.Models.VendorBillPaymentStatus>())
+                        @foreach (var value in Enum.GetValues<VendorBillPaymentStatus>())
                         {
                             var isSelected = string.Equals(paymentStatusValue, value.ToString(), StringComparison.OrdinalIgnoreCase);
                             <option value="@value" selected="@(isSelected ? "selected" : null)">@value</option>
                         }
                     </select>
                 </div>
-                <div class="col-md-2 text-end">
-                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                <div class="vendor-bill-filter-actions">
+                    <button type="submit">Filter</button>
+                    <a asp-action="Index">Reset</a>
                 </div>
             </form>
-        </div>
-    </div>
-    <div class="card shadow-sm">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-striped align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Bill</th>
-                            <th>Vendor</th>
-                            <th>Bill Date</th>
-                            <th>Due Date</th>
-                            <th class="text-end">Total</th>
-                            <th class="text-end">Paid</th>
-                            <th class="text-end">Amount Due</th>
-                            <th>Status</th>
-                            <th>Payment</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (!Model.Any())
-                        {
+
+            @if (!Model.Any())
+            {
+                <div class="vendor-bill-empty">No vendor bills found.</div>
+            }
+            else
+            {
+                <div class="vendor-bill-table-wrapper">
+                    <table class="vendor-bill-table">
+                        <thead>
                             <tr>
-                                <td colspan="10" class="text-center py-4 text-muted">No vendor bills found.</td>
+                                <th>Bill</th>
+                                <th>Vendor</th>
+                                <th>Bill Date</th>
+                                <th>Due Date</th>
+                                <th class="text-end">Total</th>
+                                <th class="text-end">Paid</th>
+                                <th class="text-end">Amount Due</th>
+                                <th>Status</th>
+                                <th>Payment</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var bill in Model)
+                        {
+                            var statusClass = bill.Status switch
+                            {
+                                VendorBillStatus.Confirmed => "vendor-status-pill is-confirmed",
+                                VendorBillStatus.Cancelled => "vendor-status-pill is-cancelled",
+                                _ => "vendor-status-pill is-draft"
+                            };
+                            var paymentClass = bill.PaymentStatus switch
+                            {
+                                VendorBillPaymentStatus.Paid => "vendor-payment-pill is-paid",
+                                VendorBillPaymentStatus.Partial => "vendor-payment-pill is-partial",
+                                _ => "vendor-payment-pill is-open"
+                            };
+                            <tr>
+                                <td class="fw-semibold">@bill.BillNumber</td>
+                                <td>@bill.VendorName</td>
+                                <td>@bill.BillDate.ToString("dd MMM yy")</td>
+                                <td>@bill.DueDate.ToString("dd MMM yy")</td>
+                                <td class="text-end">@bill.TotalAmount.ToString("N2")</td>
+                                <td class="text-end">@bill.AmountPaid.ToString("N2")</td>
+                                <td class="text-end">@bill.AmountDue.ToString("N2")</td>
+                                <td><span class="@statusClass">@bill.Status</span></td>
+                                <td><span class="@paymentClass">@bill.PaymentStatus</span></td>
+                                <td class="vendor-row-actions text-end">
+                                    <a asp-area="Admin" asp-controller="VendorBills" asp-action="Edit" asp-route-id="@bill.VendorBillId">Open</a>
+                                </td>
                             </tr>
                         }
-                        else
-                        {
-                            foreach (var bill in Model)
-                            {
-                                var statusBadge = bill.Status switch
-                                {
-                                    ShivFurnitureERP.Models.VendorBillStatus.Confirmed => "text-bg-success",
-                                    ShivFurnitureERP.Models.VendorBillStatus.Cancelled => "text-bg-secondary",
-                                    _ => "text-bg-warning"
-                                };
-                                var paymentBadge = bill.PaymentStatus switch
-                                {
-                                    ShivFurnitureERP.Models.VendorBillPaymentStatus.Paid => "text-bg-success",
-                                    ShivFurnitureERP.Models.VendorBillPaymentStatus.Partial => "text-bg-warning",
-                                    _ => "text-bg-secondary"
-                                };
-                                <tr>
-                                    <td class="fw-semibold">@bill.BillNumber</td>
-                                    <td>@bill.VendorName</td>
-                                    <td>@bill.BillDate.ToString("d")</td>
-                                    <td>@bill.DueDate.ToString("d")</td>
-                                    <td class="text-end">@bill.TotalAmount.ToString("C")</td>
-                                    <td class="text-end">@bill.AmountPaid.ToString("C")</td>
-                                    <td class="text-end">@bill.AmountDue.ToString("C")</td>
-                                    <td><span class="badge @statusBadge">@bill.Status</span></td>
-                                    <td><span class="badge @paymentBadge">@bill.PaymentStatus</span></td>
-                                    <td class="text-end">
-                                        <a asp-area="Admin" asp-controller="VendorBills" asp-action="Edit" asp-route-id="@bill.VendorBillId" class="btn btn-sm btn-outline-primary">Open</a>
-                                    </td>
-                                </tr>
-                            }
-                        }
-                    </tbody>
-                </table>
-            </div>
+                        </tbody>
+                    </table>
+                </div>
+            }
         </div>
     </div>
-</section>
+</div>

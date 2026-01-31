@@ -1,29 +1,24 @@
 @model ShivFurnitureERP.ViewModels.AnalyticalAccounts.AnalyticalAccountFormViewModel
 
-<div class="card shadow-sm">
-    <div class="card-body">
-        <h5 class="card-title">Analytical Account Details</h5>
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label asp-for="Name" class="form-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-            <div class="col-md-6">
-                <div class="form-check mt-4 pt-2">
-                    <input asp-for="IsArchived" class="form-check-input" />
-                    <label asp-for="IsArchived" class="form-check-label"></label>
-                </div>
-            </div>
-            <div class="col-12">
-                <label asp-for="Description" class="form-label"></label>
-                <textarea asp-for="Description" class="form-control" rows="3" placeholder="Optional notes for sales/purchase allocation"></textarea>
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            <div class="col-md-6 text-end">
-                <label class="form-label d-block">Created On</label>
-                <span class="fw-semibold">@Model.CreatedOn.ToString("dd MMM yyyy HH:mm")</span>
-            </div>
-        </div>
+<div class="account-form-grid">
+    <div class="account-field account-field-full">
+        <label asp-for="Name"></label>
+        <input asp-for="Name" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="account-field account-field-full">
+        <label asp-for="Description"></label>
+        <textarea asp-for="Description" placeholder="Optional notes for sales/purchase allocation"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+    <div class="account-field">
+        <label class="account-checkbox">
+            <input asp-for="IsArchived" />
+            <span>@Html.DisplayNameFor(m => m.IsArchived)</span>
+        </label>
+    </div>
+    <div class="account-field">
+        <span class="account-meta-label">Created On</span>
+        <span class="account-meta-value">@Model.CreatedOn.ToString("dd MMM yyyy HH:mm")</span>
     </div>
 </div>

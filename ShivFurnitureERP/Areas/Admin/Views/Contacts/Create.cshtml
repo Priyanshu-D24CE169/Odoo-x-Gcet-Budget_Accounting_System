@@ -4,24 +4,49 @@
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<section class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-semibold mb-0">Add Contact</h2>
-            <p class="text-muted mb-0">Create a new customer or vendor entry.</p>
-        </div>
-        <a asp-area="Admin" asp-controller="Contacts" asp-action="Index" class="btn btn-outline-secondary">Back to list</a>
-    </div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/contact-master.css" asp-append-version="true" />
+}
 
-    <form asp-area="Admin" asp-controller="Contacts" asp-action="Create" method="post" enctype="multipart/form-data">
-        @Html.AntiForgeryToken()
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        <partial name="_Form" model="Model" />
-        <div class="mt-4 text-end">
-            <button type="submit" class="btn btn-primary px-4">Save Contact</button>
+<div class="contact-master-page">
+    <div class="container-fluid">
+        <div class="contact-hero">
+            <div>
+                <p class="eyebrow">Contact Master</p>
+                <h1>Add Contact</h1>
+                <p>Create a new customer or vendor profile complete with address, tags, and profile image.</p>
+            </div>
+            <div class="contact-hero-actions">
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Home</a>
+                <a asp-area="Admin" asp-controller="Contacts" asp-action="Index" class="contact-add-btn">Directory</a>
+            </div>
         </div>
-    </form>
-</section>
+
+        <div class="contact-sheet">
+            <div class="master-action-bar">
+                <a asp-action="Create" class="master-action-btn is-primary">New</a>
+                <a asp-action="Index" class="master-action-btn">Directory</a>
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="master-action-btn">Home</a>
+                <a href="javascript:history.back()" class="master-action-btn">Back</a>
+            </div>
+
+            <div class="contact-pill-row">
+                <div class="contact-pill">New profile</div>
+                <div class="contact-note">Capture rich contact details, add tags, and control portal access from one place.</div>
+            </div>
+
+            <form asp-area="Admin" asp-controller="Contacts" asp-action="Create" method="post" enctype="multipart/form-data" class="contact-form" novalidate>
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="contact-validation"></div>
+                <partial name="_Form" model="Model" />
+                <div class="contact-form-actions">
+                    <a asp-area="Admin" asp-controller="Contacts" asp-action="Index">Cancel</a>
+                    <button type="submit">Save Contact</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

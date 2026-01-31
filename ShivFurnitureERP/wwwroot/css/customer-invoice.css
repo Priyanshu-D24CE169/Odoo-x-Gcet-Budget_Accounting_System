@@ -60,6 +60,9 @@
   color: var(--ci-ink);
   background: #fff;
   text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .customer-invoice-actions .btn-ghost-pill:hover {
@@ -75,6 +78,10 @@
   color: #fff;
   background: linear-gradient(90deg, var(--ci-primary), var(--ci-deep));
   box-shadow: 0 10px 20px rgba(165, 68, 131, 0.35);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .customer-invoice-sheet {
@@ -105,6 +112,134 @@
 
 .customer-invoice-note {
   color: var(--ci-muted);
+}
+
+.invoice-filter-grid {
+  border: 2px dashed var(--ci-border);
+  border-radius: 20px;
+  padding: 1.5rem;
+  background: var(--ci-accent);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+.invoice-filter-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.invoice-filter-field label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: var(--ci-primary);
+  margin-bottom: 0.35rem;
+}
+
+.invoice-filter-field input,
+.invoice-filter-field select {
+  border: none;
+  border-bottom: 2px solid var(--ci-border);
+  border-radius: 0;
+  background: transparent;
+  font-weight: 600;
+  color: var(--ci-ink);
+  padding: 0.35rem 0;
+}
+
+.invoice-filter-field input:focus,
+.invoice-filter-field select:focus {
+  outline: none;
+  box-shadow: none;
+  border-color: var(--ci-primary);
+}
+
+.invoice-filter-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+.invoice-filter-actions button,
+.invoice-filter-actions a {
+  border-radius: 999px;
+  padding: 0.45rem 1.5rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid var(--ci-primary);
+  color: var(--ci-primary);
+  background: #fff;
+}
+
+.invoice-filter-actions button {
+  background: linear-gradient(90deg, var(--ci-primary), var(--ci-deep));
+  color: #fff;
+  border: none;
+}
+
+.invoice-table-wrapper {
+  border: 2px dashed var(--ci-border);
+  border-radius: 22px;
+  padding: 1.25rem;
+}
+
+.invoice-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.invoice-table thead th {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  color: var(--ci-primary);
+  background: #f7edf5;
+  padding: 0.65rem 0.5rem;
+  border-bottom: 2px solid var(--ci-border);
+}
+
+.invoice-table tbody tr {
+  border-bottom: 1px dashed var(--ci-border);
+}
+
+.invoice-table td {
+  padding: 0.8rem 0.5rem;
+  vertical-align: middle;
+}
+
+.invoice-status-pill,
+.invoice-payment-pill {
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 0.15rem 0.7rem;
+  border: 1px solid var(--ci-border);
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: #fff;
+  color: var(--ci-ink);
+}
+
+.invoice-action-link {
+  border-radius: 10px;
+  border: 1px solid rgba(165, 68, 131, 0.3);
+  padding: 0.3rem 1rem;
+  font-size: 0.85rem;
+  text-decoration: none;
+  color: var(--ci-primary);
+}
+
+.invoice-empty {
+  text-align: center;
+  padding: 2rem 0;
+  color: var(--ci-muted);
+  font-weight: 600;
+  border: 2px dashed var(--ci-border);
+  border-radius: 18px;
 }
 
 .invoice-meta-grid {

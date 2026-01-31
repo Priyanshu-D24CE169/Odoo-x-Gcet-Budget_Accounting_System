@@ -315,6 +315,107 @@
   color: var(--product-success);
 }
 
+.product-form {
+  border: 2px dashed var(--product-border);
+  border-radius: 22px;
+  padding: 1.75rem;
+  background: var(--product-soft);
+}
+
+.product-validation {
+  font-weight: 600;
+  color: #c23152;
+  margin-bottom: 1rem;
+}
+
+.product-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.4rem;
+}
+
+.product-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.product-field-full {
+  grid-column: 1 / -1;
+}
+
+.product-field label {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  color: var(--product-primary);
+  font-weight: 700;
+  margin-bottom: 0.45rem;
+}
+
+.product-field input,
+.product-field select,
+.product-field textarea {
+  border: none;
+  border-bottom: 2px solid var(--product-border);
+  border-radius: 0;
+  background: transparent;
+  padding: 0.35rem 0;
+  font-weight: 600;
+  color: var(--product-ink);
+}
+
+.product-field input:focus,
+.product-field select:focus,
+.product-field textarea:focus {
+  outline: none;
+  box-shadow: none;
+  border-color: var(--product-primary);
+}
+
+.product-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 600;
+  color: var(--product-ink);
+}
+
+.product-meta-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--product-muted);
+}
+
+.product-meta-value {
+  font-weight: 700;
+  color: var(--product-ink);
+}
+
+.product-form-actions {
+  margin-top: 1.75rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.product-form-actions a,
+.product-form-actions button {
+  border-radius: 999px;
+  padding: 0.45rem 1.6rem;
+  font-weight: 600;
+  border: 1px solid var(--product-border);
+  background: #fff;
+  color: var(--product-ink);
+}
+
+.product-form-actions button[type="submit"] {
+  background: var(--product-accent);
+  border-color: var(--product-accent);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(122, 61, 131, 0.3);
+}
+
 @media (max-width: 767px) {
   .product-sheet {
     padding: 1.5rem;

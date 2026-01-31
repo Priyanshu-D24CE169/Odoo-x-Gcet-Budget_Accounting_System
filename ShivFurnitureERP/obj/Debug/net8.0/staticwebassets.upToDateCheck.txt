@@ -1,4 +1,12 @@
+wwwroot\css\analytical-budget-master.css
+wwwroot\css\auto-analytical-model.css
+wwwroot\css\bill-payments.css
+wwwroot\css\customer-invoice.css
+wwwroot\css\purchase-orders.css
+wwwroot\css\sales-orders.css
 wwwroot\css\site.css
+wwwroot\css\user-master.css
+wwwroot\css\vendor-bills.css
 wwwroot\favicon.ico
 wwwroot\js\site.js
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
@@ -61,11 +69,6 @@ wwwroot\lib\jquery\dist\jquery.slim.js
 wwwroot\lib\jquery\dist\jquery.slim.min.js
 wwwroot\lib\jquery\dist\jquery.slim.min.map
 wwwroot\lib\jquery\LICENSE.txt
-wwwroot\css\sales-orders.css
-wwwroot\css\contact-master.css
-wwwroot\css\customer-invoice.css
 wwwroot\css\analytical-account-master.css
+wwwroot\css\contact-master.css
 wwwroot\css\product-master.css
-wwwroot\css\bill-payments.css
-wwwroot\css\auto-analytical-model.css
-wwwroot\css\analytical-budget-master.css

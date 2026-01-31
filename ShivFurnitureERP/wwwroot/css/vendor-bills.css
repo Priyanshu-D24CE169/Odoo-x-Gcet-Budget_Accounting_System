@@ -1,0 +1,297 @@
+:root {
+  --vb-ink: #5b3150;
+  --vb-primary: #a54483;
+  --vb-deep: #6f3c8a;
+  --vb-paper: #fdf8f4;
+  --vb-border: #e3cfd8;
+  --vb-muted: #a18b95;
+  --vb-soft: #fff8f4;
+}
+
+.vendor-bill-page {
+  background: linear-gradient(180deg, #fff 0%, var(--vb-paper) 65%);
+  padding: 2.25rem 0 4rem;
+  color: var(--vb-ink);
+}
+
+.vendor-bill-page .container-fluid {
+  max-width: 1180px;
+}
+
+.vendor-bill-hero {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.vendor-bill-hero .eyebrow {
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--vb-primary);
+  margin-bottom: 0.35rem;
+}
+
+.vendor-bill-hero h1 {
+  font-size: 2.3rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.4rem;
+}
+
+.vendor-bill-hero p {
+  margin: 0;
+  color: var(--vb-muted);
+}
+
+.vendor-bill-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.vendor-bill-actions a {
+  border: 1px solid var(--vb-border);
+  border-radius: 999px;
+  padding: 0.45rem 1.5rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--vb-ink);
+  background: #fff;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.08);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vendor-bill-actions .btn-primary-pill {
+  border: none;
+  color: #fff;
+  background: linear-gradient(90deg, var(--vb-primary), var(--vb-deep));
+  box-shadow: 0 10px 22px rgba(165, 68, 131, 0.35);
+  text-decoration: none;
+}
+
+.vendor-bill-sheet {
+  background: #fff;
+  border: 2px solid var(--vb-border);
+  border-radius: 28px;
+  padding: 2rem;
+  box-shadow: 0 16px 40px rgba(91, 49, 80, 0.08);
+}
+
+.vendor-bill-pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.vendor-bill-pill {
+  background: var(--vb-deep);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.25rem 1.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+
+.vendor-bill-note {
+  color: var(--vb-muted);
+}
+
+.vendor-bill-filter-grid {
+  border: 2px dashed var(--vb-border);
+  border-radius: 22px;
+  padding: 1.5rem;
+  background: var(--vb-soft);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+.vendor-bill-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.vendor-bill-field label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: var(--vb-primary);
+  margin-bottom: 0.35rem;
+}
+
+.vendor-bill-field input,
+.vendor-bill-field select {
+  border: none;
+  border-bottom: 2px solid var(--vb-border);
+  border-radius: 0;
+  padding: 0.35rem 0;
+  background: transparent;
+  font-weight: 600;
+  color: var(--vb-ink);
+}
+
+.vendor-bill-field input:focus,
+.vendor-bill-field select:focus {
+  outline: none;
+  box-shadow: none;
+  border-color: var(--vb-primary);
+}
+
+.vendor-bill-filter-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+.vendor-bill-filter-actions button,
+.vendor-bill-filter-actions a {
+  border-radius: 999px;
+  padding: 0.45rem 1.6rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.vendor-bill-filter-actions button {
+  border: none;
+  background: linear-gradient(90deg, var(--vb-primary), var(--vb-deep));
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(165, 68, 131, 0.28);
+}
+
+.vendor-bill-filter-actions a {
+  border: 1px solid var(--vb-border);
+  color: var(--vb-ink);
+  background: #fff;
+}
+
+.vendor-bill-table-wrapper {
+  border: 2px dashed var(--vb-border);
+  border-radius: 22px;
+  padding: 1.25rem;
+}
+
+.vendor-bill-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.vendor-bill-table thead th {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  color: var(--vb-primary);
+  background: #f7edf5;
+  padding: 0.65rem 0.5rem;
+  border-bottom: 2px solid var(--vb-border);
+}
+
+.vendor-bill-table tbody tr {
+  border-bottom: 1px dashed var(--vb-border);
+}
+
+.vendor-bill-table td {
+  padding: 0.8rem 0.5rem;
+  vertical-align: middle;
+}
+
+.vendor-status-pill,
+.vendor-payment-pill {
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 0.15rem 0.75rem;
+  border: 1px solid var(--vb-border);
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: #fff;
+  color: var(--vb-ink);
+}
+
+.vendor-status-pill.is-confirmed {
+  background: rgba(101, 177, 140, 0.2);
+  border-color: rgba(101, 177, 140, 0.5);
+  color: #1f7e54;
+}
+
+.vendor-status-pill.is-cancelled {
+  background: rgba(161, 139, 149, 0.2);
+  border-color: rgba(161, 139, 149, 0.5);
+  color: var(--vb-muted);
+}
+
+.vendor-status-pill.is-draft {
+  background: rgba(255, 193, 7, 0.2);
+  border-color: rgba(255, 193, 7, 0.4);
+  color: #856404;
+}
+
+.vendor-payment-pill.is-paid {
+  background: rgba(101, 177, 140, 0.2);
+  border-color: rgba(101, 177, 140, 0.5);
+  color: #1f7e54;
+}
+
+.vendor-payment-pill.is-partial {
+  background: rgba(249, 115, 22, 0.2);
+  border-color: rgba(249, 115, 22, 0.4);
+  color: #b45309;
+}
+
+.vendor-payment-pill.is-open {
+  background: rgba(161, 139, 149, 0.2);
+  border-color: rgba(161, 139, 149, 0.4);
+  color: var(--vb-muted);
+}
+
+.vendor-row-actions a {
+  border-radius: 10px;
+  border: 1px solid rgba(165, 68, 131, 0.3);
+  padding: 0.3rem 1rem;
+  font-size: 0.85rem;
+  text-decoration: none;
+  color: var(--vb-primary);
+}
+
+.vendor-bill-empty {
+  text-align: center;
+  padding: 2rem 0;
+  color: var(--vb-muted);
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .vendor-bill-sheet {
+    padding: 1.5rem;
+  }
+
+  .vendor-bill-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vendor-bill-table thead {
+    display: none;
+  }
+
+  .vendor-bill-table tbody tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .vendor-bill-table td.vendor-row-actions {
+    grid-column: 1 / -1;
+    text-align: right;
+  }
+}

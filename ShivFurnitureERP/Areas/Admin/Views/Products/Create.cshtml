@@ -4,24 +4,49 @@
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<section class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-semibold mb-0">Add Product</h2>
-            <p class="text-muted mb-0">Capture product costing for sales, purchases, and budgets.</p>
-        </div>
-        <a asp-area="Admin" asp-controller="Products" asp-action="Index" class="btn btn-outline-secondary">Back to list</a>
-    </div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/product-master.css" asp-append-version="true" />
+}
 
-    <form asp-area="Admin" asp-controller="Products" asp-action="Create" method="post">
-        @Html.AntiForgeryToken()
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        <partial name="_Form" model="Model" />
-        <div class="mt-4 text-end">
-            <button type="submit" class="btn btn-primary px-4">Save Product</button>
+<div class="product-master-page">
+    <div class="container-fluid">
+        <div class="product-hero">
+            <div class="product-hero-text">
+                <p class="product-eyebrow">Product Master</p>
+                <h1>Add Product</h1>
+                <p>Capture costing for sales, purchase, and budgeting with the same polished pastel workspace.</p>
+            </div>
+            <div class="product-hero-actions">
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="product-chip-btn">Home</a>
+                <a asp-area="Admin" asp-controller="Products" asp-action="Index" class="product-add-btn">Catalog</a>
+            </div>
         </div>
-    </form>
-</section>
+
+        <div class="product-sheet">
+            <div class="master-action-bar">
+                <a asp-action="Create" class="master-action-btn is-primary">New</a>
+                <a asp-action="Index" class="master-action-btn">Directory</a>
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="master-action-btn">Home</a>
+                <a href="javascript:history.back()" class="master-action-btn">Back</a>
+            </div>
+
+            <div class="product-pill-row">
+                <div class="product-pill">New item</div>
+                <div class="product-note">Set prices, categories, and archival state before the SKU joins transactions.</div>
+            </div>
+
+            <form asp-area="Admin" asp-controller="Products" asp-action="Create" method="post" class="product-form" novalidate>
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="product-validation"></div>
+                <partial name="_Form" model="Model" />
+                <div class="product-form-actions">
+                    <a asp-area="Admin" asp-controller="Products" asp-action="Index">Cancel</a>
+                    <button type="submit">Save Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
