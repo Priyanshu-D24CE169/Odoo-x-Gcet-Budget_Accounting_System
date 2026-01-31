@@ -75,6 +75,8 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IAnalyticalAccountService, AnalyticalAccountService>();
 builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
 builder.Services.AddScoped<IEmailNotificationService, GmailEmailNotificationService>();
+builder.Services.Configure<RazorpayOptions>(builder.Configuration.GetSection("Razorpay"));
+builder.Services.AddScoped<RazorpayPaymentService>();
 builder.Services.AddScoped<IAnalyticalRuleEngine, AnalyticalRuleEngine>();
 builder.Services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
 builder.Services.AddScoped<IBudgetWarningService, BudgetWarningService>();
@@ -82,6 +84,7 @@ builder.Services.AddScoped<IVendorBillService, VendorBillService>();
 builder.Services.AddScoped<IBillPaymentService, BillPaymentService>();
 builder.Services.AddScoped<ISalesOrderService, SalesOrderService>();
 builder.Services.AddScoped<ICustomerInvoiceService, CustomerInvoiceService>();
+builder.Services.AddScoped<IInvoicePdfService, InvoicePdfService>();
 builder.Services.AddSingleton<IPaymentGatewaySimulator, PaymentGatewaySimulator>();
 builder.Services.AddScoped<IAnalyticalBudgetService, AnalyticalBudgetService>();
 

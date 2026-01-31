@@ -14,6 +14,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="QuestPDF" Version="2025.12.3" />
+    <PackageReference Include="Razorpay" Version="3.3.2" />
   </ItemGroup>
 
 </Project>

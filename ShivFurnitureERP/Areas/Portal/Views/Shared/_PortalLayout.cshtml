@@ -27,6 +27,12 @@
                     <li class="nav-item">
                         <a class="nav-link" asp-area="Portal" asp-controller="CustomerInvoices" asp-action="Index">Invoices</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="Portal" asp-controller="SalesOrders" asp-action="Index">Sales Orders</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="Portal" asp-controller="PurchaseOrders" asp-action="Index">Purchase Orders</a>
+                    </li>
                 </ul>
                 @if (User.Identity?.IsAuthenticated == true)
                 {

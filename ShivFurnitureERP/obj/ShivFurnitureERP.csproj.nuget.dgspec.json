@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Priya\\source\\repos\\Shiv-Furniture\\ShivFurnitureERP\\ShivFurnitureERP.csproj": {}
+    "A:\\Projects\\odoofinal\\ShivFurnitureERP\\ShivFurnitureERP.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Priya\\source\\repos\\Shiv-Furniture\\ShivFurnitureERP\\ShivFurnitureERP.csproj": {
+    "A:\\Projects\\odoofinal\\ShivFurnitureERP\\ShivFurnitureERP.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Priya\\source\\repos\\Shiv-Furniture\\ShivFurnitureERP\\ShivFurnitureERP.csproj",
+        "projectUniqueName": "A:\\Projects\\odoofinal\\ShivFurnitureERP\\ShivFurnitureERP.csproj",
         "projectName": "ShivFurnitureERP",
-        "projectPath": "C:\\Users\\Priya\\source\\repos\\Shiv-Furniture\\ShivFurnitureERP\\ShivFurnitureERP.csproj",
-        "packagesPath": "C:\\Users\\Priya\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Priya\\source\\repos\\Shiv-Furniture\\ShivFurnitureERP\\obj\\",
+        "projectPath": "A:\\Projects\\odoofinal\\ShivFurnitureERP\\ShivFurnitureERP.csproj",
+        "packagesPath": "C:\\Users\\Samarth\\.nuget\\packages\\",
+        "outputPath": "A:\\Projects\\odoofinal\\ShivFurnitureERP\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\Priya\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Samarth\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -26,6 +26,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -63,6 +64,14 @@
               "suppressParent": "All",
               "target": "Package",
               "version": "[8.0.1, )"
+            },
+            "QuestPDF": {
+              "target": "Package",
+              "version": "[2025.12.3, )"
+            },
+            "Razorpay": {
+              "target": "Package",
+              "version": "[3.3.2, )"
             }
           },
           "imports": [

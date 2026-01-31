@@ -8,6 +8,8 @@ using ShivFurnitureERP.Services;
 using ShivFurnitureERP.ViewModels.CustomerInvoices;
 using ShivFurnitureERP.ViewModels.Payments;
 using ShivFurnitureERP.ViewModels.PortalInvoices;
+using Microsoft.Extensions.Options;
+using ShivFurnitureERP.Options;
 
 namespace ShivFurnitureERP.Areas.Portal.Controllers;
 
@@ -17,19 +19,28 @@ public class CustomerInvoicesController : Controller
 {
     private readonly ICustomerInvoiceService _invoiceService;
     private readonly IPaymentGatewaySimulator _paymentGateway;
+    private readonly RazorpayPaymentService _razorpayService;
+    private readonly IInvoicePdfService _pdfService;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly ILogger<CustomerInvoicesController> _logger;
+    private readonly bool _useRazorpay;
 
     public CustomerInvoicesController(
         ICustomerInvoiceService invoiceService,
         IPaymentGatewaySimulator paymentGateway,
+        RazorpayPaymentService razorpayService,
+        IInvoicePdfService pdfService,
         UserManager<ApplicationUser> userManager,
-        ILogger<CustomerInvoicesController> logger)
+        ILogger<CustomerInvoicesController> logger,
+        IOptions<RazorpayOptions> razorpayOptions)
     {
         _invoiceService = invoiceService;
         _paymentGateway = paymentGateway;
+        _razorpayService = razorpayService;
+        _pdfService = pdfService;
         _userManager = userManager;
         _logger = logger;
+        _useRazorpay = !string.IsNullOrWhiteSpace(razorpayOptions.Value.KeyId);
     }
 
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
@@ -72,7 +83,131 @@ public class CustomerInvoicesController : Controller
         }
 
         var model = MapToDetailsViewModel(invoice);
+        ViewBag.UseRazorpay = _useRazorpay;
         return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateRazorpayOrder(int invoiceId, decimal amount, CancellationToken cancellationToken)
+    {
+        var contactId = await GetContactIdAsync();
+        if (contactId is null)
+        {
+            return Json(new { success = false, message = "User not authenticated" });
+        }
+
+        var invoice = await _invoiceService.GetForCustomerAsync(invoiceId, contactId.Value, cancellationToken);
+        if (invoice is null)
+        {
+            return Json(new { success = false, message = "Invoice not found" });
+        }
+
+        if (invoice.PaymentStatus == CustomerInvoicePaymentStatus.Paid)
+        {
+            return Json(new { success = false, message = "Invoice already paid" });
+        }
+
+        var amountDue = Math.Max(0, invoice.TotalAmount - invoice.AmountPaid);
+        if (amount <= 0 || amount > amountDue)
+        {
+            return Json(new { success = false, message = "Invalid payment amount" });
+        }
+
+        var request = new PaymentGatewayRequest
+        {
+            InvoiceNumber = invoice.InvoiceNumber,
+            CustomerName = invoice.Customer?.Name ?? "Customer",
+            Amount = amount,
+            Mode = PaymentMode.Online
+        };
+
+        var orderResponse = await _razorpayService.CreateOrderAsync(request, cancellationToken);
+        if (!orderResponse.Success)
+        {
+            _logger.LogError("Failed to create Razorpay order for invoice {InvoiceId}: {Error}", invoiceId, orderResponse.ErrorMessage);
+            return Json(new { success = false, message = orderResponse.ErrorMessage });
+        }
+
+        return Json(new
+        {
+            success = true,
+            orderId = orderResponse.OrderId,
+            amount = (int)(orderResponse.Amount * 100), // Convert to paise
+            currency = orderResponse.Currency,
+            keyId = orderResponse.KeyId,
+            companyName = orderResponse.CompanyName,
+            companyLogo = orderResponse.CompanyLogo,
+            themeColor = orderResponse.ThemeColor,
+            invoiceNumber = orderResponse.InvoiceNumber,
+            customerName = orderResponse.CustomerName
+        });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> VerifyRazorpayPayment(
+        int invoiceId,
+        string razorpayOrderId,
+        string razorpayPaymentId,
+        string razorpaySignature,
+        decimal amount,
+        CancellationToken cancellationToken)
+    {
+        var contactId = await GetContactIdAsync();
+        if (contactId is null)
+        {
+            return Json(new { success = false, message = "User not authenticated" });
+        }
+
+        var invoice = await _invoiceService.GetForCustomerAsync(invoiceId, contactId.Value, cancellationToken);
+        if (invoice is null)
+        {
+            return Json(new { success = false, message = "Invoice not found" });
+        }
+
+        // Verify signature
+        var isValid = _razorpayService.VerifyPaymentSignature(razorpayOrderId, razorpayPaymentId, razorpaySignature);
+        if (!isValid)
+        {
+            _logger.LogWarning("Invalid Razorpay signature for invoice {InvoiceId}, payment {PaymentId}", invoiceId, razorpayPaymentId);
+            return Json(new { success = false, message = "Payment verification failed" });
+        }
+
+        // Fetch payment details
+        var paymentDetails = await _razorpayService.FetchPaymentDetailsAsync(razorpayPaymentId, cancellationToken);
+        if (!paymentDetails.Succeeded)
+        {
+            _logger.LogError("Razorpay payment {PaymentId} not successful for invoice {InvoiceId}", razorpayPaymentId, invoiceId);
+            return Json(new { success = false, message = "Payment not successful" });
+        }
+
+        // Record payment
+        try
+        {
+            await _invoiceService.RecordPaymentAsync(
+                invoice.CustomerInvoiceId,
+                DateTime.UtcNow.Date,
+                amount,
+                PaymentMode.Online,
+                $"Razorpay: {razorpayPaymentId}",
+                cancellationToken);
+
+            _logger.LogInformation("Razorpay payment {PaymentId} recorded for invoice {InvoiceNumber}, amount: {Amount}",
+                razorpayPaymentId, invoice.InvoiceNumber, amount);
+
+            return Json(new
+            {
+                success = true,
+                message = $"Payment successful! Transaction ID: {razorpayPaymentId}",
+                transactionId = razorpayPaymentId
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to record Razorpay payment {PaymentId} for invoice {InvoiceId}", razorpayPaymentId, invoiceId);
+            return Json(new { success = false, message = "Failed to record payment. Please contact support." });
+        }
     }
 
     [HttpPost]
@@ -143,6 +278,38 @@ public class CustomerInvoicesController : Controller
 
         TempData["StatusMessage"] = $"Payment successful. Reference: {gatewayResult.TransactionId}.";
         return RedirectToAction(nameof(Details), new { id = invoice.CustomerInvoiceId });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> DownloadPdf(int id, CancellationToken cancellationToken)
+    {
+        var contactId = await GetContactIdAsync();
+        if (contactId is null)
+        {
+            return NotFound();
+        }
+
+        var invoice = await _invoiceService.GetForCustomerAsync(id, contactId.Value, cancellationToken);
+        if (invoice is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            var pdfBytes = _pdfService.GenerateInvoicePdf(invoice);
+            var fileName = $"Invoice-{invoice.InvoiceNumber}.pdf";
+            
+            _logger.LogInformation("Generated PDF for invoice {InvoiceNumber}", invoice.InvoiceNumber);
+            
+            return File(pdfBytes, "application/pdf", fileName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to generate PDF for invoice {InvoiceId}", id);
+            TempData["ErrorMessage"] = "Failed to generate PDF. Please try again.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
     }
 
     private async Task<int?> GetContactIdAsync()

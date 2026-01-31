@@ -27,7 +27,7 @@ public class GmailEmailNotificationService : IEmailNotificationService
 
         if (string.IsNullOrWhiteSpace(_options.UserName) || string.IsNullOrWhiteSpace(_options.Password))
         {
-            _logger.LogWarning("SMTP credentials are missing. Configure Smtp:UserName and Smtp:Password settings.");
+            _logger.LogWarning("SMTP credentials are missing. Configure Smtp:UserName and Smtp:Password in appsettings.json.");
             return;
         }
 
@@ -53,13 +53,16 @@ public class GmailEmailNotificationService : IEmailNotificationService
 
         try
         {
-            await smtpClient.SendMailAsync(message);
+            await smtpClient.SendMailAsync(message, cancellationToken);
             _logger.LogInformation("Invite email successfully sent to {Email}.", email);
+        }
+        catch (SmtpException ex)
+        {
+            _logger.LogError(ex, "SMTP error sending invite email to {Email}. Host: {Host}, Port: {Port}, EnableSsl: {EnableSsl}", email, _options.Host, _options.Port, _options.EnableSsl);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to send invite email to {Email}.", email);
-            throw;
+            _logger.LogError(ex, "Unexpected error sending invite email to {Email}.", email);
         }
     }
 

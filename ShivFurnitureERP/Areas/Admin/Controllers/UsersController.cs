@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using ShivFurnitureERP.Data;
 using ShivFurnitureERP.Models;
 using ShivFurnitureERP.Services;
 using ShivFurnitureERP.ViewModels.AdminUsers;
@@ -24,17 +25,20 @@ public class UsersController : Controller
     private readonly IEmailNotificationService _emailNotificationService;
     private readonly IConfiguration _configuration;
     private readonly ILogger<UsersController> _logger;
+    private readonly ApplicationDbContext _dbContext;
 
     public UsersController(
         UserManager<ApplicationUser> userManager,
         IEmailNotificationService emailNotificationService,
         IConfiguration configuration,
-        ILogger<UsersController> logger)
+        ILogger<UsersController> logger,
+        ApplicationDbContext dbContext)
     {
         _userManager = userManager;
         _emailNotificationService = emailNotificationService;
         _configuration = configuration;
         _logger = logger;
+        _dbContext = dbContext;
     }
 
     [HttpGet]
@@ -129,10 +133,43 @@ public class UsersController : Controller
             return View(PrepareModel(model));
         }
 
-        var loginUrl = GetLoginUrl(selectedRole);
-        await _emailNotificationService.SendContactInviteAsync(user.Email!, user.LoginId, model.Password, loginUrl, cancellationToken);
+        if (selectedRole == "PortalUser")
+        {
+            var contact = new Contact
+            {
+                Name = user.FullName ?? user.LoginId,
+                Email = user.Email!,
+                Type = ContactType.Customer,
+                CreatedOn = DateTime.UtcNow,
+                IsArchived = false
+            };
 
-        TempData["SuccessMessage"] = $"User {user.LoginId} created successfully.";
+            _dbContext.Contacts.Add(contact);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            user.ContactId = contact.ContactId;
+            await _userManager.UpdateAsync(user);
+
+            _logger.LogInformation("Created Contact {ContactId} with Type=Customer for Portal user {LoginId}.", contact.ContactId, user.LoginId);
+        }
+
+        var loginUrl = GetLoginUrl(selectedRole);
+        try
+        {
+            await _emailNotificationService.SendContactInviteAsync(user.Email!, user.LoginId, model.Password, loginUrl, cancellationToken);
+            _logger.LogInformation("Invite email sent to {Email} for user {LoginId}.", user.Email, user.LoginId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send invite email to {Email} for user {LoginId}. User created successfully but email notification failed.", user.Email, user.LoginId);
+            TempData["WarningMessage"] = $"User {user.LoginId} created successfully, but email notification failed. Please contact the user manually.";
+        }
+
+        if (!TempData.ContainsKey("WarningMessage"))
+        {
+            TempData["SuccessMessage"] = $"User {user.LoginId} created successfully and invite email sent.";
+        }
+
         _logger.LogInformation("User {LoginId} created with role {Role}.", user.LoginId, selectedRole);
 
         return RedirectToAction(nameof(Create));

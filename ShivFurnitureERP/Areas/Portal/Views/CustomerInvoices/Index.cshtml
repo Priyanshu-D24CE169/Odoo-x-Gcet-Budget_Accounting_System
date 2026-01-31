@@ -50,7 +50,12 @@
                                 <td class="text-end text-success">@invoice.AmountPaid.ToString("N2")</td>
                                 <td class="text-end fw-semibold">@invoice.AmountDue.ToString("N2")</td>
                                 <td class="text-end">
-                                    <a asp-action="Details" asp-route-id="@invoice.CustomerInvoiceId" class="btn btn-sm btn-outline-primary">View</a>
+                                    <a asp-action="Details" asp-route-id="@invoice.CustomerInvoiceId" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                    <a asp-action="DownloadPdf" asp-route-id="@invoice.CustomerInvoiceId" class="btn btn-sm btn-success">
+                                        <i class="bi bi-file-pdf"></i> PDF
+                                    </a>
                                 </td>
                             </tr>
                         }
