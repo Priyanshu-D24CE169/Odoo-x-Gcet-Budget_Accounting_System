@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ShivFurnitureERP")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dc800feb77d06f39cece5bdba8bb200dab3212f0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+970de139a948340cd868f6ee0594b7b0b64c08f2")]
 [assembly: System.Reflection.AssemblyProductAttribute("ShivFurnitureERP")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ShivFurnitureERP")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -336,3 +336,16 @@ A:\Projects\odoofinal\ShivFurnitureERP\bin\Debug\net8.0\runtimes\win-x86\native\
 A:\Projects\odoofinal\ShivFurnitureERP\bin\Debug\net8.0\runtimes\win-x86\native\libwinpthread-1.dll
 A:\Projects\odoofinal\ShivFurnitureERP\bin\Debug\net8.0\runtimes\win-x86\native\qpdf.dll
 A:\Projects\odoofinal\ShivFurnitureERP\bin\Debug\net8.0\runtimes\win-x86\native\zlib1.dll
+C:\Users\Priya\OneDrive\Desktop\Odoo-x-Gcet-Budget_Accounting_System\ShivFurnitureERP\obj\Debug\net8.0\ShivFurnitureERP.csproj.AssemblyReference.cache
+C:\Users\Priya\OneDrive\Desktop\Odoo-x-Gcet-Budget_Accounting_System\ShivFurnitureERP\obj\Debug\net8.0\rpswa.dswa.cache.json
+C:\Users\Priya\OneDrive\Desktop\Odoo-x-Gcet-Budget_Accounting_System\ShivFurnitureERP\obj\Debug\net8.0\ShivFurnitureERP.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Priya\OneDrive\Desktop\Odoo-x-Gcet-Budget_Accounting_System\ShivFurnitureERP\obj\Debug\net8.0\ShivFurnitureERP.AssemblyInfoInputs.cache
+C:\Users\Priya\OneDrive\Desktop\Odoo-x-Gcet-Budget_Accounting_System\ShivFurnitureERP\obj\Debug\net8.0\ShivFurnitureERP.AssemblyInfo.cs
+C:\Users\Priya\OneDrive\Desktop\Odoo-x-Gcet-Budget_Accounting_System\ShivFurnitureERP\obj\Debug\net8.0\ShivFurnitureERP.csproj.CoreCompileInputs.cache
+C:\Users\Priya\OneDrive\Desktop\Odoo-x-Gcet-Budget_Accounting_System\ShivFurnitureERP\obj\Debug\net8.0\ShivFurnitureERP.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\Priya\OneDrive\Desktop\Odoo-x-Gcet-Budget_Accounting_System\ShivFurnitureERP\obj\Debug\net8.0\ShivFurnitureERP.RazorAssemblyInfo.cache
+C:\Users\Priya\OneDrive\Desktop\Odoo-x-Gcet-Budget_Accounting_System\ShivFurnitureERP\obj\Debug\net8.0\ShivFurnitureERP.RazorAssemblyInfo.cs
+C:\Users\Priya\OneDrive\Desktop\Odoo-x-Gcet-Budget_Accounting_System\ShivFurnitureERP\obj\Debug\net8.0\ShivFurnitureERP.sourcelink.json
+C:\Users\Priya\OneDrive\Desktop\Odoo-x-Gcet-Budget_Accounting_System\ShivFurnitureERP\obj\Debug\net8.0\ShivFurnitureERP.dll
+C:\Users\Priya\OneDrive\Desktop\Odoo-x-Gcet-Budget_Accounting_System\ShivFurnitureERP\obj\Debug\net8.0\refint\ShivFurnitureERP.dll
+C:\Users\Priya\OneDrive\Desktop\Odoo-x-Gcet-Budget_Accounting_System\ShivFurnitureERP\obj\Debug\net8.0\ShivFurnitureERP.pdb

@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "A:\\Projects\\odoofinal\\ShivFurnitureERP\\ShivFurnitureERP.csproj": {}
+    "C:\\Users\\Priya\\OneDrive\\Desktop\\Odoo-x-Gcet-Budget_Accounting_System\\ShivFurnitureERP\\ShivFurnitureERP.csproj": {}
   },
   "projects": {
-    "A:\\Projects\\odoofinal\\ShivFurnitureERP\\ShivFurnitureERP.csproj": {
+    "C:\\Users\\Priya\\OneDrive\\Desktop\\Odoo-x-Gcet-Budget_Accounting_System\\ShivFurnitureERP\\ShivFurnitureERP.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "A:\\Projects\\odoofinal\\ShivFurnitureERP\\ShivFurnitureERP.csproj",
+        "projectUniqueName": "C:\\Users\\Priya\\OneDrive\\Desktop\\Odoo-x-Gcet-Budget_Accounting_System\\ShivFurnitureERP\\ShivFurnitureERP.csproj",
         "projectName": "ShivFurnitureERP",
-        "projectPath": "A:\\Projects\\odoofinal\\ShivFurnitureERP\\ShivFurnitureERP.csproj",
-        "packagesPath": "C:\\Users\\Samarth\\.nuget\\packages\\",
-        "outputPath": "A:\\Projects\\odoofinal\\ShivFurnitureERP\\obj\\",
+        "projectPath": "C:\\Users\\Priya\\OneDrive\\Desktop\\Odoo-x-Gcet-Budget_Accounting_System\\ShivFurnitureERP\\ShivFurnitureERP.csproj",
+        "packagesPath": "C:\\Users\\Priya\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Priya\\OneDrive\\Desktop\\Odoo-x-Gcet-Budget_Accounting_System\\ShivFurnitureERP\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\Samarth\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Priya\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -26,7 +26,6 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
