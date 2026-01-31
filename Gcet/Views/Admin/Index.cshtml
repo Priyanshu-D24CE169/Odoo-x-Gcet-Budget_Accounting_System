@@ -1,0 +1,91 @@
+@model IEnumerable<UserManagementViewModel>
+@{
+    ViewData["Title"] = "User Administration";
+}
+
+<h1 class="mb-4">User Administration</h1>
+
+@if (TempData["SuccessMessage"] is string message)
+{
+    <div class="alert alert-success" role="alert">@message</div>
+}
+
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Last Login</th>
+                <th>Failed Attempts</th>
+                <th>Lockout</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.Username</td>
+                <td>@user.Email</td>
+                <td>@user.Role</td>
+                <td>
+                    @if (user.IsActive)
+                    {
+                        <span class="badge bg-success">Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Disabled</span>
+                    }
+                </td>
+                <td>@(user.LastLoginAt?.ToString("yyyy-MM-dd HH:mm") ?? "Never")</td>
+                <td>@user.FailedLoginAttempts</td>
+                <td>
+                    @if (user.IsLockedOut)
+                    {
+                        <span class="badge bg-danger">Locked until @user.LockoutEnd?.ToString("HH:mm")</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">Unlocked</span>
+                    }
+                </td>
+                <td class="text-end">
+                    <form asp-action="ToggleStatus" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@user.Id" />
+                        <input type="hidden" name="isActive" value="@(!user.IsActive)" />
+                        <button type="submit" class="btn btn-sm @(user.IsActive ? "btn-outline-secondary" : "btn-outline-success")">
+                            @(user.IsActive ? "Disable" : "Enable")
+                        </button>
+                    </form>
+
+                    <form asp-action="ChangeRole" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@user.Id" />
+                        <input type="hidden" name="role" value="@(user.Role == "Admin" ? "User" : "Admin")" />
+                        <button type="submit" class="btn btn-sm btn-outline-primary">
+                            Make @(user.Role == "Admin" ? "User" : "Admin")
+                        </button>
+                    </form>
+
+                    <form asp-action="Unlock" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@user.Id" />
+                        <button type="submit" class="btn btn-sm btn-outline-warning" @(user.IsLockedOut ? string.Empty : "disabled")>Unlock</button>
+                    </form>
+
+                    <form asp-action="ResetPassword" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@user.Id" />
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Reset Password</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
