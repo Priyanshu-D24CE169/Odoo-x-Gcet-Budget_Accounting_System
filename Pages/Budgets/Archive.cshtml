@@ -1,0 +1,62 @@
+@page
+@model Budget_Accounting_System.Pages.Budgets.ArchiveModel
+@{
+    ViewData["Title"] = "Archive Budget";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-header bg-warning">
+                    <h4 class="mb-0">Archive Budget</h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Are you sure you want to archive this budget?</h5>
+                    <p class="text-muted">Here user can archive the existing budget</p>
+                    
+                    <dl class="row">
+                        <dt class="col-sm-4">Budget Name</dt>
+                        <dd class="col-sm-8">@Model.Budget.Name</dd>
+
+                        <dt class="col-sm-4">Period</dt>
+                        <dd class="col-sm-8">
+                            @Model.Budget.StartDate.ToString("dd/MM/yyyy") to @Model.Budget.EndDate.ToString("dd/MM/yyyy")
+                        </dd>
+
+                        <dt class="col-sm-4">Analytical Account</dt>
+                        <dd class="col-sm-8">@Model.Budget.AnalyticalAccount.Name</dd>
+
+                        <dt class="col-sm-4">Type</dt>
+                        <dd class="col-sm-8">@Model.Budget.Type</dd>
+
+                        <dt class="col-sm-4">Budgeted Amount</dt>
+                        <dd class="col-sm-8">@Model.Budget.PlannedAmount.ToString("C")</dd>
+
+                        <dt class="col-sm-4">Achieved Amount</dt>
+                        <dd class="col-sm-8">@Model.AchievedAmount.ToString("C") (@Model.AchievementPercentage.ToString("F1")%)</dd>
+
+                        <dt class="col-sm-4">Revisions</dt>
+                        <dd class="col-sm-8">@Model.Budget.Revisions.Count</dd>
+                    </dl>
+
+                    @if (Model.Budget.Revisions.Any())
+                    {
+                        <div class="alert alert-info">
+                            <strong>Note:</strong> This budget has @Model.Budget.Revisions.Count revision(s). 
+                            Archiving will preserve all revision history.
+                        </div>
+                    }
+
+                    <form method="post">
+                        <input type="hidden" asp-for="Budget.Id" />
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-warning">Archive</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,122 @@
+@page
+@model Budget_Accounting_System.Pages.Contacts.IndexModel
+@{
+    ViewData["Title"] = "Contacts";
+}
+
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-md-8">
+            <h2>Contact Master</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-page="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> New
+            </a>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <form method="get">
+                <div class="input-group">
+                    <input type="text" name="searchString" class="form-control" placeholder="Search by name or email..." value="@Model.SearchString" />
+                    <button class="btn btn-outline-secondary" type="submit">Search</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <form method="get" class="d-flex">
+                <select name="filterType" class="form-select me-2" onchange="this.form.submit()">
+                    <option value="">All Types</option>
+                    <option value="Customer" selected="@(Model.FilterType == "Customer")">Customer</option>
+                    <option value="Vendor" selected="@(Model.FilterType == "Vendor")">Vendor</option>
+                    <option value="Both" selected="@(Model.FilterType == "Both")">Both</option>
+                </select>
+            </form>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var contact in Model.Contacts)
+                        {
+                            <tr>
+                                <td>@contact.Name</td>
+                                <td>@contact.Email</td>
+                                <td>@contact.Phone</td>
+                                <td>
+                                    <span class="badge bg-info">@contact.Type</span>
+                                </td>
+                                <td>
+                                    @if (contact.IsActive)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Archived</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-page="Details" asp-route-id="@contact.Id" class="btn btn-sm btn-info" title="Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a asp-page="Edit" asp-route-id="@contact.Id" class="btn btn-sm btn-warning" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        @if (contact.IsActive)
+                                        {
+                                            <a asp-page="Archive" asp-route-id="@contact.Id" class="btn btn-sm btn-secondary" title="Archive">
+                                                <i class="bi bi-archive"></i>
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <form method="post" asp-page-handler="Restore" asp-route-id="@contact.Id" style="display:inline;">
+                                                <button type="submit" class="btn btn-sm btn-success" title="Restore">
+                                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (!Model.Contacts.Any())
+            {
+                <div class="text-center text-muted py-5">
+                    <h5>No contacts found</h5>
+                    <p>Click "New" to create your first contact.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

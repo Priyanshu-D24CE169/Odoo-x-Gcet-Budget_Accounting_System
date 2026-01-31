@@ -1,0 +1,81 @@
+@page
+@model Budget_Accounting_System.Pages.AnalyticalAccounts.CreateModel
+@{
+    ViewData["Title"] = "Create Analytical Account";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#">New</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link disabled">Confirm</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link disabled">Archived</a>
+                        </li>
+                        <li class="nav-item ms-auto">
+                            <a asp-page="Index" class="nav-link">Back</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title mb-4">Analytics Master - New</h4>
+
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="AnalyticalAccount.Name" class="form-label">Analytic Name</label>
+                            <input asp-for="AnalyticalAccount.Name" class="form-control" placeholder="e.g., Deepawali" />
+                            <span asp-validation-for="AnalyticalAccount.Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="AnalyticalAccount.Code" class="form-label">Code</label>
+                            <input asp-for="AnalyticalAccount.Code" class="form-control" placeholder="e.g., DEEP-2025" />
+                            <span asp-validation-for="AnalyticalAccount.Code" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="AnalyticalAccount.Description" class="form-label">Description</label>
+                            <textarea asp-for="AnalyticalAccount.Description" class="form-control" rows="2" placeholder="e.g., Marriage Session or Furniture Expo 2026"></textarea>
+                            <span asp-validation-for="AnalyticalAccount.Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="AnalyticalAccount.ParentId" class="form-label">Parent Account (Optional)</label>
+                            <select asp-for="AnalyticalAccount.ParentId" class="form-select">
+                                <option value="">-- No Parent (Root Level) --</option>
+                                @foreach (var account in Model.ParentAccounts)
+                                {
+                                    <option value="@account.Id">@account.Code - @account.Name</option>
+                                }
+                            </select>
+                            <small class="text-muted">Select a parent to create a hierarchical structure</small>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input asp-for="AnalyticalAccount.IsActive" class="form-check-input" checked />
+                            <label asp-for="AnalyticalAccount.IsActive" class="form-check-label">Active</label>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

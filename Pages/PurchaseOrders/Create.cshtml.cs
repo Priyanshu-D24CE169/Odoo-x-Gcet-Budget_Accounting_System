@@ -1,0 +1,203 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
+using Budget_Accounting_System.Data;
+using Budget_Accounting_System.Models;
+using System.ComponentModel.DataAnnotations;
+
+namespace Budget_Accounting_System.Pages.PurchaseOrders;
+
+[Authorize(Roles = "Admin")]
+public class CreateModel : PageModel
+{
+    private readonly ApplicationDbContext _context;
+    private readonly ILogger<CreateModel> _logger;
+
+    public CreateModel(ApplicationDbContext context, ILogger<CreateModel> logger)
+    {
+        _context = context;
+        _logger = logger;
+    }
+
+    [BindProperty]
+    public InputModel Input { get; set; } = default!;
+
+    public List<Contact> Vendors { get; set; } = new();
+    public List<Product> Products { get; set; } = new();
+    public List<AnalyticalAccount> AnalyticalAccounts { get; set; } = new();
+
+    public class InputModel
+    {
+        [Required]
+        [Display(Name = "Vendor")]
+        public int VendorId { get; set; }
+
+        [Required]
+        [StringLength(50)]
+        [Display(Name = "PO Number")]
+        public string PONumber { get; set; } = string.Empty;
+
+        [Required]
+        [Display(Name = "PO Date")]
+        [DataType(DataType.Date)]
+        public DateTime PODate { get; set; } = DateTime.Today;
+
+        [StringLength(100)]
+        [Display(Name = "Reference")]
+        public string? Reference { get; set; }
+
+        public List<LineItemInput> Lines { get; set; } = new();
+    }
+
+    public class LineItemInput
+    {
+        [Required]
+        public int ProductId { get; set; }
+
+        public int? AnalyticalAccountId { get; set; }
+
+        [Required]
+        [Range(0.01, double.MaxValue)]
+        public decimal Quantity { get; set; }
+
+        [Required]
+        [Range(0.01, double.MaxValue)]
+        public decimal UnitPrice { get; set; }
+    }
+
+    public async Task<IActionResult> OnGetAsync()
+    {
+        await LoadDropdownsAsync();
+
+        var lastPO = await _context.PurchaseOrders
+            .OrderByDescending(p => p.Id)
+            .FirstOrDefaultAsync();
+
+        var nextNumber = lastPO != null 
+            ? int.Parse(lastPO.PONumber.Replace("PO", "")) + 1 
+            : 1;
+
+        Input = new InputModel
+        {
+            PONumber = $"PO{nextNumber:D4}",
+            PODate = DateTime.Today,
+            Lines = new List<LineItemInput>()
+        };
+
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPostAsync(string action)
+    {
+        _logger.LogInformation("PO POST - Action: {Action}, Lines Count: {Count}", 
+            action, Input.Lines?.Count ?? 0);
+
+        if (!ModelState.IsValid)
+        {
+            _logger.LogWarning("ModelState is invalid");
+            foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                _logger.LogWarning("Validation Error: {Error}", error.ErrorMessage);
+            }
+            await LoadDropdownsAsync();
+            return Page();
+        }
+
+        if (Input.Lines == null || !Input.Lines.Any())
+        {
+            ModelState.AddModelError("", "Please add at least one product line");
+            await LoadDropdownsAsync();
+            return Page();
+        }
+
+        var exists = await _context.PurchaseOrders
+            .AnyAsync(p => p.PONumber == Input.PONumber);
+
+        if (exists)
+        {
+            ModelState.AddModelError("Input.PONumber", "This PO number already exists");
+            await LoadDropdownsAsync();
+            return Page();
+        }
+
+        try
+        {
+            var purchaseOrder = new PurchaseOrder
+            {
+                VendorId = Input.VendorId,
+                PONumber = Input.PONumber,
+                PODate = Input.PODate,
+                Reference = Input.Reference,
+                Status = action == "confirm" ? POStatus.Confirmed : POStatus.Draft,
+                TotalAmount = 0,
+                CreatedDate = DateTime.UtcNow
+            };
+
+            foreach (var lineInput in Input.Lines)
+            {
+                var line = new PurchaseOrderLine
+                {
+                    ProductId = lineInput.ProductId,
+                    Quantity = lineInput.Quantity,
+                    UnitPrice = lineInput.UnitPrice,
+                    LineTotal = lineInput.Quantity * lineInput.UnitPrice,
+                    AnalyticalAccountId = lineInput.AnalyticalAccountId
+                };
+
+                purchaseOrder.Lines.Add(line);
+            }
+
+            purchaseOrder.TotalAmount = purchaseOrder.Lines.Sum(l => l.LineTotal);
+
+            _context.PurchaseOrders.Add(purchaseOrder);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("PO {PONumber} created successfully with {LineCount} lines", 
+                purchaseOrder.PONumber, purchaseOrder.Lines.Count);
+
+            TempData["SuccessMessage"] = $"Purchase Order {purchaseOrder.PONumber} {(action == "confirm" ? "confirmed" : "created")} successfully!";
+            return RedirectToPage("./Index");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating purchase order");
+            ModelState.AddModelError("", "An error occurred while creating the purchase order. Please try again.");
+            await LoadDropdownsAsync();
+            return Page();
+        }
+    }
+
+    private async Task LoadDropdownsAsync()
+    {
+        Vendors = await _context.Contacts
+            .Where(c => c.IsActive && (c.Type == ContactType.Vendor || c.Type == ContactType.Both))
+            .OrderBy(c => c.Name)
+            .ToListAsync();
+
+        Products = await _context.Products
+            .Where(p => p.IsActive)
+            .OrderBy(p => p.Name)
+            .ToListAsync();
+
+        AnalyticalAccounts = await _context.AnalyticalAccounts
+            .Where(a => a.IsActive)
+            .OrderBy(a => a.Code)
+            .ToListAsync();
+    }
+
+    public async Task<JsonResult> OnGetProductDetailsAsync(int productId)
+    {
+        var product = await _context.Products.FindAsync(productId);
+        
+        if (product == null)
+            return new JsonResult(new { success = false });
+
+        return new JsonResult(new
+        {
+            success = true,
+            unitPrice = product.UnitPrice,
+            unit = product.Unit
+        });
+    }
+}

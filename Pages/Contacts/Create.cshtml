@@ -1,0 +1,83 @@
+@page
+@model Budget_Accounting_System.Pages.Contacts.CreateModel
+@{
+    ViewData["Title"] = "Create Contact";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#">New</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link disabled">Confirm</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link disabled">Archived</a>
+                        </li>
+                        <li class="nav-item ms-auto">
+                            <a asp-page="Index" class="nav-link">Back</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title mb-4">Contact Master - New</h4>
+
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Contact.Name" class="form-label"></label>
+                            <input asp-for="Contact.Name" class="form-control" placeholder="Enter contact name" />
+                            <span asp-validation-for="Contact.Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Contact.Email" class="form-label"></label>
+                            <input asp-for="Contact.Email" class="form-control" placeholder="contact@example.com" />
+                            <span asp-validation-for="Contact.Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Contact.Phone" class="form-label"></label>
+                            <input asp-for="Contact.Phone" class="form-control" placeholder="555-0123" />
+                            <span asp-validation-for="Contact.Phone" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Contact.Type" class="form-label"></label>
+                            <select asp-for="Contact.Type" class="form-select" asp-items="Html.GetEnumSelectList<ContactType>()">
+                                <option value="">Select Type</option>
+                            </select>
+                            <span asp-validation-for="Contact.Type" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Contact.Address" class="form-label"></label>
+                            <textarea asp-for="Contact.Address" class="form-control" rows="3" placeholder="Street&#10;City&#10;State&#10;Country"></textarea>
+                            <span asp-validation-for="Contact.Address" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input asp-for="Contact.IsActive" class="form-check-input" checked />
+                            <label asp-for="Contact.IsActive" class="form-check-label">Active</label>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

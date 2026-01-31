@@ -1,0 +1,134 @@
+@page
+@model Budget_Accounting_System.Pages.SalesOrders.IndexModel
+@{
+    ViewData["Title"] = "Sales Orders";
+}
+
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-md-8">
+            <h2>Sales Orders</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-page="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> New
+            </a>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <form method="get">
+                <div class="input-group">
+                    <input type="text" name="searchString" class="form-control" placeholder="Search SO Number..." value="@Model.SearchString" />
+                    <button class="btn btn-outline-secondary" type="submit">Search</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-4">
+            <form method="get">
+                <select name="filterStatus" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Status</option>
+                    <option value="Draft" selected="@(Model.FilterStatus == "Draft")">Draft</option>
+                    <option value="Confirmed" selected="@(Model.FilterStatus == "Confirmed")">Confirmed</option>
+                    <option value="Cancelled" selected="@(Model.FilterStatus == "Cancelled")">Cancelled</option>
+                </select>
+            </form>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>SO No.</th>
+                            <th>SO Date</th>
+                            <th>Customer</th>
+                            <th>Reference</th>
+                            <th>Total Amount</th>
+                            <th>Status</th>
+                            <th>Invoices</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var so in Model.SalesOrders)
+                        {
+                            <tr>
+                                <td><strong>@so.SONumber</strong></td>
+                                <td>@so.SODate.ToString("dd/MM/yyyy")</td>
+                                <td>@so.Customer.Name</td>
+                                <td>@so.Reference</td>
+                                <td>@so.TotalAmount.ToString("C")</td>
+                                <td>
+                                    @if (so.Status == SOStatus.Draft)
+                                    {
+                                        <span class="badge bg-secondary">Draft</span>
+                                    }
+                                    else if (so.Status == SOStatus.Confirmed)
+                                    {
+                                        <span class="badge bg-success">Confirmed</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Cancelled</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (so.CustomerInvoices.Any())
+                                    {
+                                        <a asp-page="/CustomerInvoices/Index" asp-route-soId="@so.Id" class="btn btn-sm btn-outline-primary">
+                                            @so.CustomerInvoices.Count Invoice(s)
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No invoices</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-page="Details" asp-route-id="@so.Id" class="btn btn-sm btn-info">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        @if (so.Status == SOStatus.Draft)
+                                        {
+                                            <a asp-page="Edit" asp-route-id="@so.Id" class="btn btn-sm btn-warning">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                        }
+                                        @if (so.Status == SOStatus.Confirmed)
+                                        {
+                                            <a asp-page="/CustomerInvoices/CreateFromSO" asp-route-soId="@so.Id" class="btn btn-sm btn-primary" title="Create Invoice">
+                                                <i class="bi bi-receipt"></i>
+                                            </a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (!Model.SalesOrders.Any())
+            {
+                <div class="text-center text-muted py-5">
+                    <h5>No sales orders found</h5>
+                    <p>Click "New" to create your first sales order.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

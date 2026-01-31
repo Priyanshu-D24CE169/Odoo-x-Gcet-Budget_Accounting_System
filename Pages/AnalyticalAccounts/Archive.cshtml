@@ -1,0 +1,46 @@
+@page
+@model Budget_Accounting_System.Pages.AnalyticalAccounts.ArchiveModel
+@{
+    ViewData["Title"] = "Archive Analytical Account";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-header bg-warning">
+                    <h4 class="mb-0">Archive Analytical Account</h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Are you sure you want to archive this analytical account?</h5>
+                    
+                    <dl class="row">
+                        <dt class="col-sm-4">Code</dt>
+                        <dd class="col-sm-8">@Model.AnalyticalAccount.Code</dd>
+
+                        <dt class="col-sm-4">Name</dt>
+                        <dd class="col-sm-8">@Model.AnalyticalAccount.Name</dd>
+
+                        <dt class="col-sm-4">Budgets</dt>
+                        <dd class="col-sm-8">@Model.BudgetCount</dd>
+                    </dl>
+
+                    @if (Model.BudgetCount > 0)
+                    {
+                        <div class="alert alert-warning">
+                            <strong>Warning:</strong> This analytical account has @Model.BudgetCount active budget(s). Archiving will not delete them.
+                        </div>
+                    }
+
+                    <form method="post">
+                        <input type="hidden" asp-for="AnalyticalAccount.Id" />
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-warning">Archive</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

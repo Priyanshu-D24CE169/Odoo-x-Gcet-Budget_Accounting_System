@@ -1,0 +1,127 @@
+@page
+@model Budget_Accounting_System.Pages.Budgets.CreateModel
+@{
+    ViewData["Title"] = "Create Budget";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#">New</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link disabled">Confirm</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link disabled">Revise</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link disabled">Archived</a>
+                        </li>
+                        <li class="nav-item ms-auto">
+                            <span class="nav-link text-muted">Draft</span>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-page="Index" class="nav-link">Back</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title mb-4">Budget - New</h4>
+                    <p class="text-muted">Here user can create a new fresh budget</p>
+
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label asp-for="Budget.Name" class="form-label">Budget Name</label>
+                                    <input asp-for="Budget.Name" class="form-control" placeholder="e.g., January 2026" />
+                                    <span asp-validation-for="Budget.Name" class="text-danger"></span>
+                                    <small class="text-muted">In case of Revision keep original budget name as it is and add date of revision in last with word ( Rev DD MM YYYY )</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="Budget.Type" class="form-label">Type</label>
+                                    <select asp-for="Budget.Type" class="form-select" asp-items="Html.GetEnumSelectList<BudgetType>()">
+                                        <option value="">Select Type</option>
+                                    </select>
+                                    <span asp-validation-for="Budget.Type" class="text-danger"></span>
+                                    <small class="text-muted">Income / Expense</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Budget Period - Start Date</label>
+                                    <input asp-for="Budget.StartDate" type="date" class="form-control" />
+                                    <span asp-validation-for="Budget.StartDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Budget Period - End Date</label>
+                                    <input asp-for="Budget.EndDate" type="date" class="form-control" />
+                                    <span asp-validation-for="Budget.EndDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Budget.AnalyticalAccountId" class="form-label">Analytic Name</label>
+                            <select asp-for="Budget.AnalyticalAccountId" class="form-select">
+                                <option value="">Select Analytical Account</option>
+                                @foreach (var account in Model.AnalyticalAccounts)
+                                {
+                                    <option value="@account.Id">@account.Code - @account.Name</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Budget.AnalyticalAccountId" class="text-danger"></span>
+                            <small class="text-muted">
+                                Analytical set on all <strong>@(Model.Budget.Type == BudgetType.Income ? "Invoice" : "Purchase Order / Vendor Bill")</strong> lines to be mapped with type Budget = @Model.Budget.Type
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Budget.PlannedAmount" class="form-label">Budgeted Amount</label>
+                            <input asp-for="Budget.PlannedAmount" type="number" step="0.01" class="form-control" placeholder="Monetary" />
+                            <span asp-validation-for="Budget.PlannedAmount" class="text-danger"></span>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <strong>Achieved Amount:</strong> Only visible for confirmed budget. Considering above Deepawali Analytical Example:
+                            <br/>
+                            <strong>Analytic Name:</strong> Deepawali | <strong>Type:</strong> Income | <strong>Lookup:</strong> Sales Invoice
+                            <br/>
+                            Search Analytical in <strong>Sales Invoice</strong> with name <strong>Deepawali</strong> consider <strong>budget period</strong> and <strong>compute total</strong> and set in achieved amount.
+                            <br/>
+                            <strong>Budget Period = (start date ____ End Date____)</strong>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input asp-for="Budget.IsActive" class="form-check-input" checked />
+                            <label asp-for="Budget.IsActive" class="form-check-label">Active (Confirmed)</label>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Save & Confirm</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

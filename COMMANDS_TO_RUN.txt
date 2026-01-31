@@ -1,0 +1,58 @@
+========================================
+  COPY AND PASTE THESE COMMANDS EXACTLY
+========================================
+
+1. STOP DEBUGGER (Press Shift+F5)
+
+2. Open Terminal (Ctrl + `) and run:
+
+cd "Budget Accounting System"
+
+dotnet ef migrations add AddIdentitySystemAndLoginId -o Data/Migrations
+
+dotnet ef database update
+
+dotnet build
+
+dotnet run
+
+
+3. Login with:
+   LoginID:  sysadmin
+   Password: Admin@1234
+
+
+========================================
+  IF YOU GET ERRORS
+========================================
+
+Error: Build failed
+Solution:
+  - Rename UnifiedLogin.cshtml.cs ? Login.cshtml.cs
+  - Rename UnifiedLogin.cshtml ? Login.cshtml
+  - Then run: dotnet build
+
+Error: Database connection failed
+Solution:
+  - Check appsettings.json connection string
+  - Make sure SQL Server is running
+
+Error: Migration already exists
+Solution:
+  - Run: dotnet ef migrations remove
+  - Then run the add migration command again
+
+========================================
+  CREDENTIALS
+========================================
+
+Admin User:
+  LoginID:  sysadmin
+  Password: Admin@1234
+  Access:   Full system (Admin Dashboard)
+
+Portal User (not created yet):
+  Need to create manually through admin interface
+  or add code to IdentityInitializer
+
+========================================

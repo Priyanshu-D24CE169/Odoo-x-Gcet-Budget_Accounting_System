@@ -1,0 +1,158 @@
+@page
+@model Budget_Accounting_System.Pages.VendorBills.IndexModel
+@{
+    ViewData["Title"] = "Vendor Bills";
+}
+
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-md-8">
+            <h2>Vendor Bills</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-page="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> New
+            </a>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <form method="get">
+                <div class="input-group">
+                    <input type="text" name="searchString" class="form-control" placeholder="Search Bill Number..." value="@Model.SearchString" />
+                    <button class="btn btn-outline-secondary" type="submit">Search</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-4">
+            <form method="get">
+                <select name="filterStatus" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Status</option>
+                    <option value="Draft" selected="@(Model.FilterStatus == "Draft")">Draft</option>
+                    <option value="Posted" selected="@(Model.FilterStatus == "Posted")">Posted</option>
+                    <option value="Cancelled" selected="@(Model.FilterStatus == "Cancelled")">Cancelled</option>
+                </select>
+            </form>
+        </div>
+        <div class="col-md-4">
+            <form method="get">
+                <select name="filterPaymentStatus" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Payment Status</option>
+                    <option value="Paid" selected="@(Model.FilterPaymentStatus == "Paid")">Paid</option>
+                    <option value="Partial" selected="@(Model.FilterPaymentStatus == "Partial")">Partial</option>
+                    <option value="NotPaid" selected="@(Model.FilterPaymentStatus == "NotPaid")">Not Paid</option>
+                </select>
+            </form>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Bill No.</th>
+                            <th>Bill Date</th>
+                            <th>Due Date</th>
+                            <th>Vendor</th>
+                            <th>Reference</th>
+                            <th>Total Amount</th>
+                            <th>Amount Due</th>
+                            <th>Status</th>
+                            <th>Payment</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var bill in Model.VendorBills)
+                        {
+                            var amountDue = bill.TotalAmount - bill.PaidAmount;
+                            var paymentStatus = amountDue == 0 ? "Paid" : 
+                                               amountDue < bill.TotalAmount ? "Partial" : "Not Paid";
+                            
+                            <tr>
+                                <td><strong>@bill.BillNumber</strong></td>
+                                <td>@bill.BillDate.ToString("dd/MM/yyyy")</td>
+                                <td>@bill.DueDate?.ToString("dd/MM/yyyy")</td>
+                                <td>@bill.Vendor.Name</td>
+                                <td>@bill.Reference</td>
+                                <td>@bill.TotalAmount.ToString("C")</td>
+                                <td>
+                                    <strong class="@(amountDue > 0 ? "text-danger" : "text-success")">
+                                        @amountDue.ToString("C")
+                                    </strong>
+                                </td>
+                                <td>
+                                    @if (bill.Status == BillStatus.Draft)
+                                    {
+                                        <span class="badge bg-secondary">Draft</span>
+                                    }
+                                    else if (bill.Status == BillStatus.Posted)
+                                    {
+                                        <span class="badge bg-success">Posted</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Cancelled</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (paymentStatus == "Paid")
+                                    {
+                                        <span class="badge bg-success">Paid</span>
+                                    }
+                                    else if (paymentStatus == "Partial")
+                                    {
+                                        <span class="badge bg-warning">Partial</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Not Paid</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-page="Details" asp-route-id="@bill.Id" class="btn btn-sm btn-info">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        @if (bill.Status == BillStatus.Draft)
+                                        {
+                                            <a asp-page="Edit" asp-route-id="@bill.Id" class="btn btn-sm btn-warning">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                        }
+                                        @if (bill.Status == BillStatus.Posted && amountDue > 0)
+                                        {
+                                            <a asp-page="Pay" asp-route-id="@bill.Id" class="btn btn-sm btn-success" title="Record Payment">
+                                                <i class="bi bi-cash"></i>
+                                            </a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (!Model.VendorBills.Any())
+            {
+                <div class="text-center text-muted py-5">
+                    <h5>No vendor bills found</h5>
+                    <p>Click "New" to create your first vendor bill.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,101 @@
+@page
+@model Budget_Accounting_System.Pages.VendorBills.PayModel
+@{
+    ViewData["Title"] = "Pay Vendor Bill";
+    var amountDue = Model.VendorBill.TotalAmount - Model.VendorBill.PaidAmount;
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Record Payment - @Model.VendorBill.BillNumber</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Bill Summary -->
+                    <div class="alert alert-info">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Vendor:</strong> @Model.VendorBill.Vendor.Name
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Bill Date:</strong> @Model.VendorBill.BillDate.ToString("dd/MM/yyyy")
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-4">
+                                <strong>Total Amount:</strong> @Model.VendorBill.TotalAmount.ToString("C")
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Paid:</strong> @Model.VendorBill.PaidAmount.ToString("C")
+                            </div>
+                            <div class="col-md-4">
+                                <strong class="text-danger">Amount Due:</strong> <span class="text-danger">@amountDue.ToString("C")</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="post">
+                        <input type="hidden" asp-for="Payment.VendorBillId" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Payment.PaymentDate" class="form-label">Payment Date</label>
+                            <input asp-for="Payment.PaymentDate" type="date" class="form-control" required />
+                            <span asp-validation-for="Payment.PaymentDate" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Payment.Method" class="form-label">Payment Method</label>
+                            <select asp-for="Payment.Method" class="form-select" required>
+                                <option value="">Select Method</option>
+                                <option value="@PaymentMethod.Cash">Cash</option>
+                                <option value="@PaymentMethod.BankTransfer">Bank Transfer</option>
+                                <option value="@PaymentMethod.Check">Check</option>
+                            </select>
+                            <span asp-validation-for="Payment.Method" class="text-danger"></span>
+                        </div>
+
+
+                        <div class="mb-3">
+                            <label asp-for="Payment.Amount" class="form-label">Payment Amount</label>
+                            <input asp-for="Payment.Amount" type="number" step="0.01" class="form-control" 
+                                   max="@amountDue" placeholder="Maximum: @amountDue.ToString("C")" required />
+                            <span asp-validation-for="Payment.Amount" class="text-danger"></span>
+                            <div class="form-text">
+                                <button type="button" class="btn btn-sm btn-outline-primary" 
+                                        onclick="document.getElementById('Payment_Amount').value = @amountDue">
+                                    Pay Full Amount
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Payment.Reference" class="form-label">Reference / Transaction ID</label>
+                            <input asp-for="Payment.Reference" class="form-control" placeholder="Enter reference number" />
+                            <span asp-validation-for="Payment.Reference" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Payment.Notes" class="form-label">Notes</label>
+                            <textarea asp-for="Payment.Notes" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Payment.Notes" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-page="Details" asp-route-id="@Model.VendorBill.Id" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-cash"></i> Record Payment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

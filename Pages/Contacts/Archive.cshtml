@@ -1,0 +1,40 @@
+@page
+@model Budget_Accounting_System.Pages.Contacts.ArchiveModel
+@{
+    ViewData["Title"] = "Archive Contact";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-header bg-warning">
+                    <h4 class="mb-0">Archive Contact</h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Are you sure you want to archive this contact?</h5>
+                    <p class="text-muted">Archived contacts will be hidden from the main list but can be restored later.</p>
+                    
+                    <dl class="row">
+                        <dt class="col-sm-4">Name</dt>
+                        <dd class="col-sm-8">@Model.Contact.Name</dd>
+
+                        <dt class="col-sm-4">Email</dt>
+                        <dd class="col-sm-8">@Model.Contact.Email</dd>
+
+                        <dt class="col-sm-4">Type</dt>
+                        <dd class="col-sm-8">@Model.Contact.Type</dd>
+                    </dl>
+
+                    <form method="post">
+                        <input type="hidden" asp-for="Contact.Id" />
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-warning">Archive</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

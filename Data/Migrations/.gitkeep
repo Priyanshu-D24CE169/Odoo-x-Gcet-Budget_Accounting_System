@@ -1,0 +1,2 @@
+# This folder will contain EF Core migrations
+# Run: dotnet ef migrations add InitialCreate

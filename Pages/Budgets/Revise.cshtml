@@ -1,0 +1,130 @@
+@page
+@model Budget_Accounting_System.Pages.Budgets.ReviseModel
+@{
+    ViewData["Title"] = "Revise Budget";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link disabled">New</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link disabled">Confirm</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#">Revise</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link disabled">Archived</a>
+                        </li>
+                        <li class="nav-item ms-auto">
+                            <span class="nav-link text-warning">Revised</span>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-page="Index" class="nav-link">Back</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title mb-4">Budget - Revise</h4>
+                    <p class="text-warning">Only Visible at Confirm Stage</p>
+                    <p class="text-muted">
+                        Here user can revise the confirmed budget e.g., Budgeted Expense was 2,00,000 
+                        now it seems required to revise this limit by 3,50,000/- than user can revise.
+                    </p>
+                    <p class="text-info">
+                        <strong>On clicking of Revise - New Budget will appear and old one will move to revised state.</strong><br/>
+                        Link will be visible in main budget, on click it will lead to new revision budget.<br/>
+                        No revision to original link.
+                    </p>
+
+                    <!-- Original Budget Info -->
+                    <div class="alert alert-light border">
+                        <h5>Original Budget</h5>
+                        <dl class="row mb-0">
+                            <dt class="col-sm-3">Budget Name</dt>
+                            <dd class="col-sm-9">@Model.OriginalBudget.Name</dd>
+
+                            <dt class="col-sm-3">Period</dt>
+                            <dd class="col-sm-9">@Model.OriginalBudget.StartDate.ToString("dd/MM/yyyy") to @Model.OriginalBudget.EndDate.ToString("dd/MM/yyyy")</dd>
+
+                            <dt class="col-sm-3">Analytical Account</dt>
+                            <dd class="col-sm-9">@Model.OriginalBudget.AnalyticalAccount.Name</dd>
+
+                            <dt class="col-sm-3">Current Amount</dt>
+                            <dd class="col-sm-9"><strong>@Model.OriginalBudget.PlannedAmount.ToString("C")</strong></dd>
+
+                            <dt class="col-sm-3">Achieved Amount</dt>
+                            <dd class="col-sm-9">@Model.AchievedAmount.ToString("C") (@Model.AchievementPercentage.ToString("F1")%)</dd>
+                        </dl>
+                    </div>
+
+                    <form method="post">
+                        <input type="hidden" asp-for="OriginalBudgetId" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Revision of Original Budget</label>
+                            <input type="text" class="form-control" value="@Model.OriginalBudget.Name (Original Budget)" readonly />
+                            <small class="text-muted">Original budget will move to "Revised" status tab</small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Old Budgeted Amount</label>
+                                    <input type="text" class="form-control" value="@Model.OriginalBudget.PlannedAmount.ToString("C")" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="NewAmount" class="form-label">New Budgeted Amount</label>
+                                    <input asp-for="NewAmount" type="number" step="0.01" class="form-control" placeholder="Enter revised amount" />
+                                    <span asp-validation-for="NewAmount" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="RevisionReason" class="form-label">Reason for Revision</label>
+                            <textarea asp-for="RevisionReason" class="form-control" rows="3" placeholder="Explain why the budget needs to be revised..."></textarea>
+                            <span asp-validation-for="RevisionReason" class="text-danger"></span>
+                        </div>
+
+                        @if (Model.NewAmount > 0 && Model.OriginalBudget.PlannedAmount > 0)
+                        {
+                            var change = Model.NewAmount - Model.OriginalBudget.PlannedAmount;
+                            var changePercentage = (change / Model.OriginalBudget.PlannedAmount) * 100;
+                            
+                            <div class="alert alert-@(change >= 0 ? "warning" : "info")">
+                                <strong>Change Impact:</strong>
+                                @if (change >= 0)
+                                {
+                                    <span>Budget will <strong>increase</strong> by @change.ToString("C") (@changePercentage.ToString("F1")%)</span>
+                                }
+                                else
+                                {
+                                    <span>Budget will <strong>decrease</strong> by @Math.Abs(change).ToString("C") (@Math.Abs(changePercentage).ToString("F1")%)</span>
+                                }
+                            </div>
+                        }
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-page="Details" asp-route-id="@Model.OriginalBudgetId" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-warning">Create Revision</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
