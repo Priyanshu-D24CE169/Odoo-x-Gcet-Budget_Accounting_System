@@ -231,5 +231,5 @@ E:\.net_project\Budget Accounting System\Budget Accounting System\obj\Debug\net1
 E:\.net_project\Budget Accounting System\Budget Accounting System\obj\Debug\net10.0\Budget Accounting System.pdb
 E:\.net_project\Budget Accounting System\Budget Accounting System\obj\Debug\net10.0\Budget Accounting System.genruntimeconfig.cache
 E:\.net_project\Budget Accounting System\Budget Accounting System\obj\Debug\net10.0\ref\Budget Accounting System.dll
-E:\.net_project\Budget Accounting System\Budget Accounting System\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
 E:\.net_project\Budget Accounting System\Budget Accounting System\obj\Debug\net10.0\compressed\1imsd4b1hk-{0}-j20svakcbx-j20svakcbx.gz
+E:\.net_project\Budget Accounting System\Budget Accounting System\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt

@@ -1,0 +1,86 @@
+@page
+@model Budget_Accounting_System.Pages.Budgets.ConfirmModel
+@{
+    ViewData["Title"] = "Confirm Budget";
+}
+
+<div class="row mb-3">
+    <div class="col-12">
+        <h2 class="fw-bold"><i class="bi bi-check-circle text-success"></i> Confirm Budget</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-page="/Index">Dashboard</a></li>
+                <li class="breadcrumb-item"><a asp-page="./Index">Budgets</a></li>
+                <li class="breadcrumb-item"><a asp-page="./Details" asp-route-id="@Model.Budget.Id">@Model.Budget.Name</a></li>
+                <li class="breadcrumb-item active">Confirm</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0"><i class="bi bi-exclamation-triangle-fill"></i> Confirm Budget</h5>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-warning">
+            <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Important Information</h6>
+            <p class="mb-0">Confirming this budget will:</p>
+            <ul class="mb-0">
+                <li>Make the budget <strong>immutable</strong> (cannot be edited)</li>
+                <li>Lock the budget period (Start Date and End Date cannot be changed)</li>
+                <li>Enable actual amount tracking</li>
+                <li>Show achieved amounts, percentages, and remaining amounts</li>
+                <li>Allow the budget to be revised in the future</li>
+            </ul>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Budget Details</h5>
+                <dl class="row mb-0">
+                    <dt class="col-sm-3">Name:</dt>
+                    <dd class="col-sm-9">@Model.Budget.Name</dd>
+
+                    <dt class="col-sm-3">Period:</dt>
+                    <dd class="col-sm-9">
+                        @Model.Budget.StartDate.ToString("dd MMM yyyy") - @Model.Budget.EndDate.ToString("dd MMM yyyy")
+                        <small class="text-muted">(@Model.Budget.TotalDays days)</small>
+                    </dd>
+
+                    <dt class="col-sm-3">Total Income:</dt>
+                    <dd class="col-sm-9 text-success fw-bold">?@Model.Budget.TotalBudgetedIncome.ToString("N2")</dd>
+
+                    <dt class="col-sm-3">Total Expense:</dt>
+                    <dd class="col-sm-9 text-danger fw-bold">?@Model.Budget.TotalBudgetedExpense.ToString("N2")</dd>
+
+                    <dt class="col-sm-3">Net Budget:</dt>
+                    <dd class="col-sm-9 fw-bold">
+                        <span class="@(Model.Budget.TotalBudgetedNet >= 0 ? "text-success" : "text-danger")">
+                            ?@Model.Budget.TotalBudgetedNet.ToString("N2")
+                        </span>
+                    </dd>
+
+                    <dt class="col-sm-3">Budget Lines:</dt>
+                    <dd class="col-sm-9">@Model.Budget.Lines.Count line(s)</dd>
+                </dl>
+            </div>
+        </div>
+
+        <form method="post">
+            <div class="alert alert-info">
+                <i class="bi bi-lightbulb"></i> 
+                <strong>Next Steps:</strong> After confirmation, you can view actual spending/income against this budget on the Details page.
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a asp-page="./Details" asp-route-id="@Model.Budget.Id" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-success btn-lg" onclick="return confirm('Are you sure you want to confirm this budget? This action cannot be undone.');">
+                    <i class="bi bi-check-circle-fill"></i> Confirm Budget
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

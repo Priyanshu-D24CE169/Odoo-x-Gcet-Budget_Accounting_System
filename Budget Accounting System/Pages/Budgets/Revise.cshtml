@@ -1,0 +1,111 @@
+@page
+@model Budget_Accounting_System.Pages.Budgets.ReviseModel
+@{
+    ViewData["Title"] = "Revise Budget";
+}
+
+<div class="row mb-3">
+    <div class="col-12">
+        <h2 class="fw-bold"><i class="bi bi-arrow-repeat text-warning"></i> Revise Budget</h2>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-page="/Index">Dashboard</a></li>
+                <li class="breadcrumb-item"><a asp-page="./Index">Budgets</a></li>
+                <li class="breadcrumb-item"><a asp-page="./Details" asp-route-id="@Model.Budget.Id">@Model.Budget.Name</a></li>
+                <li class="breadcrumb-item active">Revise</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-warning">
+        <h5 class="mb-0"><i class="bi bi-exclamation-triangle-fill"></i> Create Budget Revision</h5>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-warning">
+            <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Revision Process</h6>
+            <p class="mb-2">Creating a revision will:</p>
+            <ul class="mb-0">
+                <li>Create a new <strong>Draft</strong> budget with the same name and period</li>
+                <li>Copy all budget lines from the original budget</li>
+                <li>Mark the original budget as <strong>Revised</strong></li>
+                <li>Link both budgets together for audit trail</li>
+                <li>Allow you to edit budgeted amounts in the new draft</li>
+                <li>Preserve the original budget for historical reference</li>
+            </ul>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Original Budget Details</h5>
+                <dl class="row mb-0">
+                    <dt class="col-sm-3">Name:</dt>
+                    <dd class="col-sm-9">@Model.Budget.Name</dd>
+
+                    <dt class="col-sm-3">Period:</dt>
+                    <dd class="col-sm-9">
+                        @Model.Budget.StartDate.ToString("dd MMM yyyy") - @Model.Budget.EndDate.ToString("dd MMM yyyy")
+                    </dd>
+
+                    <dt class="col-sm-3">Total Income:</dt>
+                    <dd class="col-sm-9 text-success fw-bold">?@Model.Budget.TotalBudgetedIncome.ToString("N2")</dd>
+
+                    <dt class="col-sm-3">Total Expense:</dt>
+                    <dd class="col-sm-9 text-danger fw-bold">?@Model.Budget.TotalBudgetedExpense.ToString("N2")</dd>
+
+                    <dt class="col-sm-3">Net Budget:</dt>
+                    <dd class="col-sm-9 fw-bold">
+                        <span class="@(Model.Budget.TotalBudgetedNet >= 0 ? "text-success" : "text-danger")">
+                            ?@Model.Budget.TotalBudgetedNet.ToString("N2")
+                        </span>
+                    </dd>
+
+                    <dt class="col-sm-3">Budget Lines:</dt>
+                    <dd class="col-sm-9">@Model.Budget.Lines.Count line(s)</dd>
+
+                    <dt class="col-sm-3">Confirmed On:</dt>
+                    <dd class="col-sm-9">
+                        @Model.Budget.ConfirmedDate?.ToString("dd MMM yyyy hh:mm tt")
+                        @if (!string.IsNullOrEmpty(Model.Budget.ConfirmedBy))
+                        {
+                            <text> by @Model.Budget.ConfirmedBy</text>
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="card mb-3 border-primary">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0"><i class="bi bi-lightbulb"></i> What Happens Next?</h6>
+            </div>
+            <div class="card-body">
+                <ol class="mb-0">
+                    <li>A new draft budget will be created with name: <strong>@Model.Budget.Name (Rev @DateTime.Now.ToString("dd MMM yyyy"))</strong></li>
+                    <li>All @Model.Budget.Lines.Count budget lines will be copied to the new draft</li>
+                    <li>You will be redirected to edit the new budget</li>
+                    <li>You can modify the budgeted amounts as needed</li>
+                    <li>Once ready, confirm the revised budget</li>
+                    <li>The original budget will show a link to the revision</li>
+                </ol>
+            </div>
+        </div>
+
+        <form method="post">
+            <div class="alert alert-info">
+                <i class="bi bi-shield-check"></i> 
+                <strong>Audit Trail:</strong> Both budgets will remain in the system with full history.
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a asp-page="./Details" asp-route-id="@Model.Budget.Id" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-warning btn-lg" onclick="return confirm('Create a revision of this budget?');">
+                    <i class="bi bi-arrow-repeat"></i> Create Revision
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -98,6 +98,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQW5hbHl0aWNhbEFjY291bnRzXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[E:/.net_project/Budget Accounting System/Budget Accounting System/Pages/Budgets/Confirm.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQnVkZ2V0c1xDb25maXJtLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [E:/.net_project/Budget Accounting System/Budget Accounting System/Pages/Budgets/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQnVkZ2V0c1xDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -108,6 +112,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [E:/.net_project/Budget Accounting System/Budget Accounting System/Pages/Budgets/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQnVkZ2V0c1xJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/.net_project/Budget Accounting System/Budget Accounting System/Pages/Budgets/Revise.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQnVkZ2V0c1xSZXZpc2UuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [E:/.net_project/Budget Accounting System/Budget Accounting System/Pages/Contacts/Archive.cshtml]
