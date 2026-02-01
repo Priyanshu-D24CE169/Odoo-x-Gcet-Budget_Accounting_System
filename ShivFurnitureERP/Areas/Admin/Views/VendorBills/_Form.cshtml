@@ -4,63 +4,67 @@
     var forceReadOnly = ViewData["ForceReadOnly"] as bool? ?? false;
     var isEditable = Model.CanEdit && !forceReadOnly;
     var hasWarnings = Model.Lines.Any(l => l.HasBudgetWarning);
-    var statusBadgeClass = Model.Status switch
+    var statusPillClass = Model.Status switch
     {
-        ShivFurnitureERP.Models.VendorBillStatus.Confirmed => "text-bg-success",
-        ShivFurnitureERP.Models.VendorBillStatus.Cancelled => "text-bg-secondary",
-        _ => "text-bg-warning"
+        ShivFurnitureERP.Models.VendorBillStatus.Confirmed => "is-confirmed",
+        ShivFurnitureERP.Models.VendorBillStatus.Cancelled => "is-cancelled",
+        _ => "is-draft"
     };
-    var paymentBadgeClass = Model.PaymentStatus switch
+    var paymentPillClass = Model.PaymentStatus switch
     {
-        ShivFurnitureERP.Models.VendorBillPaymentStatus.Paid => "text-bg-success",
-        ShivFurnitureERP.Models.VendorBillPaymentStatus.Partial => "text-bg-warning",
-        _ => "text-bg-secondary"
+        ShivFurnitureERP.Models.VendorBillPaymentStatus.Paid => "is-confirmed",
+        ShivFurnitureERP.Models.VendorBillPaymentStatus.Partial => "is-partial",
+        _ => "is-draft"
     };
 }
 
-<div class="row g-4" data-vendor-bill-form data-next-index="@Model.Lines.Count">
-    <div class="col-lg-4">
-        <div class="card shadow-sm h-100">
-            <div class="card-body">
-                <h5 class="card-title">Bill Summary</h5>
-                <p class="text-muted small mb-4">Review the vendor, dates, and financial status for this bill.</p>
-                <div class="mb-3">
-                    <label asp-for="BillNumber" class="form-label"></label>
-                    <input asp-for="BillNumber" class="form-control" readonly />
+<div class="vendor-bill-sheet" data-vendor-bill-form data-next-index="@Model.Lines.Count">
+    <div class="vendor-bill-pill-row">
+        <span class="vendor-bill-pill">@Model.Status</span>
+        <p class="vendor-bill-note mb-0">Budget alerts highlight any line where the analytical assignment exceeds the configured limit so you can adjust before confirming.</p>
+    </div>
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="vendor-bill-summary h-100">
+                <h5>Bill Summary</h5>
+                <p>Review vendor details, issue dates, and financial posture before confirming.</p>
+                <div class="vendor-bill-field">
+                    <label asp-for="BillNumber"></label>
+                    <input asp-for="BillNumber" readonly />
                 </div>
-                <div class="mb-3">
-                    <label asp-for="VendorId" class="form-label"></label>
+                <div class="vendor-bill-field">
+                    <label asp-for="VendorId"></label>
                     @if (isEditable)
                     {
-                        <select asp-for="VendorId" class="form-select" asp-items="Model.Vendors">
+                        <select asp-for="VendorId" asp-items="Model.Vendors">
                             <option value="">Select vendor</option>
                         </select>
                     }
                     else
                     {
                         <input type="hidden" asp-for="VendorId" />
-                        <div class="form-control-plaintext fw-semibold">
+                        <div class="form-control-plaintext fw-semibold px-0">
                             @Model.Vendors.FirstOrDefault(v => v.Value == Model.VendorId?.ToString())?.Text ?? "-"
                         </div>
                     }
                     <span asp-validation-for="VendorId" class="text-danger small"></span>
                 </div>
-                <div class="mb-3">
-                    <label asp-for="BillDate" class="form-label"></label>
-                    <input asp-for="BillDate" class="form-control" type="date" readonly="@(!isEditable)" />
+                <div class="vendor-bill-field">
+                    <label asp-for="BillDate"></label>
+                    <input asp-for="BillDate" type="date" readonly="@(!isEditable)" />
                     <span asp-validation-for="BillDate" class="text-danger small"></span>
                 </div>
-                <div class="mb-3">
-                    <label asp-for="DueDate" class="form-label"></label>
-                    <input asp-for="DueDate" class="form-control" type="date" readonly="@(!isEditable)" />
+                <div class="vendor-bill-field">
+                    <label asp-for="DueDate"></label>
+                    <input asp-for="DueDate" type="date" readonly="@(!isEditable)" />
                     <span asp-validation-for="DueDate" class="text-danger small"></span>
                 </div>
                 @if (Model.PurchaseOrderId.HasValue)
                 {
-                    <div class="mb-3">
-                        <label class="form-label">Purchase Order</label>
+                    <div class="vendor-bill-field">
+                        <label>Purchase Order</label>
                         <div class="d-flex align-items-center gap-2">
-                            <span class="form-control-plaintext fw-semibold">#@Model.PurchaseOrderId</span>
+                            <span class="fw-semibold">#@Model.PurchaseOrderId</span>
                             <a asp-area="Admin" asp-controller="PurchaseOrders" asp-action="Edit" asp-route-id="@Model.PurchaseOrderId" class="btn btn-sm btn-outline-secondary">Open PO</a>
                         </div>
                         <input asp-for="PurchaseOrderId" type="hidden" />
@@ -70,16 +74,16 @@
                 {
                     <input asp-for="PurchaseOrderId" type="hidden" />
                 }
-                <div class="mb-3">
-                    <label class="form-label">Status</label>
-                    <div class="d-flex gap-2 align-items-center flex-wrap">
-                        <span class="badge @statusBadgeClass">@Model.Status</span>
-                        <span class="badge @paymentBadgeClass">@Model.PaymentStatus</span>
+                <div class="vendor-bill-field">
+                    <label>Status</label>
+                    <div class="status-stack">
+                        <span class="vendor-bill-status-pill @statusPillClass">@Model.Status</span>
+                        <span class="vendor-bill-status-pill @paymentPillClass">@Model.PaymentStatus</span>
                     </div>
                     <input asp-for="Status" type="hidden" />
                     <input asp-for="PaymentStatus" type="hidden" />
                 </div>
-                <div>
+                <div class="totals-stack">
                     <div class="d-flex justify-content-between">
                         <span>Total</span>
                         <strong>@Model.TotalAmount.ToString("C")</strong>
@@ -88,7 +92,7 @@
                         <span>Paid</span>
                         <strong>@Model.AmountPaid.ToString("C")</strong>
                     </div>
-                    <div class="d-flex justify-content-between text-danger">
+                    <div class="d-flex justify-content-between due">
                         <span>Amount Due</span>
                         <strong>@Model.AmountDue.ToString("C")</strong>
                     </div>
@@ -97,14 +101,12 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div class="col-lg-8">
-        <div class="card shadow-sm">
-            <div class="card-body">
+        <div class="col-lg-8">
+            <div class="vendor-bill-lines-card">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
-                        <h5 class="card-title mb-0">Bill Lines</h5>
-                        <small class="text-muted">Lines inherit products, quantities, and analytical accounts from the source PO.</small>
+                        <h5 class="mb-0">Bill Lines</h5>
+                        <small>Lines inherit products, quantities, and analytical accounts from the source PO.</small>
                     </div>
                     @if (isEditable)
                     {
@@ -117,9 +119,9 @@
                         Budget limits were exceeded for highlighted lines. Use the budget button to review the analytical account configuration.
                     </div>
                 }
-                <div class="table-responsive">
-                    <table class="table table-striped align-middle mb-0">
-                        <thead class="table-light">
+                <div class="vendor-bill-table-wrapper">
+                    <table class="vendor-bill-table align-middle mb-0">
+                        <thead>
                             <tr>
                                 <th>Product</th>
                                 <th style="width: 120px;">Qty</th>

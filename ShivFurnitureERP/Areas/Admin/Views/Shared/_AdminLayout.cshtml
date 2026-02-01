@@ -10,6 +10,9 @@
     <link rel="stylesheet" href="~/ShivFurnitureERP.styles.css" asp-append-version="true" />
     @RenderSection("Styles", required: false)
 </head>
+@{
+    var sessionExpiryClaim = User?.FindFirst("session-expiration")?.Value;
+}
 <body class="bg-light">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
         <div class="container-fluid">
@@ -90,23 +93,31 @@
                     var rawName = User.Identity?.Name;
                     var displayName = string.IsNullOrWhiteSpace(rawName) ? "User" : rawName!.Trim();
                     var avatarInitial = displayName[0].ToString().ToUpperInvariant();
-                    <div class="dropdown user-menu ms-lg-3">
-                        <button class="btn btn-link text-white text-decoration-none p-0 d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
-                            <span class="avatar-placeholder">@avatarInitial</span>
-                            <span class="fw-semibold small text-white">@displayName</span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
-                            <li>
-                                <a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Profile">View Profile</a>
-                            </li>
-                            <li><hr class="dropdown-divider" /></li>
-                            <li>
-                                <form asp-area="Admin" asp-controller="Account" asp-action="Logout" method="post" class="m-0">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="dropdown-item text-danger">Sign Out</button>
-                                </form>
-                            </li>
-                        </ul>
+                    <div class="d-flex align-items-center gap-3 ms-lg-3">
+                        @if (!string.IsNullOrWhiteSpace(sessionExpiryClaim))
+                        {
+                            <div class="text-white-50 small" data-session-expiry="@sessionExpiryClaim">
+                                You will be logged out in <span class="fw-semibold" data-session-timer>--:--</span>
+                            </div>
+                        }
+                        <div class="dropdown user-menu">
+                            <button class="btn btn-link text-white text-decoration-none p-0 d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                                <span class="avatar-placeholder">@avatarInitial</span>
+                                <span class="fw-semibold small text-white">@displayName</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
+                                <li>
+                                    <a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Profile">View Profile</a>
+                                </li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li>
+                                    <form asp-area="Admin" asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="dropdown-item text-danger">Sign Out</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 }
                 else
@@ -116,11 +127,59 @@
             </div>
         </div>
     </nav>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <form asp-area="Admin" asp-controller="Account" asp-action="Logout" method="post" class="d-none" id="auto-logout-form">
+            @Html.AntiForgeryToken()
+        </form>
+    }
     <main role="main" class="container">
         @RenderBody()
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script>
+        (() => {
+            const timerRoot = document.querySelector('[data-session-expiry]');
+            if (!timerRoot) {
+                return;
+            }
+
+            const expirySeconds = Number(timerRoot.getAttribute('data-session-expiry'));
+            if (!expirySeconds) {
+                return;
+            }
+
+            const timerDisplay = timerRoot.querySelector('[data-session-timer]');
+            const logoutForm = document.getElementById('auto-logout-form');
+
+            const updateTimer = () => {
+                const remainingMs = expirySeconds * 1000 - Date.now();
+                if (remainingMs <= 0) {
+                    clearInterval(intervalId);
+                    if (timerDisplay) {
+                        timerDisplay.textContent = '00:00';
+                    }
+                    if (logoutForm) {
+                        logoutForm.submit();
+                    } else {
+                        window.location.href = '/Account/Login';
+                    }
+                    return;
+                }
+
+                const totalSeconds = Math.floor(remainingMs / 1000);
+                const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+                const seconds = String(totalSeconds % 60).padStart(2, '0');
+                if (timerDisplay) {
+                    timerDisplay.textContent = `${minutes}:${seconds}`;
+                }
+            };
+
+            updateTimer();
+            const intervalId = setInterval(updateTimer, 1000);
+        })();
+    </script>
     @RenderSection("Scripts", required: false)
 </body>
 </html>

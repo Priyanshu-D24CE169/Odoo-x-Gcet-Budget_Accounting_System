@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -85,12 +87,23 @@ public class VendorBillsController : Controller
             await ApplyBudgetWarningsAsync(model, cancellationToken);
             await PopulatePaymentsAsync(model, cancellationToken);
             return View(model);
-    }
+        }
+
+        var billEntity = MapToEntity(model);
+        var budgetWarnings = await _budgetWarningService.EvaluateAsync(billEntity, cancellationToken);
+        if (budgetWarnings.Values.Any(warning => warning.IsExceeded))
+        {
+            ModelState.AddModelError(string.Empty, "Budget limits are exceeded for one or more analytical accounts. Adjust the bill or choose a different account before saving.");
+            await PopulateSelectListsAsync(model, cancellationToken);
+            EnsureLinePlaceholders(model);
+            ApplyBudgetWarnings(model, billEntity, budgetWarnings);
+            await PopulatePaymentsAsync(model, cancellationToken);
+            return View(model);
+        }
 
         try
         {
-            var bill = MapToEntity(model);
-            await _vendorBillService.UpdateAsync(bill, cancellationToken);
+            await _vendorBillService.UpdateAsync(billEntity, cancellationToken);
             TempData["StatusMessage"] = "Vendor Bill updated.";
             return RedirectToAction(nameof(Edit), new { id });
         }
@@ -99,7 +112,7 @@ public class VendorBillsController : Controller
             ModelState.AddModelError(string.Empty, ex.Message);
             await PopulateSelectListsAsync(model, cancellationToken);
             EnsureLinePlaceholders(model);
-            await ApplyBudgetWarningsAsync(model, cancellationToken);
+            ApplyBudgetWarnings(model, billEntity, budgetWarnings);
             await PopulatePaymentsAsync(model, cancellationToken);
             return View(model);
         }
@@ -174,7 +187,13 @@ public class VendorBillsController : Controller
             .Select(p => new SelectListItem { Text = p.Name, Value = p.ProductId.ToString() })
             .ToListAsync(cancellationToken);
 
+        var expenseAccountIds = _dbContext.AnalyticalBudgets
+            .Where(b => b.BudgetType == BudgetType.Expense)
+            .Select(b => b.AnalyticalAccountId)
+            .Distinct();
+
         var analyticalAccounts = await _dbContext.AnalyticalAccounts
+            .Where(a => !a.IsArchived && expenseAccountIds.Contains(a.AnalyticalAccountId))
             .OrderBy(a => a.Name)
             .Select(a => new SelectListItem { Text = a.Name, Value = a.AnalyticalAccountId.ToString() })
             .ToListAsync(cancellationToken);
@@ -260,7 +279,14 @@ public class VendorBillsController : Controller
     {
         var bill = MapToEntity(model);
         var warnings = await _budgetWarningService.EvaluateAsync(bill, cancellationToken);
+        ApplyBudgetWarnings(model, bill, warnings);
+    }
 
+    private static void ApplyBudgetWarnings(
+        VendorBillFormViewModel model,
+        VendorBill bill,
+        IReadOnlyDictionary<int, BudgetWarningResult> warnings)
+    {
         for (var index = 0; index < model.Lines.Count; index++)
         {
             if (warnings.TryGetValue(index, out var warning))

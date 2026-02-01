@@ -1,13 +1,210 @@
+@using System.Globalization
+@using System.Linq
+@model ShivFurnitureERP.ViewModels.DashboardViewModel
 @{
-    ViewData["Title"] = "Admin Dashboard";
+    ViewData["Title"] = "Management Dashboard";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var currencyCulture = CultureInfo.GetCultureInfo("en-IN");
+    Func<decimal, string> formatCurrency = amount => amount.ToString("C", currencyCulture);
 }
 
-<section class="container py-5">
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <h2 class="fw-semibold mb-3">Welcome, Admin</h2>
-            <p class="text-muted">Use the navigation to manage ERP operations.</p>
+@section Styles {
+    <link rel="stylesheet" href="~/css/budget-dashboard.css" asp-append-version="true" />
+}
+
+<section class="budget-dashboard">
+    <div class="dashboard-hero">
+        <div>
+            <p class="eyebrow">Budget Accounting ERP</p>
+            <h1>Management cockpit</h1>
+            <p class="lead">Real-time visibility into every rupee budgeted, earned, and spent so business owners can act with confidence.</p>
         </div>
+        <form method="get" class="dashboard-filters">
+            <div class="filter-field">
+                <label for="start">From</label>
+                <input type="date" id="start" name="start" value="@Model.FilterStart.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="filter-field">
+                <label for="end">To</label>
+                <input type="date" id="end" name="end" value="@Model.FilterEnd.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="filter-field">
+                <label for="accountId">Cost Center</label>
+                @Html.DropDownList("accountId", Model.AccountOptions, new { @class = "form-select" })
+            </div>
+            <div class="filter-actions">
+                <button type="submit" class="btn btn-primary">Refresh</button>
+            </div>
+        </form>
     </div>
+
+    <div class="kpi-grid">
+        <article class="kpi-card">
+            <p>Total Budgeted</p>
+            <h3>@formatCurrency(Model.TotalBudgetedAmount)</h3>
+            <span>Confirmed budgets in scope</span>
+        </article>
+        <article class="kpi-card">
+            <p>Total Actual</p>
+            <h3>@formatCurrency(Model.TotalActualAmount)</h3>
+            <span>Posted invoices + bills</span>
+        </article>
+        <article class="kpi-card">
+            <p>Utilization</p>
+            <h3>@Model.BudgetUtilizationPercent.ToString("N1")%</h3>
+            <span>Budget burn to date</span>
+        </article>
+        <article class="kpi-card">
+            <p>Remaining Budget</p>
+            <h3>@formatCurrency(Model.RemainingBudget)</h3>
+            <span>Headroom available</span>
+        </article>
+    </div>
+
+    <div class="dashboard-panels">
+        <section class="panel">
+            <header>
+                <h2>Income vs Expense</h2>
+                <p>Only confirmed budgets and posted documents are counted.</p>
+            </header>
+            <div class="income-expense">
+                <div>
+                    <h3>Income</h3>
+                    <p class="amount">@formatCurrency(Model.IncomeExpense.ActualIncome) <span>of @formatCurrency(Model.IncomeExpense.BudgetedIncome)</span></p>
+                    <div class="meter">
+                        <div class="fill" style="width:@Model.IncomeExpense.IncomeUtilizationPercent%"></div>
+                    </div>
+                    <small>@Model.IncomeExpense.IncomeUtilizationPercent.ToString("N1")% utilized · @formatCurrency(Model.IncomeExpense.RemainingIncome) remaining</small>
+                </div>
+                <div>
+                    <h3>Expenses</h3>
+                    <p class="amount">@formatCurrency(Model.IncomeExpense.ActualExpense) <span>of @formatCurrency(Model.IncomeExpense.BudgetedExpense)</span></p>
+                    <div class="meter">
+                        <div class="fill" style="width:@Model.IncomeExpense.ExpenseUtilizationPercent%"></div>
+                    </div>
+                    <small>@Model.IncomeExpense.ExpenseUtilizationPercent.ToString("N1")% utilized · @formatCurrency(Model.IncomeExpense.RemainingExpense) remaining</small>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <header>
+                <h2>Payment status overview</h2>
+                <p>Monitor receivables and payables to stay cash-flow positive.</p>
+            </header>
+            <div class="payment-status">
+                <div>
+                    <h3>Receivables</h3>
+                    @if (Model.PaymentStatus.IncomeStatuses.Any())
+                    {
+                        <ul>
+                            @foreach (var item in Model.PaymentStatus.IncomeStatuses)
+                            {
+                                <li>
+                                    <span class="label">@item.Label (@item.DocumentCount)</span>
+                                    <span class="value">@formatCurrency(item.TotalAmount)</span>
+                                    <small>@formatCurrency(item.OutstandingAmount) outstanding</small>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="empty-state">No confirmed invoices in this window.</p>
+                    }
+                </div>
+                <div>
+                    <h3>Payables</h3>
+                    @if (Model.PaymentStatus.ExpenseStatuses.Any())
+                    {
+                        <ul>
+                            @foreach (var item in Model.PaymentStatus.ExpenseStatuses)
+                            {
+                                <li>
+                                    <span class="label">@item.Label (@item.DocumentCount)</span>
+                                    <span class="value">@formatCurrency(item.TotalAmount)</span>
+                                    <small>@formatCurrency(item.OutstandingAmount) outstanding</small>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="empty-state">No confirmed vendor bills in this window.</p>
+                    }
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <section class="panel">
+        <header>
+            <h2>Budget vs actual by analytical account</h2>
+            <p>Track cost center performance with decision-ready KPIs.</p>
+        </header>
+        <div class="table-wrapper">
+            <table class="cost-center-table">
+                <thead>
+                    <tr>
+                        <th>Analytical Account</th>
+                        <th class="text-end">Budgeted</th>
+                        <th class="text-end">Actual</th>
+                        <th class="text-end">Utilization</th>
+                        <th class="text-end">Remaining</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.CostCenters.Any())
+                    {
+                        foreach (var center in Model.CostCenters)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@center.AnalyticalAccountName</strong>
+                                    <div class="subtext">Income: @formatCurrency(center.ActualIncome) · Expense: @formatCurrency(center.ActualExpense)</div>
+                                </td>
+                                <td class="text-end">@formatCurrency(center.BudgetedAmount)</td>
+                                <td class="text-end">@formatCurrency(center.ActualAmount)</td>
+                                <td class="text-end">@center.UtilizationPercent.ToString("N1")%</td>
+                                <td class="text-end">@formatCurrency(center.RemainingAmount)</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-4">No confirmed budgets or transactions match the current filters.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="panel alerts-panel">
+        <header>
+            <h2>Budget alerts</h2>
+            <p>Highlight cost centers approaching or exceeding their limits.</p>
+        </header>
+        @if (Model.Alerts.Any())
+        {
+            <div class="alerts-grid">
+                @foreach (var alert in Model.Alerts)
+                {
+                    <article class="alert-card @(alert.IsExceeded ? "is-critical" : "is-warning")">
+                        <h3>@alert.AccountName</h3>
+                        <p class="amount">@formatCurrency(alert.ActualAmount) <span>of @formatCurrency(alert.BudgetedAmount)</span></p>
+                        <p class="status">@alert.UtilizationPercent.ToString("N1")% utilized</p>
+                        <small>@(alert.IsExceeded ? "Over budget – immediate action required" : "Nearing cap – review allocations")</small>
+                    </article>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <p>All cost centers are operating within safe limits for the selected period.</p>
+            </div>
+        }
+    </section>
 </section>

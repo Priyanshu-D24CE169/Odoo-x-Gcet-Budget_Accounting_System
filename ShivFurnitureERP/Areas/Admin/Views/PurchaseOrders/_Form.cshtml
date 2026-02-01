@@ -3,103 +3,97 @@
 @{
     var hasWarnings = Model.Lines.Any(l => l.HasBudgetWarning);
     var totalAmount = Model.Lines.Sum(l => l.LineTotal);
-    var statusBadgeClass = Model.Status switch
+    var statusPillClass = Model.Status switch
     {
-        ShivFurnitureERP.Models.PurchaseOrderStatus.Confirmed => "text-bg-success",
-        ShivFurnitureERP.Models.PurchaseOrderStatus.Cancelled => "text-bg-secondary",
-        _ => "text-bg-warning"
+        ShivFurnitureERP.Models.PurchaseOrderStatus.Confirmed => "is-confirmed",
+        ShivFurnitureERP.Models.PurchaseOrderStatus.Cancelled => "is-cancelled",
+        _ => "is-draft"
     };
 }
 
-<div class="row g-4" data-po-form data-next-index="@Model.Lines.Count">
-    <div class="col-lg-4">
-        <div class="card shadow-sm h-100">
-            <div class="card-body">
-                <h5 class="card-title">Order Summary</h5>
-                <p class="text-muted small mb-4">Define vendor, reference, and key dates for this purchase order.</p>
-                <div class="mb-3">
-                    <label asp-for="PONumber" class="form-label"></label>
-                    <input asp-for="PONumber" class="form-control" readonly placeholder="Auto-generated when saved" />
-                    <span asp-validation-for="PONumber" class="text-danger small"></span>
-                </div>
-                <div class="mb-3">
-                    <label asp-for="VendorId" class="form-label"></label>
-                    <select asp-for="VendorId" class="form-select" asp-items="Model.Vendors">
-                        <option value="">Select vendor</option>
-                    </select>
-                    <span asp-validation-for="VendorId" class="text-danger small"></span>
-                </div>
-                <div class="mb-3">
-                    <label asp-for="Reference" class="form-label"></label>
-                    <input asp-for="Reference" class="form-control" placeholder="Internal reference" />
-                    <span asp-validation-for="Reference" class="text-danger small"></span>
-                </div>
-                <div class="mb-3">
-                    <label asp-for="PODate" class="form-label"></label>
-                    <input asp-for="PODate" class="form-control" type="date" />
-                    <span asp-validation-for="PODate" class="text-danger small"></span>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Status</label>
-                    <div>
-                        <span class="badge @statusBadgeClass">@Model.Status</span>
-                    </div>
-                    <input asp-for="Status" type="hidden" />
-                </div>
-            </div>
+<div class="purchase-order-sheet" data-po-form data-next-index="@Model.Lines.Count">
+    <div class="purchase-order-pill-row">
+        <span class="purchase-order-pill">PO Flow</span>
+        <span class="purchase-order-note">Numbers generate when saved. Capture core vendor details before confirming.</span>
+        <span class="purchase-order-status-pill @statusPillClass">@Model.Status</span>
+    </div>
+
+    <div class="purchase-order-filter-grid">
+        <div class="purchase-order-field">
+            <label asp-for="PONumber"></label>
+            <input asp-for="PONumber" readonly placeholder="Auto-generated when saved" />
+            <span asp-validation-for="PONumber" class="text-danger small"></span>
+        </div>
+        <div class="purchase-order-field">
+            <label asp-for="VendorId"></label>
+            <select asp-for="VendorId" asp-items="Model.Vendors">
+                <option value="">Select vendor</option>
+            </select>
+            <span asp-validation-for="VendorId" class="text-danger small"></span>
+        </div>
+        <div class="purchase-order-field">
+            <label asp-for="Reference"></label>
+            <input asp-for="Reference" placeholder="Internal reference" />
+            <span asp-validation-for="Reference" class="text-danger small"></span>
+        </div>
+        <div class="purchase-order-field">
+            <label asp-for="PODate"></label>
+            <input asp-for="PODate" type="date" />
+            <span asp-validation-for="PODate" class="text-danger small"></span>
         </div>
     </div>
-    <div class="col-lg-8">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div>
-                        <h5 class="card-title mb-0">PO Lines</h5>
-                        <small class="text-muted">List every product to be purchased with analytical allocation.</small>
-                    </div>
-                    <button type="button" class="btn btn-sm btn-outline-primary" data-po-add-line>+ Add Line</button>
-                </div>
-                @if (hasWarnings)
-                {
-                    <div class="alert alert-warning py-2 small">
-                        Budget limits were exceeded for highlighted lines. Confirmation remains available but review the warnings below.
-                    </div>
-                }
-                <div class="table-responsive">
-                    <table class="table table-striped align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Product</th>
-                                <th style="width: 120px;">Qty</th>
-                                <th style="width: 140px;">Unit Price</th>
-                                <th style="width: 140px;" class="text-end">Line Total</th>
-                                <th>Analytical Account</th>
-                                <th class="text-end" style="width: 90px;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="po-lines-body" data-po-lines>
-                            @for (var i = 0; i < Model.Lines.Count; i++)
-                            {
-                                var rowViewData = new ViewDataDictionary(ViewData);
-                                rowViewData.TemplateInfo.HtmlFieldPrefix = $"Lines[{i}]";
-                                rowViewData["RowIndex"] = i.ToString();
-                                rowViewData["Products"] = Model.Products;
-                                rowViewData["AnalyticalAccounts"] = Model.AnalyticalAccounts;
-                                @await Html.PartialAsync("_LineRow", Model.Lines[i], rowViewData)
-                            }
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <th colspan="3" class="text-end">Grand Total</th>
-                                <th class="text-end">
-                                    <span class="fw-semibold" data-po-grand-total>@totalAmount.ToString("N2")</span>
-                                </th>
-                                <th colspan="2"></th>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
+
+    <input asp-for="Status" type="hidden" />
+
+    <div class="purchase-order-table-wrapper">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <div>
+                <h5 class="mb-0">PO Lines</h5>
+                <small class="text-muted">Detail each product with allocation guidance.</small>
             </div>
+            <button type="button" class="btn btn-sm btn-outline-primary" data-po-add-line>+ Add Line</button>
+        </div>
+
+        @if (hasWarnings)
+        {
+            <div class="purchase-order-alert">
+                Budget limits were exceeded for highlighted lines. Review before confirming.
+            </div>
+        }
+
+        <div class="table-responsive">
+            <table class="purchase-order-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th style="width: 120px;">Qty</th>
+                        <th style="width: 140px;">Unit Price</th>
+                        <th style="width: 140px;" class="text-end">Line Total</th>
+                        <th>Analytical Account</th>
+                        <th class="text-end" style="width: 90px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="po-lines-body" data-po-lines>
+                    @for (var i = 0; i < Model.Lines.Count; i++)
+                    {
+                        var rowViewData = new ViewDataDictionary(ViewData);
+                        rowViewData.TemplateInfo.HtmlFieldPrefix = $"Lines[{i}]";
+                        rowViewData["RowIndex"] = i.ToString();
+                        rowViewData["Products"] = Model.Products;
+                        rowViewData["AnalyticalAccounts"] = Model.AnalyticalAccounts;
+                        @await Html.PartialAsync("_LineRow", Model.Lines[i], rowViewData)
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="3" class="text-end">Grand Total</th>
+                        <th class="text-end">
+                            <span class="fw-semibold" data-po-grand-total>@totalAmount.ToString("N2")</span>
+                        </th>
+                        <th colspan="2"></th>
+                    </tr>
+                </tfoot>
+            </table>
         </div>
     </div>
 </div>

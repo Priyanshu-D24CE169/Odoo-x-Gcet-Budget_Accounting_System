@@ -4,51 +4,59 @@
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<section class="py-4">
-    <div class="d-flex justify-content-between flex-wrap gap-2 align-items-center mb-3">
-        <div>
-            <h2 class="mb-0">Vendor Bill <span class="text-muted">@Model.BillNumber</span></h2>
-            <p class="text-muted mb-0">Manage bill details, analyse budget usage, and keep payments up to date.</p>
-        </div>
-        <div class="d-flex gap-2">
-            <a asp-area="Admin" asp-controller="VendorBills" asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
-            @if (Model.CanConfirm)
-            {
-                <form asp-action="Confirm" method="post" class="d-inline">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="id" value="@Model.VendorBillId" />
-                    <button type="submit" class="btn btn-success">Confirm</button>
-                </form>
-            }
-            @if (Model.CanCancel)
-            {
-                <form asp-action="Cancel" method="post" class="d-inline" onsubmit="return confirm('Cancel this bill?');">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="id" value="@Model.VendorBillId" />
-                    <button type="submit" class="btn btn-outline-danger">Cancel</button>
-                </form>
-            }
-        </div>
-    </div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/vendor-bills.css" asp-append-version="true" />
+}
 
-    @if (TempData["StatusMessage"] is string statusMessage)
-    {
-        <div class="alert alert-info">@statusMessage</div>
-    }
-
-    <form asp-action="Edit" method="post">
-        @Html.AntiForgeryToken()
-        <input asp-for="VendorBillId" type="hidden" />
-        <div class="mb-4">
-            @await Html.PartialAsync("_Form", Model)
+<section class="vendor-bill-page">
+    <div class="container-fluid">
+        <div class="vendor-bill-hero">
+            <div>
+                <div class="eyebrow">Vendor Workspace</div>
+                <h1>Vendor Bill <span class="text-muted">@Model.BillNumber</span></h1>
+                <p>Draft, confirm, and reconcile vendor bills with the same polished workflow as the rest of the suite.</p>
+            </div>
+            <div class="vendor-bill-actions">
+                <a asp-area="Admin" asp-controller="VendorBills" asp-action="Index">Directory</a>
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                @if (Model.CanConfirm)
+                {
+                    <form asp-action="Confirm" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.VendorBillId" />
+                        <button type="submit" class="btn-primary-pill">Confirm</button>
+                    </form>
+                }
+                @if (Model.CanCancel)
+                {
+                    <form asp-action="Cancel" method="post" onsubmit="return confirm('Cancel this bill?');">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.VendorBillId" />
+                        <button type="submit">Cancel</button>
+                    </form>
+                }
+            </div>
         </div>
-        @if (Model.CanEdit)
+
+        @if (TempData["StatusMessage"] is string statusMessage)
         {
-            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <div class="alert alert-info">@statusMessage</div>
         }
-    </form>
 
-    @await Html.PartialAsync("_Payments", Model)
+        <form asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+            <input asp-for="VendorBillId" type="hidden" />
+            <div class="mb-4">
+                @await Html.PartialAsync("_Form", Model)
+            </div>
+            @if (Model.CanEdit)
+            {
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            }
+        </form>
+
+        @await Html.PartialAsync("_Payments", Model)
+    </div>
 </section>
 
 @section Scripts {

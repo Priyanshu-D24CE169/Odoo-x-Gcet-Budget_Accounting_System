@@ -1,39 +1,61 @@
 @model ShivFurnitureERP.ViewModels.LoginViewModel
 @{
     ViewData["Title"] = "Portal Login";
+    ViewData["PortalShowNav"] = false;
     Layout = "~/Areas/Portal/Views/Shared/_PortalLayout.cshtml";
 }
 
-<section class="row justify-content-center py-5">
-    <div class="col-md-5">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h3 class="mb-4 text-center">Portal Login</h3>
+@section Styles {
+    <link rel="stylesheet" href="~/css/portal-auth.css" asp-append-version="true" />
+}
+
+<section class="portal-auth-page">
+    <div class="portal-auth-shell">
+        <div class="portal-auth-hero">
+            <div class="portal-auth-eyebrow">Customer Workspace</div>
+            <h1>Portal Login</h1>
+            <p>Confirm fulfillment updates, review invoices, and stay in sync with your vendor.</p>
+        </div>
+        <div class="portal-auth-card">
+            <div class="portal-auth-tabs">
+                <span class="portal-auth-tab is-active">Portal Sign In</span>
+                <a class="portal-auth-tab" asp-controller="Account" asp-action="Login" asp-area="" asp-route-returnUrl="@Model.ReturnUrl">Admin Sign In</a>
+                <a class="portal-auth-tab" asp-area="Portal" asp-controller="Account" asp-action="Register" asp-route-returnUrl="@Model.ReturnUrl">Create Account</a>
+            </div>
+            <div class="portal-auth-info" role="status">
+                Portal sessions automatically sign out after <strong>10 minutes</strong> for security.
+            </div>
+            <div class="portal-auth-form-wrapper">
                 <form asp-area="Portal" asp-controller="Account" asp-action="Login" method="post">
                     @Html.AntiForgeryToken()
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                    <div class="mb-3">
-                        <label asp-for="LoginId" class="form-label"></label>
-                        <input asp-for="LoginId" class="form-control" autocomplete="username" />
-                        <span asp-validation-for="LoginId" class="text-danger"></span>
+                    <div class="portal-auth-field">
+                        <label asp-for="LoginId"></label>
+                        <input asp-for="LoginId" autocomplete="username" />
+                        <span asp-validation-for="LoginId" class="text-danger small"></span>
                     </div>
 
-                    <div class="mb-3">
-                        <label asp-for="Password" class="form-label"></label>
-                        <input asp-for="Password" class="form-control" autocomplete="current-password" />
-                        <span asp-validation-for="Password" class="text-danger"></span>
+                    <div class="portal-auth-field">
+                        <label asp-for="Password"></label>
+                        <input asp-for="Password" autocomplete="current-password" />
+                        <span asp-validation-for="Password" class="text-danger small"></span>
                     </div>
 
-                    <div class="mb-3 form-check">
+                    <div class="form-check mb-3">
                         <input asp-for="RememberMe" class="form-check-input" />
                         <label asp-for="RememberMe" class="form-check-label"></label>
                     </div>
 
                     <input type="hidden" asp-for="ReturnUrl" />
 
-                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                    <div class="portal-auth-actions">
+                        <button type="submit" class="portal-auth-primary">Login</button>
+                    </div>
                 </form>
+            </div>
+            <div class="portal-auth-meta">
+                Need to onboard a teammate? <a class="portal-auth-link" asp-area="Portal" asp-controller="Account" asp-action="Register" asp-route-returnUrl="@Model.ReturnUrl">Create a portal account</a> to grant them access.
             </div>
         </div>
     </div>

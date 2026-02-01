@@ -1,67 +1,94 @@
 @using System.Linq
+@using ShivFurnitureERP.Models
 @model IReadOnlyList<ShivFurnitureERP.ViewModels.PortalInvoices.PortalCustomerInvoiceListItemViewModel>
 @{
     ViewData["Title"] = "My Invoices";
     Layout = "~/Areas/Portal/Views/Shared/_PortalLayout.cshtml";
+    ViewData["PortalFullBleed"] = true;
 }
 
-<section class="py-4">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-        <div>
-            <h2 class="mb-0">Customer Invoices</h2>
-            <p class="text-muted mb-0">Review invoices issued to your account and pay the outstanding balance securely.</p>
+<section class="portal-ledger-page">
+    <div class="container-fluid">
+        <div class="portal-ledger-hero">
+            <div>
+                <div class="portal-ledger-eyebrow">Billing Workspace</div>
+                <h1>Customer Invoices</h1>
+                <p>Review invoices issued to your account and settle balances with confidence.</p>
+            </div>
+            <div class="portal-ledger-actions">
+                <a asp-area="Portal" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                <a asp-area="Portal" asp-controller="SalesOrders" asp-action="Index">Sales Orders</a>
+                <a asp-area="Portal" asp-controller="CustomerInvoices" asp-action="Index" class="is-active">Invoices</a>
+            </div>
         </div>
-    </div>
 
-    <div class="card shadow-sm">
-        <div class="table-responsive">
-            <table class="table table-striped align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Invoice</th>
-                        <th>Invoice Date</th>
-                        <th>Due Date</th>
-                        <th>Status</th>
-                        <th>Payment Status</th>
-                        <th class="text-end">Total</th>
-                        <th class="text-end">Paid</th>
-                        <th class="text-end">Due</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (!Model.Any())
-                    {
-                        <tr>
-                            <td colspan="9" class="text-center text-muted py-4">No invoices available yet.</td>
-                        </tr>
-                    }
-                    else
-                    {
-                        foreach (var invoice in Model)
-                        {
+        <div class="portal-ledger-card">
+            @if (!Model.Any())
+            {
+                <div class="portal-ledger-empty">
+                    <div class="portal-ledger-pill">No Invoices Yet</div>
+                    <p class="portal-ledger-note">As soon as finance issues an invoice it will land in this ledger for quick payment.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="portal-ledger-table align-middle mb-0">
+                        <thead>
                             <tr>
-                                <td>@invoice.InvoiceNumber</td>
-                                <td>@invoice.InvoiceDate.ToString("dd MMM yyyy")</td>
-                                <td>@invoice.DueDate.ToString("dd MMM yyyy")</td>
-                                <td>@invoice.Status</td>
-                                <td>@invoice.PaymentStatus</td>
-                                <td class="text-end">@invoice.TotalAmount.ToString("N2")</td>
-                                <td class="text-end text-success">@invoice.AmountPaid.ToString("N2")</td>
-                                <td class="text-end fw-semibold">@invoice.AmountDue.ToString("N2")</td>
-                                <td class="text-end">
-                                    <a asp-action="Details" asp-route-id="@invoice.CustomerInvoiceId" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-eye"></i> View
-                                    </a>
-                                    <a asp-action="DownloadPdf" asp-route-id="@invoice.CustomerInvoiceId" class="btn btn-sm btn-success">
-                                        <i class="bi bi-file-pdf"></i> PDF
-                                    </a>
-                                </td>
+                                <th>Invoice</th>
+                                <th>Invoice Date</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Payment</th>
+                                <th class="text-end">Total</th>
+                                <th class="text-end">Paid</th>
+                                <th class="text-end">Due</th>
+                                <th class="text-end">Actions</th>
                             </tr>
-                        }
-                    }
-                </tbody>
-            </table>
+                        </thead>
+                        <tbody>
+                            @foreach (var invoice in Model.OrderByDescending(i => i.InvoiceDate))
+                            {
+                                var statusClass = invoice.Status switch
+                                {
+                                    CustomerInvoiceStatus.Confirmed => "is-confirmed",
+                                    CustomerInvoiceStatus.Cancelled => "is-cancelled",
+                                    _ => "is-draft"
+                                };
+                                var paymentClass = invoice.PaymentStatus switch
+                                {
+                                    CustomerInvoicePaymentStatus.Paid => "is-paid",
+                                    CustomerInvoicePaymentStatus.Partial => "is-partial",
+                                    _ => "is-unpaid"
+                                };
+                                <tr>
+                                    <td class="portal-ledger-figure">@invoice.InvoiceNumber</td>
+                                    <td>@invoice.InvoiceDate.ToString("dd MMM yyyy")</td>
+                                    <td>@invoice.DueDate.ToString("dd MMM yyyy")</td>
+                                    <td>
+                                        <span class="portal-ledger-badge @statusClass">@invoice.Status</span>
+                                    </td>
+                                    <td>
+                                        <span class="portal-ledger-badge @paymentClass">@invoice.PaymentStatus</span>
+                                    </td>
+                                    <td class="text-end portal-ledger-figure">@invoice.TotalAmount.ToString("N2")</td>
+                                    <td class="text-end portal-ledger-figure">@invoice.AmountPaid.ToString("N2")</td>
+                                    <td class="text-end portal-ledger-figure">@invoice.AmountDue.ToString("N2")</td>
+                                    <td class="text-end d-flex justify-content-end gap-2 flex-wrap">
+                                        <a asp-action="Details" asp-route-id="@invoice.CustomerInvoiceId" class="portal-ledger-btn">
+                                            View
+                                        </a>
+                                        <a asp-action="DownloadPdf" asp-route-id="@invoice.CustomerInvoiceId" class="portal-ledger-btn secondary">
+                                            PDF
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
         </div>
     </div>
 </section>

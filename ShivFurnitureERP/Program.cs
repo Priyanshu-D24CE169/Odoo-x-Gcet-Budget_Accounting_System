@@ -1,4 +1,6 @@
 using System;
+using System.Globalization;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
@@ -16,6 +18,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
+
+var culture = CultureInfo.GetCultureInfo("en-IN");
+CultureInfo.DefaultThreadCurrentCulture = culture;
+CultureInfo.DefaultThreadCurrentUICulture = culture;
 
 builder.Services.AddControllersWithViews(options =>
 {
@@ -49,8 +55,13 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
+    const int adminSessionMinutes = 20;
+    const int portalSessionMinutes = 10;
+
     options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Home/AccessDenied";
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(adminSessionMinutes);
+    options.SlidingExpiration = false;
     options.Events = new CookieAuthenticationEvents
     {
         OnRedirectToLogin = context =>
@@ -63,6 +74,46 @@ builder.Services.ConfigureApplicationCookie(options =>
         OnRedirectToAccessDenied = context =>
         {
             context.Response.Redirect("/Home/AccessDenied");
+            return Task.CompletedTask;
+        },
+        OnSigningIn = context =>
+        {
+            var principal = context.Principal;
+            if (principal is null)
+            {
+                return Task.CompletedTask;
+            }
+
+            double? minutes = principal.IsInRole("Admin")
+                ? adminSessionMinutes
+                : principal.IsInRole("PortalUser")
+                    ? portalSessionMinutes
+                    : null;
+
+            if (minutes.HasValue)
+            {
+                var issued = DateTimeOffset.UtcNow;
+                context.Properties.IssuedUtc = issued;
+                context.Properties.ExpiresUtc = issued.AddMinutes(minutes.Value);
+                context.Properties.AllowRefresh = false;
+
+                var identity = principal.Identities.FirstOrDefault();
+                if (identity is not null && context.Properties.ExpiresUtc.HasValue)
+                {
+                    const string claimType = "session-expiration";
+                    var existingClaim = identity.FindFirst(claimType);
+                    if (existingClaim is not null)
+                    {
+                        identity.RemoveClaim(existingClaim);
+                    }
+
+                    identity.AddClaim(new Claim(
+                        claimType,
+                        context.Properties.ExpiresUtc.Value.ToUnixTimeSeconds().ToString(),
+                        ClaimValueTypes.Integer64));
+                }
+            }
+
             return Task.CompletedTask;
         }
     };
@@ -96,6 +147,7 @@ await using (var scope = app.Services.CreateAsyncScope())
     var dbContext = scopedProvider.GetRequiredService<ApplicationDbContext>();
     await dbContext.Database.MigrateAsync();
     await IdentitySeeder.SeedAsync(scopedProvider);
+    await DomainDataSeeder.SeedAsync(scopedProvider);
 }
 
 if (!app.Environment.IsDevelopment())
@@ -127,6 +179,6 @@ app.MapAreaControllerRoute(
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Account}/{action=Login}/{id?}");
 
 await app.RunAsync();

@@ -86,6 +86,9 @@
   padding: 0.85rem 1.25rem;
   margin-bottom: 1.25rem;
   font-weight: 600;
+  background: rgba(255, 193, 7, 0.18);
+  color: #7a4f00;
+  border: 1px solid rgba(255, 193, 7, 0.4);
 }
 
 .purchase-order-alert.is-success {
@@ -216,6 +219,45 @@
 .purchase-order-table td {
   padding: 0.8rem 0.5rem;
   vertical-align: middle;
+}
+
+.purchase-order-table .purchase-line-input {
+  width: 100%;
+  border: 1px solid var(--po-border);
+  border-radius: 12px;
+  padding: 0.4rem 0.65rem;
+  background: #fff;
+  font-weight: 600;
+  color: var(--po-ink);
+}
+
+.purchase-order-table .purchase-line-input:focus {
+  outline: none;
+  border-color: var(--po-primary);
+  box-shadow: 0 0 0 2px rgba(165, 68, 131, 0.15);
+}
+
+.purchase-line-row.has-warning {
+  background: rgba(255, 193, 7, 0.15);
+}
+
+.purchase-order-table .line-total {
+  font-weight: 700;
+  color: var(--po-primary);
+}
+
+.purchase-order-table .remove-line {
+  border: 1px solid rgba(165, 68, 131, 0.35);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--po-primary);
+  padding: 0.25rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.purchase-order-table .remove-line:hover {
+  background: rgba(165, 68, 131, 0.1);
 }
 
 .purchase-order-status-pill {

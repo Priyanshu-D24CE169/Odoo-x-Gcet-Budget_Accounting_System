@@ -1,28 +1,45 @@
 @model ShivFurnitureERP.ViewModels.LoginViewModel
 @{
     ViewData["Title"] = "Sign in";
+    ViewData["HidePublicNav"] = true;
+    ViewData["FullScreenBody"] = true;
 }
 
-<section class="row justify-content-center py-5">
-    <div class="col-md-6 col-lg-4">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h2 class="h4 text-center mb-2">Welcome back</h2>
-                <p class="text-muted text-center mb-4">Use your ShivFurniture credentials and we'll route you to the right workspace.</p>
+@section Styles {
+    <link rel="stylesheet" href="~/css/portal-auth.css" asp-append-version="true" />
+}
+
+<section class="portal-auth-page">
+    <div class="portal-auth-shell">
+        <div class="portal-auth-hero">
+            <div class="portal-auth-eyebrow">Secure Access</div>
+            <h1>Welcome back</h1>
+            <p>Use your ShivFurniture credentials and we'll route you to the right workspace.</p>
+        </div>
+        <div class="portal-auth-card">
+            <div class="portal-auth-tabs">
+                <span class="portal-auth-tab is-active">Sign In</span>
+                <a class="portal-auth-tab" asp-area="Portal" asp-controller="Account" asp-action="Register" asp-route-returnUrl="@Model.ReturnUrl">Create Account</a>
+                <a class="portal-auth-tab" asp-controller="Home" asp-action="Index">Home</a>
+            </div>
+            <div class="portal-auth-info" role="status">
+                Sessions expire automatically after <strong>20 minutes</strong> for admin access and <strong>10 minutes</strong> for portal users.
+            </div>
+            <div class="portal-auth-form-wrapper">
                 <form asp-controller="Account" asp-action="Login" method="post" novalidate>
                     @Html.AntiForgeryToken()
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                    <div class="mb-3">
-                        <label asp-for="LoginId" class="form-label"></label>
-                        <input asp-for="LoginId" class="form-control" autocomplete="username" />
-                        <span asp-validation-for="LoginId" class="text-danger"></span>
+                    <div class="portal-auth-field">
+                        <label asp-for="LoginId"></label>
+                        <input asp-for="LoginId" autocomplete="username" />
+                        <span asp-validation-for="LoginId" class="text-danger small"></span>
                     </div>
 
-                    <div class="mb-3">
-                        <label asp-for="Password" class="form-label"></label>
-                        <input asp-for="Password" class="form-control" autocomplete="current-password" />
-                        <span asp-validation-for="Password" class="text-danger"></span>
+                    <div class="portal-auth-field">
+                        <label asp-for="Password"></label>
+                        <input asp-for="Password" autocomplete="current-password" />
+                        <span asp-validation-for="Password" class="text-danger small"></span>
                     </div>
 
                     <div class="form-check mb-3">
@@ -32,12 +49,13 @@
 
                     <input type="hidden" asp-for="ReturnUrl" />
 
-                    <button type="submit" class="btn btn-primary w-100">Sign in</button>
+                    <div class="portal-auth-actions">
+                        <button type="submit" class="portal-auth-primary">Sign In</button>
+                    </div>
                 </form>
-                <p class="text-center text-muted mt-3 mb-0">
-                    Need a portal account?
-                    <a asp-area="Portal" asp-controller="Account" asp-action="Register" asp-route-returnUrl="@Model.ReturnUrl">Sign up</a>
-                </p>
+            </div>
+            <div class="portal-auth-meta">
+                Need a dedicated portal login? <a class="portal-auth-link" asp-area="Portal" asp-controller="Account" asp-action="Register" asp-route-returnUrl="@Model.ReturnUrl">Create an account</a>
             </div>
         </div>
     </div>

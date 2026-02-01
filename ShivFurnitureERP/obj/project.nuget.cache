@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Lc9Io3+/ZB0=",
+  "dgSpecHash": "QH7DyAKojDY=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Priya\\OneDrive\\Desktop\\Odoo-x-Gcet-Budget_Accounting_System\\ShivFurnitureERP\\ShivFurnitureERP.csproj",
+  "projectFilePath": "C:\\Users\\Priya\\source\\repos\\Shiv-Furniture\\ShivFurnitureERP\\ShivFurnitureERP.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Priya\\.nuget\\packages\\azure.core\\1.25.0\\azure.core.1.25.0.nupkg.sha512",
     "C:\\Users\\Priya\\.nuget\\packages\\azure.identity\\1.7.0\\azure.identity.1.7.0.nupkg.sha512",

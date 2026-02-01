@@ -2,8 +2,11 @@ wwwroot\css\analytical-account-master.css
 wwwroot\css\analytical-budget-master.css
 wwwroot\css\auto-analytical-model.css
 wwwroot\css\bill-payments.css
+wwwroot\css\budget-dashboard.css
 wwwroot\css\contact-master.css
 wwwroot\css\customer-invoice.css
+wwwroot\css\portal-auth.css
+wwwroot\css\portal-ledger.css
 wwwroot\css\product-master.css
 wwwroot\css\purchase-orders.css
 wwwroot\css\sales-orders.css

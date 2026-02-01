@@ -19,7 +19,7 @@ namespace ShivFurnitureERP.Controllers
 
         public async Task<IActionResult> Index(CancellationToken cancellationToken)
         {
-            var dashboard = await _dashboardService.GetDashboardAsync(cancellationToken);
+            var dashboard = await _dashboardService.GetDashboardAsync(null, null, null, cancellationToken);
             return View(dashboard);
         }
 
