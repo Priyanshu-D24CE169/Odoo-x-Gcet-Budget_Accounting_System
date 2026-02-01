@@ -1,0 +1,152 @@
+@model List<ShivFurnitureERP.Models.SalesOrder>
+@{
+    ViewData["Title"] = "My Sales Orders";
+}
+
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin: -1rem -1rem 2rem -1rem;
+        border-radius: 0;
+    }
+    .page-title {
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    .page-subtitle {
+        opacity: 0.9;
+        font-size: 0.95rem;
+    }
+    .content-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border: 1px solid #e8e8e8;
+    }
+    .table-header {
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #764ba2;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+    .badge-draft {
+        background: #6c757d;
+        color: white;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+    }
+    .badge-confirmed {
+        background: #28a745;
+        color: white;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+    }
+    .badge-cancelled {
+        background: #dc3545;
+        color: white;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+    }
+    .btn-view {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 20px;
+        padding: 0.4rem 1.2rem;
+        font-size: 0.85rem;
+        transition: transform 0.2s;
+    }
+    .btn-view:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(118, 75, 162, 0.4);
+        color: white;
+    }
+    .empty-state {
+        padding: 4rem 2rem;
+        text-align: center;
+        color: #6c757d;
+    }
+    .empty-state i {
+        font-size: 3rem;
+        color: #764ba2;
+        opacity: 0.3;
+    }
+</style>
+
+<div class="page-header">
+    <div class="container-fluid">
+        <h2 class="page-title mb-2">SALES ORDERS</h2>
+        <p class="page-subtitle mb-0">View and track your sales orders</p>
+    </div>
+</div>
+
+<section class="container-fluid">
+    @if (!Model.Any())
+    {
+        <div class="content-card">
+            <div class="empty-state">
+                <i class="bi bi-receipt"></i>
+                <p class="mt-3 mb-0 h5">No sales orders found</p>
+                <p class="text-muted">Your sales orders will appear here once created</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="content-card">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-header">
+                        <tr>
+                            <th class="border-0 py-3">SO NUMBER</th>
+                            <th class="border-0 py-3">SO DATE</th>
+                            <th class="border-0 py-3">REFERENCE</th>
+                            <th class="border-0 py-3">STATUS</th>
+                            <th class="border-0 py-3 text-end">TOTAL AMOUNT</th>
+                            <th class="border-0 py-3 text-end">ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model)
+                        {
+                            var totalAmount = order.Lines.Sum(l => l.Total);
+                            <tr>
+                                <td class="fw-semibold" style="color: #764ba2;">@order.SONumber</td>
+                                <td>@order.SODate.ToString("dd MMM yyyy")</td>
+                                <td>@(order.Reference ?? "-")</td>
+                                <td>
+                                    @if (order.Status == ShivFurnitureERP.Models.SalesOrderStatus.Draft)
+                                    {
+                                        <span class="badge-draft">Draft</span>
+                                    }
+                                    else if (order.Status == ShivFurnitureERP.Models.SalesOrderStatus.Confirmed)
+                                    {
+                                        <span class="badge-confirmed">Confirmed</span>
+                                    }
+                                    else if (order.Status == ShivFurnitureERP.Models.SalesOrderStatus.Cancelled)
+                                    {
+                                        <span class="badge-cancelled">Cancelled</span>
+                                    }
+                                </td>
+                                <td class="fw-semibold text-end">?@totalAmount.ToString("N2")</td>
+                                <td class="text-end">
+                                    <a asp-action="Details" asp-route-id="@order.SalesOrderId" class="btn-view">
+                                        <i class="bi bi-eye"></i> View Details
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</section>
+

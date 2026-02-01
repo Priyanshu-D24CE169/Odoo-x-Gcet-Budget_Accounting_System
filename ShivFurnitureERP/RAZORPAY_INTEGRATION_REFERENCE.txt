@@ -1,0 +1,108 @@
+// ====================================================================
+// RAZORPAY PAYMENT INTEGRATION - QUICK REFERENCE
+// ====================================================================
+
+// FILE: ShivFurnitureERP\appsettings.json
+{
+  "Razorpay": {
+    "KeyId": "rzp_test_SARpa9YbdC9n5c",          // Your Razorpay Test/Live Key ID
+    "KeySecret": "ARY6YclEZZdHMHIgHfX3jHjx",      // Your Razorpay Test/Live Secret
+    "CompanyName": "Shiv Furniture ERP",          // Display name in checkout
+    "CompanyLogo": "",                             // Logo URL (optional)
+    "ThemeColor": "#3399cc"                        // Checkout theme color
+  }
+}
+
+// ====================================================================
+// ENDPOINTS CREATED
+// ====================================================================
+
+// 1. CreateRazorpayOrder (POST)
+//    - Creates Razorpay order
+//    - Returns order details for checkout
+//    URL: /Portal/CustomerInvoices/CreateRazorpayOrder
+
+// 2. VerifyRazorpayPayment (POST)
+//    - Verifies payment signature
+//    - Records payment in database
+//    URL: /Portal/CustomerInvoices/VerifyRazorpayPayment
+
+// ====================================================================
+// HOW IT WORKS
+// ====================================================================
+
+// FLOW:
+// 1. Customer views unpaid invoice
+// 2. Clicks "Pay with Razorpay" button
+// 3. System creates Razorpay order (CreateRazorpayOrder)
+// 4. Razorpay checkout modal opens
+// 5. Customer completes payment
+// 6. Razorpay returns payment details
+// 7. System verifies signature (VerifyRazorpayPayment)
+// 8. Payment recorded in database
+// 9. Invoice status updated
+
+// ====================================================================
+// FEATURES
+// ====================================================================
+
+// ? Secure payment signature verification
+// ? Automatic invoice payment recording
+// ? Support for partial payments
+// ? Real-time payment status updates
+// ? Fallback to simulator if Razorpay not configured
+// ? Comprehensive error handling and logging
+// ? Mobile-responsive checkout
+
+// ====================================================================
+// TESTING
+// ====================================================================
+
+// TEST CARDS (Razorpay Test Mode):
+// Success: 4111 1111 1111 1111
+// CVV: Any 3 digits
+// Expiry: Any future date
+// Name: Any name
+
+// NETBANKING: Use test bank credentials from Razorpay docs
+
+// UPI: success@razorpay (for success)
+//      failure@razorpay (for failure)
+
+// ====================================================================
+// PRODUCTION CHECKLIST
+// ====================================================================
+
+// 1. Replace test keys with live keys in appsettings.json
+// 2. Set KeyId to rzp_live_XXXXX
+// 3. Set KeySecret to your live secret
+// 4. Enable webhooks in Razorpay dashboard (optional)
+// 5. Test with small amount first
+// 6. Monitor payment logs
+// 7. Set company logo URL for branding
+
+// ====================================================================
+// TROUBLESHOOTING
+// ====================================================================
+
+// ISSUE: Payment not appearing
+// FIX: Check browser console for errors, verify KeyId is correct
+
+// ISSUE: Signature verification failed
+// FIX: Ensure KeySecret matches the one used for order creation
+
+// ISSUE: Amount mismatch
+// FIX: Amount is sent in paise (multiply by 100)
+
+// ISSUE: Checkout not opening
+// FIX: Verify Razorpay script loaded: https://checkout.razorpay.com/v1/checkout.js
+
+// ====================================================================
+// LOGS LOCATION
+// ====================================================================
+
+// Check application logs for:
+// - "Razorpay order created: {OrderId}"
+// - "Razorpay signature verified successfully"
+// - "Razorpay payment {PaymentId} recorded for invoice"
+// - Any error messages with stack traces

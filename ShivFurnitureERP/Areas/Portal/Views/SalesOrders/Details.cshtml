@@ -1,0 +1,202 @@
+@model ShivFurnitureERP.Models.SalesOrder
+@{
+    ViewData["Title"] = $"Sales Order {Model.SONumber}";
+    var totalAmount = Model.Lines.Sum(l => l.Total);
+}
+
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin: -1rem -1rem 2rem -1rem;
+    }
+    .page-title {
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    .info-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border: 1px solid #e8e8e8;
+        height: 100%;
+    }
+    .info-card .card-title {
+        color: #764ba2;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .info-label {
+        color: #764ba2;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .info-value {
+        color: #333;
+        font-weight: 500;
+    }
+    .amount-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3);
+    }
+    .amount-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .amount-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-top: 0.5rem;
+    }
+    .lines-table {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border: 1px solid #e8e8e8;
+    }
+    .table-header {
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #764ba2;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+    .btn-back {
+        background: white;
+        color: #764ba2;
+        border: 2px solid white;
+        border-radius: 20px;
+        padding: 0.5rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    .btn-back:hover {
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border-color: white;
+    }
+    .badge-status {
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+</style>
+
+<div class="page-header">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="page-title mb-2">Sales Order @Model.SONumber</h2>
+                <p class="mb-0 opacity-75">@Model.Customer?.Name</p>
+            </div>
+            <a asp-action="Index" class="btn-back">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+</div>
+
+<section class="container-fluid">
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="info-card p-4">
+                <h5 class="card-title">Order Information</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <div class="info-label mb-1">SO Number</div>
+                            <div class="info-value">@Model.SONumber</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <div class="info-label mb-1">SO Date</div>
+                            <div class="info-value">@Model.SODate.ToString("dd MMM yyyy")</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <div class="info-label mb-1">Reference</div>
+                            <div class="info-value">@(Model.Reference ?? "-")</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <div class="info-label mb-1">Status</div>
+                            <div class="info-value">
+                                @if (Model.Status == ShivFurnitureERP.Models.SalesOrderStatus.Draft)
+                                {
+                                    <span class="badge-status" style="background: #6c757d; color: white;">Draft</span>
+                                }
+                                else if (Model.Status == ShivFurnitureERP.Models.SalesOrderStatus.Confirmed)
+                                {
+                                    <span class="badge-status" style="background: #28a745; color: white;">Confirmed</span>
+                                }
+                                else if (Model.Status == ShivFurnitureERP.Models.SalesOrderStatus.Cancelled)
+                                {
+                                    <span class="badge-status" style="background: #dc3545; color: white;">Cancelled</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="amount-card">
+                <div class="amount-label">Total Amount</div>
+                <div class="amount-value">?@totalAmount.ToString("N2")</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="lines-table">
+        <div class="p-4">
+            <h5 class="card-title mb-4" style="color: #764ba2; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Order Lines</h5>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-header">
+                        <tr>
+                            <th class="border-0 py-3">Product</th>
+                            <th class="border-0 py-3 text-center" style="width:120px;">Quantity</th>
+                            <th class="border-0 py-3 text-end" style="width:140px;">Unit Price</th>
+                            <th class="border-0 py-3 text-end" style="width:160px;">Line Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var line in Model.Lines.OrderBy(l => l.SalesOrderLineId))
+                        {
+                            <tr>
+                                <td class="fw-semibold">@(line.Product?.Name ?? $"Product #{line.ProductId}")</td>
+                                <td class="text-center">@line.Quantity.ToString("N2")</td>
+                                <td class="text-end">?@line.UnitPrice.ToString("N2")</td>
+                                <td class="text-end fw-bold" style="color: #764ba2;">?@line.Total.ToString("N2")</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot style="background: #f8f9fa;">
+                        <tr>
+                            <th colspan="3" class="text-end py-3" style="color: #764ba2; text-transform: uppercase; letter-spacing: 0.5px;">Total</th>
+                            <th class="text-end py-3" style="color: #764ba2; font-size: 1.2rem;">?@totalAmount.ToString("N2")</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
