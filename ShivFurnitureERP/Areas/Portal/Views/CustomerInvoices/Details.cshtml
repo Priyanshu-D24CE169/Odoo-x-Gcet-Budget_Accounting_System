@@ -136,6 +136,9 @@
                 {
                     <!-- Razorpay Integration -->
                     <div class="row g-3">
+                        <form id="razorpayTokenForm" class="d-none">
+                            @Html.AntiForgeryToken()
+                        </form>
                         <div class="col-md-6">
                             <label class="form-label">Invoice Number</label>
                             <input class="form-control" value="@Model.InvoiceNumber" readonly />
@@ -209,6 +212,8 @@
     {
         <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
         <script>
+            const antiForgeryToken = document.querySelector('#razorpayTokenForm input[name="__RequestVerificationToken"]')?.value ?? '';
+
             document.getElementById('rzpPayButton').addEventListener('click', function() {
                 const amount = parseFloat(document.getElementById('paymentAmount').value);
                 const maxAmount = @Model.AmountDue;
@@ -223,12 +228,12 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        'RequestVerificationToken': antiForgeryToken
                     },
                     body: new URLSearchParams({
                         invoiceId: @Model.CustomerInvoiceId,
                         amount: amount,
-                        __RequestVerificationToken: '@Html.AntiForgeryToken()'.match(/value="([^"]+)"/)?.[1] || ''
+                        __RequestVerificationToken: antiForgeryToken
                     })
                 })
                 .then(response => response.json())
@@ -283,7 +288,8 @@
                 fetch('@Url.Action("VerifyRazorpayPayment")', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': antiForgeryToken
                     },
                     body: new URLSearchParams({
                         invoiceId: @Model.CustomerInvoiceId,
@@ -291,7 +297,7 @@
                         razorpayPaymentId: paymentId,
                         razorpaySignature: signature,
                         amount: amount,
-                        __RequestVerificationToken: '@Html.AntiForgeryToken()'.match(/value="([^"]+)"/)?.[1] || ''
+                        __RequestVerificationToken: antiForgeryToken
                     })
                 })
                 .then(response => response.json())

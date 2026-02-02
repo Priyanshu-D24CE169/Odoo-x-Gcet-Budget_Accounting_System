@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using ShivFurnitureERP.Models;
+using ShivFurnitureERP.Options;
 using ShivFurnitureERP.Services;
 using ShivFurnitureERP.ViewModels.CustomerInvoices;
+using ShivFurnitureERP.ViewModels.Payments;
 
 namespace ShivFurnitureERP.Areas.Admin.Controllers;
 
@@ -12,11 +15,22 @@ public class CustomerInvoicesController : Controller
 {
     private readonly ICustomerInvoiceService _invoiceService;
     private readonly ISalesOrderService _salesOrderService;
+    private readonly RazorpayPaymentService _razorpayService;
+    private readonly ILogger<CustomerInvoicesController> _logger;
+    private readonly bool _useRazorpay;
 
-    public CustomerInvoicesController(ICustomerInvoiceService invoiceService, ISalesOrderService salesOrderService)
+    public CustomerInvoicesController(
+        ICustomerInvoiceService invoiceService,
+        ISalesOrderService salesOrderService,
+        RazorpayPaymentService razorpayService,
+        ILogger<CustomerInvoicesController> logger,
+        IOptions<RazorpayOptions> razorpayOptions)
     {
         _invoiceService = invoiceService;
         _salesOrderService = salesOrderService;
+        _razorpayService = razorpayService;
+        _logger = logger;
+        _useRazorpay = !string.IsNullOrWhiteSpace(razorpayOptions.Value.KeyId);
     }
 
     public async Task<IActionResult> Index(
@@ -96,6 +110,7 @@ public class CustomerInvoicesController : Controller
         }
 
         var viewModel = MapToDetailsViewModel(invoice);
+        ViewBag.UseRazorpay = _useRazorpay;
         return View(viewModel);
     }
 
@@ -142,6 +157,114 @@ public class CustomerInvoicesController : Controller
         {
             ModelState.AddModelError(string.Empty, ex.Message);
             return await ReturnDetailsWithModelErrorsAsync(model.CustomerInvoiceId, cancellationToken);
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateRazorpayOrder(int invoiceId, decimal amount, CancellationToken cancellationToken)
+    {
+        var invoice = await _invoiceService.GetByIdAsync(invoiceId, cancellationToken);
+        if (invoice is null)
+        {
+            return Json(new { success = false, message = "Invoice not found" });
+        }
+
+        if (invoice.PaymentStatus == CustomerInvoicePaymentStatus.Paid)
+        {
+            return Json(new { success = false, message = "Invoice already paid" });
+        }
+
+        var amountDue = Math.Max(0, invoice.TotalAmount - invoice.AmountPaid);
+        if (amount <= 0 || amount > amountDue)
+        {
+            return Json(new { success = false, message = "Invalid payment amount" });
+        }
+
+        var request = new PaymentGatewayRequest
+        {
+            InvoiceNumber = invoice.InvoiceNumber,
+            CustomerName = invoice.Customer?.Name ?? "Customer",
+            Amount = amount,
+            Mode = PaymentMode.Online
+        };
+
+        var orderResponse = await _razorpayService.CreateOrderAsync(request, cancellationToken);
+        if (!orderResponse.Success)
+        {
+            _logger.LogError("Failed to create Razorpay order for invoice {InvoiceId}: {Error}", invoiceId, orderResponse.ErrorMessage);
+            return Json(new { success = false, message = orderResponse.ErrorMessage });
+        }
+
+        return Json(new
+        {
+            success = true,
+            orderId = orderResponse.OrderId,
+            amount = (int)(orderResponse.Amount * 100),
+            currency = orderResponse.Currency,
+            keyId = orderResponse.KeyId,
+            companyName = orderResponse.CompanyName,
+            companyLogo = orderResponse.CompanyLogo,
+            themeColor = orderResponse.ThemeColor,
+            invoiceNumber = orderResponse.InvoiceNumber,
+            customerName = orderResponse.CustomerName
+        });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> VerifyRazorpayPayment(
+        int invoiceId,
+        string razorpayOrderId,
+        string razorpayPaymentId,
+        string razorpaySignature,
+        decimal amount,
+        CancellationToken cancellationToken)
+    {
+        var invoice = await _invoiceService.GetByIdAsync(invoiceId, cancellationToken);
+        if (invoice is null)
+        {
+            return Json(new { success = false, message = "Invoice not found" });
+        }
+
+        var isValid = _razorpayService.VerifyPaymentSignature(razorpayOrderId, razorpayPaymentId, razorpaySignature);
+        if (!isValid)
+        {
+            _logger.LogWarning("Invalid Razorpay signature for invoice {InvoiceId}, payment {PaymentId}", invoiceId, razorpayPaymentId);
+            return Json(new { success = false, message = "Payment verification failed" });
+        }
+
+        var paymentDetails = await _razorpayService.FetchPaymentDetailsAsync(razorpayPaymentId, cancellationToken);
+        if (!paymentDetails.Succeeded)
+        {
+            _logger.LogError("Razorpay payment {PaymentId} not successful for invoice {InvoiceId}", razorpayPaymentId, invoiceId);
+            return Json(new { success = false, message = "Payment not successful" });
+        }
+
+        try
+        {
+            await _invoiceService.RecordPaymentAsync(
+                invoice.CustomerInvoiceId,
+                DateTime.UtcNow.Date,
+                amount,
+                PaymentMode.Online,
+                $"Razorpay: {razorpayPaymentId}",
+                cancellationToken);
+
+            _logger.LogInformation("Razorpay payment {PaymentId} recorded for invoice {InvoiceNumber}, amount: {Amount}",
+                razorpayPaymentId, invoice.InvoiceNumber, amount);
+
+            return Json(new
+            {
+                success = true,
+                message = "Payment successful",
+                paymentId = razorpayPaymentId
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to record Razorpay payment {PaymentId} for invoice {InvoiceId}", razorpayPaymentId, invoiceId);
+            return Json(new { success = false, message = "Failed to record payment" });
         }
     }
 

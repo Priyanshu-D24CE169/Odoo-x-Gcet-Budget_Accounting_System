@@ -58,6 +58,14 @@ public class ContactsController : Controller
     {
         if (!ModelState.IsValid)
         {
+            await PopulateFormDependenciesAsync(model, cancellationToken);
+            return View(model);
+        }
+
+        if (await _contactService.EmailExistsAsync(model.Email, cancellationToken))
+        {
+            ModelState.AddModelError(nameof(model.Email), "A contact with this email already exists.");
+            await PopulateFormDependenciesAsync(model, cancellationToken);
             return View(model);
         }
 
@@ -91,8 +99,23 @@ public class ContactsController : Controller
             return BadRequest();
         }
 
+        var existingContact = await _contactService.GetByIdAsync(id, cancellationToken);
+        if (existingContact is null)
+        {
+            return NotFound();
+        }
+
         if (!ModelState.IsValid)
         {
+            await PopulateFormDependenciesAsync(model, cancellationToken, existingContact);
+            return View(model);
+        }
+
+        if (!existingContact.Email.Equals(model.Email, StringComparison.OrdinalIgnoreCase) &&
+            await _contactService.EmailExistsAsync(model.Email, cancellationToken))
+        {
+            ModelState.AddModelError(nameof(model.Email), "A contact with this email already exists.");
+            await PopulateFormDependenciesAsync(model, cancellationToken, existingContact);
             return View(model);
         }
 
@@ -102,6 +125,35 @@ public class ContactsController : Controller
 
         TempData["StatusMessage"] = "Contact updated successfully.";
         return RedirectToAction(nameof(Index));
+    }
+
+    private async Task PopulateFormDependenciesAsync(ContactFormViewModel model, CancellationToken cancellationToken, Contact? existingContact = null)
+    {
+        var contact = existingContact;
+
+        if (contact is null && model.ContactId.HasValue)
+        {
+            contact = await _contactService.GetByIdAsync(model.ContactId.Value, cancellationToken);
+        }
+
+        if (contact is not null)
+        {
+            model.ExistingImagePath ??= contact.ImagePath;
+            if (string.IsNullOrWhiteSpace(model.TagsInput) && contact.ContactTags?.Count > 0)
+            {
+                model.TagsInput = string.Join(", ", contact.ContactTags.Select(ct => ct.Tag.Name));
+            }
+
+            if (model.CreatedOn == default)
+            {
+                model.CreatedOn = contact.CreatedOn;
+            }
+        }
+
+        if (model.CreatedOn == default)
+        {
+            model.CreatedOn = DateTime.UtcNow;
+        }
     }
 
     private static Contact MapToEntity(ContactFormViewModel model)

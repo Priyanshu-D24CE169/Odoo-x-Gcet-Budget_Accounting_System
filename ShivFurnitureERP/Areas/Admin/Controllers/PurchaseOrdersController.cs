@@ -187,11 +187,15 @@ public class PurchaseOrdersController : Controller
             .Select(p => new SelectListItem { Text = p.Name, Value = p.ProductId.ToString() })
             .ToListAsync(cancellationToken);
 
+        var expenseAccountIds = _dbContext.AnalyticalBudgets
+            .Where(budget => budget.BudgetType == BudgetType.Expense)
+            .Select(budget => budget.AnalyticalAccountId)
+            .Distinct();
+
         var analyticalAccounts = await _dbContext.AnalyticalAccounts
-            .Where(a => !_dbContext.AnalyticalBudgets
-                .Any(b => b.AnalyticalAccountId == a.AnalyticalAccountId && b.BudgetType == BudgetType.Income))
-            .OrderBy(a => a.Name)
-            .Select(a => new SelectListItem { Text = a.Name, Value = a.AnalyticalAccountId.ToString() })
+            .Where(account => !account.IsArchived && expenseAccountIds.Contains(account.AnalyticalAccountId))
+            .OrderBy(account => account.Name)
+            .Select(account => new SelectListItem { Text = account.Name, Value = account.AnalyticalAccountId.ToString() })
             .ToListAsync(cancellationToken);
 
         model.Vendors = vendors;

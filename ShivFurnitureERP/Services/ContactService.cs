@@ -122,6 +122,20 @@ public class ContactService : IContactService
         await EnsurePortalAccountAsync(existingContact, cancellationToken);
     }
 
+    public Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return Task.FromResult(false);
+        }
+
+        var normalized = email.Trim().ToLower();
+
+        return _dbContext.Contacts
+            .AsNoTracking()
+            .AnyAsync(c => c.Email.ToLower() == normalized, cancellationToken);
+    }
+
     private async Task EnsurePortalAccountAsync(Contact contact, CancellationToken cancellationToken)
     {
         if (!RequiresPortalAccount(contact.Type) || contact.PortalUser is not null)

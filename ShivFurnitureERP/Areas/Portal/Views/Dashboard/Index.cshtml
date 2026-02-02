@@ -1,13 +1,287 @@
+@using ShivFurnitureERP.Models
+@model PortalDashboardViewModel
+
 @{
     ViewData["Title"] = "Portal Dashboard";
     Layout = "~/Areas/Portal/Views/Shared/_PortalLayout.cshtml";
 }
 
-<section class="container py-5">
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <h2 class="fw-semibold mb-3">Welcome to the portal</h2>
-            <p class="text-muted">This is your personal workspace.</p>
+@section Styles {
+    <link rel="stylesheet" href="~/css/portal-dashboard.css" asp-append-version="true" />
+}
+
+@{
+    var nextDueInvoice = Model.UpcomingInvoices.FirstOrDefault();
+    var nextDueText = nextDueInvoice is null ? "No upcoming due" : $"Next due {nextDueInvoice.DueDate:MMM dd}";
+}
+
+<section class="portal-dashboard">
+    <div class="container-fluid px-3 px-md-4">
+        <div class="dashboard-hero">
+            <div>
+                <p class="dashboard-hero__eyebrow">Customer Portal</p>
+                <h1>Hi @Model.DisplayName, welcome back.</h1>
+                <p>@Model.GeneratedOn.ToString("dddd, dd MMMM yyyy")</p>
+                <div class="dashboard-hero__stat">
+                    <span>Paid this year</span>
+                    <strong>@Model.PaidThisYear.ToString("C")</strong>
+                </div>
+            </div>
+            <div class="dashboard-hero__actions">
+                <a class="btn btn-light" asp-area="Portal" asp-controller="CustomerInvoices" asp-action="Index">Invoices</a>
+                <a class="btn btn-outline-secondary" asp-area="Portal" asp-controller="SalesOrders" asp-action="Index">Sales Orders</a>
+                <a class="btn btn-outline-secondary" asp-area="Portal" asp-controller="PurchaseOrders" asp-action="Index">Purchase Orders</a>
+            </div>
         </div>
+
+        @if (!Model.HasContact)
+        {
+            <div class="alert alert-warning dashboard-alert">
+                <strong>No linked account.</strong> Your profile is not connected to a customer or vendor record yet. Please contact the administrator.
+            </div>
+        }
+        else
+        {
+            <div class="row g-3 metric-grid">
+                <div class="col-md-6 col-xl-3">
+                    <div class="metric-card">
+                        <p class="metric-card__label">Outstanding balance</p>
+                        <p class="metric-card__value">@Model.OutstandingAmount.ToString("C")</p>
+                        <p class="metric-card__meta">@Model.OpenInvoices open invoices</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <div class="metric-card">
+                        <p class="metric-card__label">Overdue invoices</p>
+                        <p class="metric-card__value">@Model.OverdueInvoices</p>
+                        <p class="metric-card__meta">@nextDueText</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <div class="metric-card">
+                        <p class="metric-card__label">Sales orders</p>
+                        <p class="metric-card__value">@Model.ActiveSalesOrders</p>
+                        <p class="metric-card__meta">Pipeline @Model.SalesOrderValue.ToString("C")</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <div class="metric-card">
+                        <p class="metric-card__label">Purchase orders</p>
+                        <p class="metric-card__value">@Model.ActivePurchaseOrders</p>
+                        <p class="metric-card__meta">Commitments @Model.PurchaseOrderValue.ToString("C")</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mt-1 align-items-stretch">
+                <div class="col-lg-8">
+                    <div class="dashboard-panel mb-4">
+                        <div class="dashboard-panel__header">
+                            <div>
+                                <p class="panel-eyebrow">Payment radar</p>
+                                <h2>Upcoming invoices</h2>
+                            </div>
+                            <a class="link-small" asp-area="Portal" asp-controller="CustomerInvoices" asp-action="Index">View all invoices</a>
+                        </div>
+                        @if (Model.UpcomingInvoices.Any())
+                        {
+                            <div class="upcoming-list">
+                                @foreach (var invoice in Model.UpcomingInvoices)
+                                {
+                                    <article class="upcoming-card">
+                                        <div>
+                                            <p class="upcoming-card__title">@invoice.InvoiceNumber</p>
+                                            <p class="upcoming-card__meta">Due @invoice.DueDate.ToString("dd MMM") · @invoice.OutstandingAmount.ToString("C") outstanding</p>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="status-pill @PaymentStatusClass(invoice.PaymentStatus)">@invoice.PaymentStatus</span>
+                                            <a class="stretched-link" asp-area="Portal" asp-controller="CustomerInvoices" asp-action="Details" asp-route-id="@invoice.CustomerInvoiceId">Review</a>
+                                        </div>
+                                    </article>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="dashboard-empty">Nothing is due right now.</div>
+                        }
+                    </div>
+
+                    <div class="dashboard-panel">
+                        <div class="dashboard-panel__header">
+                            <div>
+                                <p class="panel-eyebrow">Recent activity</p>
+                                <h2>Recent invoices</h2>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="dashboard-table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Invoice</th>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Payment</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                @if (Model.RecentInvoices.Any())
+                                {
+                                    foreach (var invoice in Model.RecentInvoices)
+                                    {
+                                        <tr>
+                                            <td>@invoice.InvoiceNumber</td>
+                                            <td>@invoice.InvoiceDate.ToString("dd MMM yyyy")</td>
+                                            <td>@invoice.TotalAmount.ToString("C")</td>
+                                            <td><span class="status-pill @InvoiceStatusClass(invoice.Status)">@invoice.Status</span></td>
+                                            <td><span class="status-pill @PaymentStatusClass(invoice.PaymentStatus)">@invoice.PaymentStatus</span></td>
+                                            <td class="text-end">
+                                                <a class="link-small" asp-area="Portal" asp-controller="CustomerInvoices" asp-action="Details" asp-route-id="@invoice.CustomerInvoiceId">Open</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6">No invoices found.</td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="dashboard-panel mb-4">
+                        <div class="dashboard-panel__header">
+                            <div>
+                                <p class="panel-eyebrow">Heads up</p>
+                                <h2>Alerts</h2>
+                            </div>
+                        </div>
+                        <div class="alerts-stack">
+                            @foreach (var alert in Model.Alerts)
+                            {
+                                <div class="alert alert-@alert.Tone mb-3" role="alert">
+                                    <strong>@alert.Title.</strong> @alert.Message
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="dashboard-panel">
+                        <div class="dashboard-panel__header">
+                            <div>
+                                <p class="panel-eyebrow">Shortcuts</p>
+                                <h2>Quick links</h2>
+                            </div>
+                        </div>
+                        <div class="quick-links">
+                            <a asp-area="Portal" asp-controller="CustomerInvoices" asp-action="Index">View invoice ledger</a>
+                            <a asp-area="Portal" asp-controller="SalesOrders" asp-action="Index">Track sales orders</a>
+                            <a asp-area="Portal" asp-controller="PurchaseOrders" asp-action="Index">Track purchase orders</a>
+                            <a asp-area="" asp-controller="Account" asp-action="Profile">Manage profile</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mt-1">
+                <div class="col-lg-6">
+                    <div class="dashboard-panel">
+                        <div class="dashboard-panel__header">
+                            <div>
+                                <p class="panel-eyebrow">Customer pipeline</p>
+                                <h2>Sales orders</h2>
+                            </div>
+                            <a class="link-small" asp-area="Portal" asp-controller="SalesOrders" asp-action="Index">View all</a>
+                        </div>
+                        @if (Model.RecentSalesOrders.Any())
+                        {
+                            <div class="order-list">
+                                @foreach (var order in Model.RecentSalesOrders)
+                                {
+                                    <article class="order-card">
+                                        <div>
+                                            <p class="order-card__title">@order.Number</p>
+                                            <p class="order-card__meta">@order.Date.ToString("dd MMM yyyy")</p>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="status-pill @OrderStatusClass(order.StatusCode)">@order.StatusLabel</span>
+                                            <p class="order-card__amount">@order.TotalAmount.ToString("C")</p>
+                                            <a class="link-small" asp-area="Portal" asp-controller="SalesOrders" asp-action="Details" asp-route-id="@order.Id">Details</a>
+                                        </div>
+                                    </article>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="dashboard-empty">No sales orders yet.</div>
+                        }
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="dashboard-panel">
+                        <div class="dashboard-panel__header">
+                            <div>
+                                <p class="panel-eyebrow">Vendor pipeline</p>
+                                <h2>Purchase orders</h2>
+                            </div>
+                            <a class="link-small" asp-area="Portal" asp-controller="PurchaseOrders" asp-action="Index">View all</a>
+                        </div>
+                        @if (Model.RecentPurchaseOrders.Any())
+                        {
+                            <div class="order-list">
+                                @foreach (var order in Model.RecentPurchaseOrders)
+                                {
+                                    <article class="order-card">
+                                        <div>
+                                            <p class="order-card__title">@order.Number</p>
+                                            <p class="order-card__meta">@order.Date.ToString("dd MMM yyyy")</p>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="status-pill @OrderStatusClass(order.StatusCode)">@order.StatusLabel</span>
+                                            <p class="order-card__amount">@order.TotalAmount.ToString("C")</p>
+                                            <a class="link-small" asp-area="Portal" asp-controller="PurchaseOrders" asp-action="Details" asp-route-id="@order.Id">Details</a>
+                                        </div>
+                                    </article>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="dashboard-empty">No purchase orders yet.</div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 </section>
+
+@functions {
+    private static string PaymentStatusClass(CustomerInvoicePaymentStatus status) => status switch
+    {
+        CustomerInvoicePaymentStatus.Paid => "is-paid",
+        CustomerInvoicePaymentStatus.Partial => "is-partial",
+        _ => "is-due"
+    };
+
+    private static string InvoiceStatusClass(CustomerInvoiceStatus status) => status switch
+    {
+        CustomerInvoiceStatus.Confirmed => "is-confirmed",
+        CustomerInvoiceStatus.Cancelled => "is-cancelled",
+        _ => "is-draft"
+    };
+
+    private static string OrderStatusClass(string code) => code switch
+    {
+        "confirmed" => "is-confirmed",
+        "cancelled" => "is-cancelled",
+        _ => "is-draft"
+    };
+}

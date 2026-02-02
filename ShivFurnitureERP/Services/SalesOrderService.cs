@@ -19,6 +19,7 @@ public class SalesOrderService : ISalesOrderService
     {
         var query = _dbContext.SalesOrders
             .Include(order => order.Customer)
+            .Include(order => order.Lines)
             .OrderByDescending(order => order.SalesOrderId)
             .AsNoTracking();
 

@@ -6,6 +6,7 @@ wwwroot\css\budget-dashboard.css
 wwwroot\css\contact-master.css
 wwwroot\css\customer-invoice.css
 wwwroot\css\portal-auth.css
+wwwroot\css\portal-dashboard.css
 wwwroot\css\portal-ledger.css
 wwwroot\css\product-master.css
 wwwroot\css\purchase-orders.css
@@ -75,3 +76,5 @@ wwwroot\lib\jquery\dist\jquery.slim.js
 wwwroot\lib\jquery\dist\jquery.slim.min.js
 wwwroot\lib\jquery\dist\jquery.slim.min.map
 wwwroot\lib\jquery\LICENSE.txt
+wwwroot\uploads\contacts\82701fbed706421c994ecff25043b596.png
+wwwroot\uploads\contacts\dc041646485848c686feea43eb2e4caa.png

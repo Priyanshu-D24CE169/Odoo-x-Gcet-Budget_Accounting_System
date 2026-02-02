@@ -7,7 +7,6 @@ C:\Users\Priya\source\repos\Shiv-Furniture\ShivFurnitureERP\obj\Debug\net8.0\Shi
 C:\Users\Priya\source\repos\Shiv-Furniture\ShivFurnitureERP\obj\Debug\net8.0\ShivFurnitureERP.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\Priya\source\repos\Shiv-Furniture\ShivFurnitureERP\obj\Debug\net8.0\ShivFurnitureERP.RazorAssemblyInfo.cache
 C:\Users\Priya\source\repos\Shiv-Furniture\ShivFurnitureERP\obj\Debug\net8.0\ShivFurnitureERP.RazorAssemblyInfo.cs
-C:\Users\Priya\source\repos\Shiv-Furniture\ShivFurnitureERP\bin\Debug\net8.0\appsettings.Development.json
 C:\Users\Priya\source\repos\Shiv-Furniture\ShivFurnitureERP\bin\Debug\net8.0\ShivFurnitureERP.staticwebassets.runtime.json
 C:\Users\Priya\source\repos\Shiv-Furniture\ShivFurnitureERP\bin\Debug\net8.0\ShivFurnitureERP.staticwebassets.endpoints.json
 C:\Users\Priya\source\repos\Shiv-Furniture\ShivFurnitureERP\bin\Debug\net8.0\ShivFurnitureERP.exe
@@ -393,3 +392,4 @@ C:\Users\Priya\source\repos\Shiv-Furniture\ShivFurnitureERP\bin\Debug\net8.0\run
 C:\Users\Priya\source\repos\Shiv-Furniture\ShivFurnitureERP\bin\Debug\net8.0\runtimes\win-x86\native\libwinpthread-1.dll
 C:\Users\Priya\source\repos\Shiv-Furniture\ShivFurnitureERP\bin\Debug\net8.0\runtimes\win-x86\native\qpdf.dll
 C:\Users\Priya\source\repos\Shiv-Furniture\ShivFurnitureERP\bin\Debug\net8.0\runtimes\win-x86\native\zlib1.dll
+C:\Users\Priya\source\repos\Shiv-Furniture\ShivFurnitureERP\bin\Debug\net8.0\appsettings.json

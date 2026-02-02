@@ -22,9 +22,6 @@
                 <a class="portal-auth-tab" asp-area="Portal" asp-controller="Account" asp-action="Register" asp-route-returnUrl="@Model.ReturnUrl">Create Account</a>
                 <a class="portal-auth-tab" asp-controller="Home" asp-action="Index">Home</a>
             </div>
-            <div class="portal-auth-info" role="status">
-                Sessions expire automatically after <strong>20 minutes</strong> for admin access and <strong>10 minutes</strong> for portal users.
-            </div>
             <div class="portal-auth-form-wrapper">
                 <form asp-controller="Account" asp-action="Login" method="post" novalidate>
                     @Html.AntiForgeryToken()

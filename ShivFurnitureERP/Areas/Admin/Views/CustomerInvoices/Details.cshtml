@@ -172,6 +172,38 @@
                     </div>
                     @if (Model.CanRecordPayment)
                     {
+                        @if (ViewBag.UseRazorpay == true)
+                        {
+                            <!-- Razorpay Online Payment -->
+                            <div class="mb-4 pb-3 border-bottom">
+                                <h6 class="fw-semibold mb-3">Pay Online with Razorpay</h6>
+                                <form id="razorpayTokenForm" class="d-none">
+                                    @Html.AntiForgeryToken()
+                                </form>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Invoice Number</label>
+                                        <input class="form-control" value="@Model.InvoiceNumber" readonly />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Customer</label>
+                                        <input class="form-control" value="@Model.CustomerName" readonly />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Amount to Pay</label>
+                                        <input id="paymentAmount" class="form-control" type="number" step="0.01" min="0.01" max="@Model.AmountDue" value="@Model.AmountDue" />
+                                        <small class="text-muted">Maximum: ?@Model.AmountDue.ToString("N2")</small>
+                                    </div>
+                                </div>
+                                <button type="button" id="rzpPayButton" class="btn btn-success">
+                                    <i class="bi bi-credit-card"></i> Pay with Razorpay
+                                </button>
+                                <div id="paymentStatus" class="mt-3"></div>
+                            </div>
+                        }
+
+                        <!-- Cash/Bank Payment Form -->
+                        <h6 class="fw-semibold mb-3">@(ViewBag.UseRazorpay == true ? "Or Record Offline Payment" : "Record Payment")</h6>
                         <form asp-action="RecordPayment" method="post">
                             @Html.AntiForgeryToken()
                             <input type="hidden" asp-for="PaymentForm.CustomerInvoiceId" />
@@ -192,10 +224,8 @@
                                 <div class="col-md-6">
                                     <label asp-for="PaymentForm.PaymentMode" class="form-label"></label>
                                     <select asp-for="PaymentForm.PaymentMode" class="form-select">
-                                        @foreach (var option in Enum.GetValues<PaymentMode>())
-                                        {
-                                            <option value="@((int)option)">@option</option>
-                                        }
+                                        <option value="@((int)PaymentMode.Cash)">Cash</option>
+                                        <option value="@((int)PaymentMode.Bank)">Bank</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6">
@@ -219,4 +249,120 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    
+    @if (ViewBag.UseRazorpay == true && Model.CanRecordPayment)
+    {
+        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+        <script>
+            const antiForgeryToken = document.querySelector('#razorpayTokenForm input[name="__RequestVerificationToken"]')?.value ?? '';
+
+            document.getElementById('rzpPayButton').addEventListener('click', function() {
+                const amount = parseFloat(document.getElementById('paymentAmount').value);
+                const maxAmount = @Model.AmountDue;
+                
+                if (!amount || amount <= 0 || amount > maxAmount) {
+                    showStatus('Please enter a valid amount between ?0.01 and ?' + maxAmount.toFixed(2), 'danger');
+                    return;
+                }
+                
+                showStatus('Creating payment order...', 'info');
+                
+                fetch('@Url.Action("CreateRazorpayOrder")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': antiForgeryToken
+                    },
+                    body: new URLSearchParams({
+                        invoiceId: @Model.CustomerInvoiceId,
+                        amount: amount,
+                        __RequestVerificationToken: antiForgeryToken
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        showStatus(data.message || 'Failed to create order', 'danger');
+                        return;
+                    }
+                    
+                    const options = {
+                        key: data.keyId,
+                        amount: data.amount,
+                        currency: data.currency,
+                        order_id: data.orderId,
+                        name: data.companyName,
+                        description: 'Payment for Invoice ' + data.invoiceNumber,
+                        image: data.companyLogo || '',
+                        theme: {
+                            color: data.themeColor || '#3399cc'
+                        },
+                        prefill: {
+                            name: data.customerName
+                        },
+                        handler: function(response) {
+                            verifyPayment(
+                                response.razorpay_order_id,
+                                response.razorpay_payment_id,
+                                response.razorpay_signature,
+                                amount
+                            );
+                        },
+                        modal: {
+                            ondismiss: function() {
+                                showStatus('Payment cancelled', 'warning');
+                            }
+                        }
+                    };
+                    
+                    const rzp = new Razorpay(options);
+                    rzp.open();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showStatus('Error creating payment order', 'danger');
+                });
+            });
+            
+            function verifyPayment(orderId, paymentId, signature, amount) {
+                showStatus('Verifying payment...', 'info');
+                
+                fetch('@Url.Action("VerifyRazorpayPayment")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': antiForgeryToken
+                    },
+                    body: new URLSearchParams({
+                        invoiceId: @Model.CustomerInvoiceId,
+                        razorpayOrderId: orderId,
+                        razorpayPaymentId: paymentId,
+                        razorpaySignature: signature,
+                        amount: amount,
+                        __RequestVerificationToken: antiForgeryToken
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showStatus('Payment successful! Redirecting...', 'success');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showStatus(data.message || 'Payment verification failed', 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showStatus('Error verifying payment', 'danger');
+                });
+            }
+            
+            function showStatus(message, type) {
+                const statusDiv = document.getElementById('paymentStatus');
+                statusDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            }
+        </script>
+    }
 }

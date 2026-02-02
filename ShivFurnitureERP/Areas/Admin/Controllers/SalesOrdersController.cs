@@ -216,9 +216,15 @@ public class SalesOrdersController : Controller
             .Select(p => new SelectListItem { Text = p.Name, Value = p.ProductId.ToString() })
             .ToListAsync(cancellationToken);
 
+        var incomeAccountIds = _dbContext.AnalyticalBudgets
+            .Where(budget => budget.BudgetType == BudgetType.Income)
+            .Select(budget => budget.AnalyticalAccountId)
+            .Distinct();
+
         var analyticalAccounts = await _dbContext.AnalyticalAccounts
-            .OrderBy(a => a.Name)
-            .Select(a => new SelectListItem { Text = a.Name, Value = a.AnalyticalAccountId.ToString() })
+            .Where(account => !account.IsArchived && incomeAccountIds.Contains(account.AnalyticalAccountId))
+            .OrderBy(account => account.Name)
+            .Select(account => new SelectListItem { Text = account.Name, Value = account.AnalyticalAccountId.ToString() })
             .ToListAsync(cancellationToken);
 
         model.Customers = customers;

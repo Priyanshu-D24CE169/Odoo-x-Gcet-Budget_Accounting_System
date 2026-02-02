@@ -7,6 +7,7 @@
     var canConfirm = Model.CanConfirm;
     var canCancel = Model.Status != PurchaseOrderStatus.Cancelled;
     var canCreateBill = Model.CanCreateBill;
+    var isEditable = Model.Status == PurchaseOrderStatus.Draft;
 }
 
 @section Styles {
@@ -38,14 +39,24 @@
         <div class="alert alert-info">@statusMessage</div>
     }
 
+    @if (!isEditable)
+    {
+        <div class="alert alert-warning" role="status">
+            Confirmed or cancelled purchase orders are read-only. Duplicate the order or create a bill if you need to adjust spend allocations.
+        </div>
+    }
+
     <form asp-area="Admin" asp-controller="PurchaseOrders" asp-action="Edit" asp-route-id="@Model.PurchaseOrderId" method="post">
         @Html.AntiForgeryToken()
         <input asp-for="PurchaseOrderId" type="hidden" />
+        <input asp-for="Status" type="hidden" />
         <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
-        <partial name="_Form" model="Model" />
+        <div class="po-form-wrapper @(isEditable ? string.Empty : "is-locked")">
+            <partial name="_Form" model="Model" />
+        </div>
         <div class="d-flex justify-content-end gap-2 mt-4">
             <a asp-area="Admin" asp-controller="PurchaseOrders" asp-action="Index" class="btn btn-outline-secondary">Discard</a>
-            <button type="submit" class="btn btn-primary px-4">Save Changes</button>
+            <button type="submit" class="btn btn-primary px-4" @(isEditable ? string.Empty : "disabled") title="@(isEditable ? string.Empty : "Confirmed orders cannot be edited")">Save Changes</button>
         </div>
     </form>
 </section>

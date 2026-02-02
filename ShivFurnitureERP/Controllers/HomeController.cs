@@ -19,6 +19,11 @@ namespace ShivFurnitureERP.Controllers
 
         public async Task<IActionResult> Index(CancellationToken cancellationToken)
         {
+            if (User.Identity?.IsAuthenticated != true)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
             var dashboard = await _dashboardService.GetDashboardAsync(null, null, null, cancellationToken);
             return View(dashboard);
         }
